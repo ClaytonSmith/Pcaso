@@ -9,13 +9,16 @@ Pcaso is meant to run in a linux environment. Assuming [nodejs](https://nodejs.o
 
 Run the following:
 > git clone http://github.com/claytonsmith/pcaso
+
 > cd pcaso
+
 > npm install
 
 ### Starting the server
 > npm start 
 
-The server will be running on port 3000 by default.
+By default, the server will run on port 3000. If you wish to change the port number, be sure to change the auth paths in `config/auth`.
+
 ## Features
 
 
