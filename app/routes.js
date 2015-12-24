@@ -38,8 +38,9 @@ module.exports = function(app, passport) {
     
     //app.get('/user/:username', user.displayAccountPage);
     
-    app.post('/upload-file', files.upload);   
-    
+    app.post('/upload', files.upload);   
+    app.get('/download/:fileID', files.download);
+    app.delete('/delete/:fileID',  files.deleteFile);   
     // API
     //api.get('/api/get-user-info' user.getAccount);  
     

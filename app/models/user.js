@@ -39,7 +39,7 @@ var UserSchema = mongoose.Schema({
     lastUpdated:     { type: Number, default: Date.now },            // Last seen
     datasetIDs:      { type: [], default: [] },                      // List of mongoId for data sets
     notifications:   { new: [], all: [] },                           // List of new and all notifications, hide this
-    settings         : {
+    settings: {
 	defaultVisibility: {type: String, default: 'PRIVATE'},
 	accountVisivility: {type: String, default: 'PRIVATE'}  
     }    
@@ -96,7 +96,6 @@ UserSchema.method({
 	    return [];
 	}
     },
-    
     deleteNotifications: function(notificationID){
 	var index = this.notifications.new.indexOf( notificationID );
 	if( index !== -1 ){
@@ -124,10 +123,9 @@ UserSchema.method({
 	this.email = newEmail;
     },
     
-
+    
     /******* Security *******/
     generateHash: function(password) {
-
 	return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
     },
     
