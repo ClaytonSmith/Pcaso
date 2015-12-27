@@ -1,9 +1,9 @@
 'use strict'
 
+var mongoose = require('mongoose');
 
 var files      = require('./controllers/fileContainers');
-// var users      = requrie('./controllers/users'); // not yet 
-
+var users      = require('./controllers/users'); // not yet 
 
 module.exports = function(app, passport) {
 
@@ -38,9 +38,20 @@ module.exports = function(app, passport) {
     
     //app.get('/user/:username', user.displayAccountPage);
     
-    app.post('/upload', files.upload);   
-    app.get('/download/:fileID', files.download);
-    app.delete('/delete/:fileID',  files.deleteFile);   
+    app.get('/delete-account', users.deleteAccount);
+    
+    app.post('/upload-file', files.upload);
+    
+    app.get('/download/:fileId', isLoggedIn, files.download);
+    
+    app.delete('/delete-files/:fileId', isLoggedIn, users.deleteFile);   
+    
+    
+    /*== API =================================================================================*/   
+    //app.delete('/api/delete-files',  users. -- );   
+    //app.delete('/api/delete-account', users. -- );
+
+
     // API
     //api.get('/api/get-user-info' user.getAccount);  
     
@@ -74,9 +85,9 @@ module.exports = function(app, passport) {
     app.get('/signup', function(req, res) {
         res.render('signup.ejs', { message: req.flash('signupMessage') });
     });
-
+    
     // process the signup form
-    app.post('/signup', passport.authenticate('local-signup', {
+    app.post('/signup', passport.authenticate('local-signup-temp', {
         successRedirect : '/profile', // redirect to the secure profile section
         failureRedirect : '/signup', // redirect back to the signup page if there is an error
         failureFlash : true // allow flash messages
@@ -224,6 +235,7 @@ module.exports = function(app, passport) {
 function isLoggedIn(req, res, next) {
     if (req.isAuthenticated())
         return next();
+    
     
     res.redirect('/');
 }

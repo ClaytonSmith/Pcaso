@@ -2,5 +2,5 @@
 
 
 module.exports = {
-    sessionKey: "Your're REALLY secure key"       
+    sessionKey: "S3cur1k3y be dope yo"       
 }
