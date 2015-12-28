@@ -5,86 +5,174 @@ var mongoose     = require('mongoose');
 var grid         = require('gridfs-stream');
 var fs           = require('fs');
 var util         = require('util');
-
+var multipart    = require('multipart');
 var config       = require('../../config/config');
 
 // Load other models
 var User          = mongoose.model('User');
-var fileContainer = mongoose.model('FileContainer');
-
-
-exports.loadFile = function( req, res){
-    res.send({msg: 'you wish you had this cool file' })
-}
+var FileContainer = mongoose.model('FileContainer');
 
 // used to tell if a sequence is a valid bullet 
 exports.isBullet = function(req, res, next) {
-    
     // defualt true for now
-    return next();
-    
+    return next();   
     res.redirect('/');
 }
 
-exports.upload = function(req, res) {
-    // is user? 
-    // |
-    // \--> yes 
-    // |    +--> save file with credentials
-    // |    +--> make new restricted link
-    // |
-    // \--> no
-    //      +--> save link under pcaseo user
-    //      +--> make new link accessible
+// GET
+exports.download = function(req, res){
+    console.log( req.params.fileId ) ;
+    var options = {_id: req.params.fileId, root: 'uploads'};
+
+
+    grid.mongo = mongoose.mongo;
+    var conn   = mongoose.createConnection(config.db);
     
+    conn.once('open', function () {
+	var gfs = grid(conn.db);
+	
+	gfs.createReadStream( options ).pipe(res);
+    });
+}
+
+// DELETE
+exports.deleteFile = function(req, res){
+    
+    var options = {_id: req.params.fileId, root: 'uploads'};
+    grid.mongo = mongoose.mongo;
+    var conn   = mongoose.createConnection(config.db);
+    
+    conn.once('open', function () {
+	var gfs = grid(conn.db);
+	
+	gfs.remove( options, function (err) {
+	    if (err){
+		console.log('not found');
+		res.send(204);
+		return handleError(err);
+	    } else {
+		res.send(200);
+	    }
+	});
+    });
+    
+    res.send(200);
+
+}
+
+/*exports.upload = function(req, res) {
     var form = new formidable.IncomingForm();
-    form.uploadDir = __dirname + "../../../data";
+    form.uploadDir = __dirname + "../../../data/temp";
     form.keepExtensions = true;
-   // var user = req.isAuthenticated() ? <AUTHENTICATED> : <PCASO>      
-   // var fileInfo = // check req	
+    console.log(req.isAuthenticated());
+    var user = req.isAuthenticated() ? req.user : User.find({});
+
+    // var fileInfo = // check req	
     form.parse(req, function(err, fields, files) {
-
+	
 	if (!err) {
-            console.log('File uploaded : ' + files.file.path);
-            grid.mongo = mongoose.mongo;
-            var conn   = mongoose.createConnection(config.db);
-
+            console.log('File uploaded : ' + files.file.path);	    
+	    grid.mongo = mongoose.mongo;
+	    var conn   = mongoose.createConnection(config.db);
+	    
             conn.once('open', function () {
 		var gfs = grid(conn.db);
-			    
+		
 		// generate new ID for the document
 		var documentID = mongoose.Types.ObjectId();        
 		
 		var writestream = gfs.createWriteStream({
 		    _id: documentID,
-		    filename: files.file.name
+		    filename: files.file.name,
+		    root: 'uploads',
+		    mode: 'w'		    
 		});
 		
 		console.log('cool doc', documentID);
 		
-		fs.createReadStream(files.file.path).pipe(writestream);
+		fs.createReadStream(files.file.path).pipe(writestream)
+		fs.unlinkSync(files.file.path);
+		
 	    });
 	}        
     });
     
-    form.on('end', function() {        
-	// make new file container
+    form.on('end', function() {       
+	res.send(200);
+    });   
+};
+*/
+
+
+
+// POST
+// Can only get here if user is authenticated
+exports.upload = function(req, res) {
+    console.log('Hello');
+    var form = new formidable.IncomingForm();
+    var user = req.user;
+    var documentId = mongoose.Types.ObjectId();        		
+    
+
+    form.uploadDir = __dirname + "../../../data/temp";
+    form.keepExtensions = true;
+    console.log(req.isAuthenticated());
+
+    // var fileInfo = // check req	
+    form.parse(req, function(err, fields, files) {
 	
-	/*container = new FileContainer({ 
-	    //fileName: file.name || req.stuff,
-	    visibility: user.settings.defailtVisibility,
-	    parentID: user._id
+	if (!err) {
+            console.log('File uploaded : ' + files.file.path);
+	    grid.mongo = mongoose.mongo;
+	    var conn   = mongoose.createConnection(config.db);
+  
+	    console.log('Am I connected?');
+            conn.once('open', function () {
+		var gfs = grid(conn.db);
+		
+		console.log('cool doc', documentId);
+		
+		// generate new ID for the document
+
+		
+		console.log(files.file);
+
+		var writestream = gfs.createWriteStream({
+		    _id: documentId,
+		    filename: files.file.name,
+		    root: 'uploads',
+		    mode: 'w'		    
+		});
+		
+		
+		console.log('cool doc', documentId);
+		
+		fs.createReadStream(files.file.path).pipe(writestream)
+		
+		fs.unlinkSync(files.file.path);
+		
+	    });
+	}        
+    });
+    
+    form.on('end', function() {       
+
+	var fileContainer = new FileContainer({
+	    parentId: user._id,
+	    fileId: documentId,
+	    visibility: user.settings.defaultVisibility
 	});
 	
+	user.attachFile( fileContainer._id );
 	
-	// User now knows they own this file.
-	user.attachFile(container._id); */
+
+	user.save();
+	fileContainer.save();
 	
-	res.send('Completed ..... go and check fs.files & fs.chunks in  mongodb');
+	console.log(user, fileContainer);
 	
-    }); 
-    
-    //res.send({ x: 1 });
+	res.send(200);
+    });   
 };
 
 

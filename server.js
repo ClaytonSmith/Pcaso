@@ -34,6 +34,7 @@ require('./config/passport')(passport);                  // pass passport for co
 // Express init
 app.use(morgan('dev'));                                  // Logger
 app.use(cookieParser());                                 // read cookies (needed for auth) 
+app.use(bodyParser());                              // get information from html forms
 app.use(bodyParser.json());                              // get information from html forms
 app.use(bodyParser.urlencoded({ extended: true }));     
 

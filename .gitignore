@@ -16,6 +16,5 @@ results
 npm-debug.log
 node_modules
 
-data/public
-data/private
+data/temp/
 
