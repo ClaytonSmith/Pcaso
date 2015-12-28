@@ -21,18 +21,20 @@ By default, the server will run on port 3000. If you wish to change the port num
 
 ## Features
 
+V1 
 
 - [ ] User accounts 
   - [X] Login 
   - [X] Logout
   - [X] Sessions 
   - [ ] Alerts 
-  - [ ] Remove account
+  - [X] Remove account
+  - [ ] Email authentication
 - [ ] File management
   - [X] File upload
-  - [ ] File download
+  - [X] File download
   - [ ] Priviaged file viewing 
-  - [ ] Bind files to user accounts 
+  - [X] Bind files to user accounts 
   - [ ] Modify privacy settings
   - [ ] Pretty "bullet" URLs to files 
 - [ ] Comments
@@ -42,6 +44,7 @@ By default, the server will run on port 3000. If you wish to change the port num
 - [ ] Statistics
   - [ ] File "view" count
   - [ ] Traffic
+
 
 
 
