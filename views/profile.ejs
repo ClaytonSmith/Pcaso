@@ -27,12 +27,15 @@
                     <p>
                         <strong>id</strong>: <%= user._id %><br>
                         <strong>email</strong>: <%= user.local.email %><br>
-                        <strong>password</strong>: <%= user.local.password %>
+                        <strong>password</strong>: <%= user.local.password %><br>
+			<strong>Mongoose ID</strong>: <%= user._id %>
                     </p>
                     
 		    <h1> Test loggin</h1>
+
+
 		    <a href="/profile2" class="btn btn-default">Profile2</a>
-	    
+		    <a href="/delete-account" class="btn btn-default">Delete Account</a>	    
 
                     <a href="/unlink/local" class="btn btn-default">Unlink</a>
                 <% } else { %>

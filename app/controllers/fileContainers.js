@@ -10,25 +10,23 @@ var config       = require('../../config/config');
 
 // Load other models
 var User          = mongoose.model('User');
-var fileContainer = mongoose.model('FileContainer');
-
-grid.mongo = mongoose.mongo;
-var conn   = mongoose.createConnection(config.db);
+var FileContainer = mongoose.model('FileContainer');
 
 // used to tell if a sequence is a valid bullet 
 exports.isBullet = function(req, res, next) {
-    
     // defualt true for now
-    return next();
-    
+    return next();   
     res.redirect('/');
 }
 
-
 // GET
 exports.download = function(req, res){
-    console.log( req.params.fileID ) ;
-    var options = {_id: req.params.fileID, root: 'uploads'};
+    console.log( req.params.fileId ) ;
+    var options = {_id: req.params.fileId, root: 'uploads'};
+
+
+    grid.mongo = mongoose.mongo;
+    var conn   = mongoose.createConnection(config.db);
     
     conn.once('open', function () {
 	var gfs = grid(conn.db);
@@ -40,7 +38,9 @@ exports.download = function(req, res){
 // DELETE
 exports.deleteFile = function(req, res){
     
-    var options = {_id: req.params.fileID, root: 'uploads'};
+    var options = {_id: req.params.fileId, root: 'uploads'};
+    grid.mongo = mongoose.mongo;
+    var conn   = mongoose.createConnection(config.db);
     
     conn.once('open', function () {
 	var gfs = grid(conn.db);
@@ -57,10 +57,10 @@ exports.deleteFile = function(req, res){
     });
     
     res.send(200);
+
 }
 
-// POST
-exports.upload = function(req, res) {
+/*exports.upload = function(req, res) {
     var form = new formidable.IncomingForm();
     form.uploadDir = __dirname + "../../../data/temp";
     form.keepExtensions = true;
@@ -71,8 +71,10 @@ exports.upload = function(req, res) {
     form.parse(req, function(err, fields, files) {
 	
 	if (!err) {
-            console.log('File uploaded : ' + files.file.path);
-
+            console.log('File uploaded : ' + files.file.path);	    
+	    grid.mongo = mongoose.mongo;
+	    var conn   = mongoose.createConnection(config.db);
+	    
             conn.once('open', function () {
 		var gfs = grid(conn.db);
 		
@@ -96,6 +98,79 @@ exports.upload = function(req, res) {
     });
     
     form.on('end', function() {       
+	res.send(200);
+    });   
+};
+*/
+
+
+
+// POST
+// Can only get here if user is authenticated
+exports.upload = function(req, res) {
+    console.log('Hello');
+    var form = new formidable.IncomingForm();
+    var user = req.user;
+    var documentId = mongoose.Types.ObjectId();        		
+    
+
+    form.uploadDir = __dirname + "../../../data/temp";
+    form.keepExtensions = true;
+    console.log(req.isAuthenticated());
+
+    // var fileInfo = // check req	
+    form.parse(req, function(err, fields, files) {
+	
+	if (!err) {
+            console.log('File uploaded : ' + files.file.path);
+	    grid.mongo = mongoose.mongo;
+	    var conn   = mongoose.createConnection(config.db);
+  
+	    console.log('Am I connected?');
+            conn.once('open', function () {
+		var gfs = grid(conn.db);
+		
+		console.log('cool doc', documentId);
+		
+		// generate new ID for the document
+
+		
+		console.log(files.file);
+
+		var writestream = gfs.createWriteStream({
+		    _id: documentId,
+		    filename: files.file.name,
+		    root: 'uploads',
+		    mode: 'w'		    
+		});
+		
+		
+		console.log('cool doc', documentId);
+		
+		fs.createReadStream(files.file.path).pipe(writestream)
+		
+		fs.unlinkSync(files.file.path);
+		
+	    });
+	}        
+    });
+    
+    form.on('end', function() {       
+
+	var fileContainer = new FileContainer({
+	    parentId: user._id,
+	    fileId: documentId,
+	    visibility: user.settings.defaultVisibility
+	});
+	
+	user.attachFile( fileContainer._id );
+	
+
+	user.save();
+	fileContainer.save();
+	
+	console.log(user, fileContainer);
+	
 	res.send(200);
     });   
 };
