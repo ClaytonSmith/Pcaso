@@ -40,7 +40,7 @@ var UserSchema = mongoose.Schema({
     dateAdded:       { type: Number, default: Date.now },            // Join date
     lastUpdated:     { type: Number, default: Date.now },            // Last seen
     fileIDs:         { type: [], default: [] },                      // List of mongoId for containers
-    notifications:   { new: [], all: [] },                           // List of new and all notifications, hide this
+    notifications:   { new:  [], all: [] },                          // List of new and all notifications, hide this
     comments:        { type: [], default: [] },                      // Comments left by user
     settings: {
 	defaultVisibility: {type: String, default: 'PRIVATE'},
@@ -57,18 +57,22 @@ UserSchema.method({
 	// TODO: ensure ID is real
 	//
 	// Returns the result of push. 
-
+	console.log('I should be called when adding a new file');
 	return this.fileIDs.push(fileID);
     },
 
     // Removes a file from the user's list of files
     deleteFile: function(fileID){
-	console.log('USER: in deleteFile');
+	console.log('USER: in deleteFile', fileID);
+	
 	var index = this.fileIDs.indexOf( fileID );
 	if( index !== -1 ){
 	    // log
 	    
-	    FileContainers.find({ _id: fileID }).remove().exec();
+	    FileContainers.findOne({ _id: fileID }, function(err, doc){
+		console.log('Found the doc');
+		doc.remove();
+	    });
 	    
 	    // Return deleted IDs. All other IDs left untouched
 	    return this.fileIDs.splice( index, 1);
@@ -150,23 +154,25 @@ UserSchema.pre('save', function(next) {
 
 // Before a user deletes their account, remove all of their files and directory
 UserSchema.pre('remove', function(next) {
-    console.log('USER: in remove')
-    var user = this;
+    var user = this; 
     
-    user.fileIDs.forEach( function(file){
-	// delete every file
-	user.deleteFile( file );
-    }); 
+    // Keep deleting util everything is gone
+    // Can't use for( ) loop
+    while( user.fileIDs.length !== 0 ){
+	console.log('Deleting file', user.fileIDs[0]);
+	user.deleteFile( user.fileIDs[0] );
+    }; 
     
-    //user.notifications.new.forEach( function(notification){
-    // delete every notification 
-    //user.deleteNotification( notification );
-    //}); 
+    // while( user.notifications.all.length !== 0 ){
+    // 	console.log('Deleting notification', user.notifications.all.length[0]);
+    // 	user.deleteNotification( user.notifications.all.length[0] );
+    // }; 
+    
+    // while( user.comments.length !== 0 ){
+    // 	console.log('Deleting comment', user.comment.length[0]);
+    // 	user.deletecomment( user.comments.length[0] );
+    // };
 
-    //user.comments.forEach( function(comment){
-    // delete every comment 
-    //user.deleteComment( comment );
-    //});
 
     next();
 });

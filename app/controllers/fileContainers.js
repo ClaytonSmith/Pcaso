@@ -12,9 +12,6 @@ var config       = require('../../config/config');
 var User          = mongoose.model('User');
 var FileContainer = mongoose.model('FileContainer');
 
-grid.mongo = mongoose.mongo;
-var conn   = mongoose.createConnection(config.db);
-
 // used to tell if a sequence is a valid bullet 
 exports.isBullet = function(req, res, next) {
     // defualt true for now
@@ -26,6 +23,10 @@ exports.isBullet = function(req, res, next) {
 exports.download = function(req, res){
     console.log( req.params.fileId ) ;
     var options = {_id: req.params.fileId, root: 'uploads'};
+
+
+    grid.mongo = mongoose.mongo;
+    var conn   = mongoose.createConnection(config.db);
     
     conn.once('open', function () {
 	var gfs = grid(conn.db);
@@ -38,6 +39,8 @@ exports.download = function(req, res){
 exports.deleteFile = function(req, res){
     
     var options = {_id: req.params.fileId, root: 'uploads'};
+    grid.mongo = mongoose.mongo;
+    var conn   = mongoose.createConnection(config.db);
     
     conn.once('open', function () {
 	var gfs = grid(conn.db);
@@ -57,7 +60,7 @@ exports.deleteFile = function(req, res){
 
 }
 
-exports.upload = function(req, res) {
+/*exports.upload = function(req, res) {
     var form = new formidable.IncomingForm();
     form.uploadDir = __dirname + "../../../data/temp";
     form.keepExtensions = true;
@@ -68,9 +71,10 @@ exports.upload = function(req, res) {
     form.parse(req, function(err, fields, files) {
 	
 	if (!err) {
-            console.log('File uploaded : ' + files.file.path);
+            console.log('File uploaded : ' + files.file.path);	    
+	    grid.mongo = mongoose.mongo;
+	    var conn   = mongoose.createConnection(config.db);
 	    
-	    console.log(conn);
             conn.once('open', function () {
 		var gfs = grid(conn.db);
 		
@@ -97,27 +101,31 @@ exports.upload = function(req, res) {
 	res.send(200);
     });   
 };
+*/
 
 
 
-/*
 // POST
 // Can only get here if user is authenticated
 exports.upload = function(req, res) {
     console.log('Hello');
     var form = new formidable.IncomingForm();
+    var user = req.user;
+    var documentId = mongoose.Types.ObjectId();        		
+    
+
     form.uploadDir = __dirname + "../../../data/temp";
     form.keepExtensions = true;
     console.log(req.isAuthenticated());
-    //    var user = req.user;
 
-    
     // var fileInfo = // check req	
     form.parse(req, function(err, fields, files) {
 	
 	if (!err) {
             console.log('File uploaded : ' + files.file.path);
-	    
+	    grid.mongo = mongoose.mongo;
+	    var conn   = mongoose.createConnection(config.db);
+  
 	    console.log('Am I connected?');
             conn.once('open', function () {
 		var gfs = grid(conn.db);
@@ -125,7 +133,7 @@ exports.upload = function(req, res) {
 		console.log('cool doc', documentId);
 		
 		// generate new ID for the document
-		var documentId = mongoose.Types.ObjectId();        		
+
 		
 		console.log(files.file);
 
@@ -165,6 +173,6 @@ exports.upload = function(req, res) {
 	
 	res.send(200);
     });   
-};*/
+};
 
 

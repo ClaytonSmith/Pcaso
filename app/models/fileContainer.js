@@ -8,9 +8,6 @@ var util         = require('util');
 var multipart    = require('multipart');
 var config       = require('../../config/config');
 
-grid.mongo = mongoose.mongo;
-var conn   = mongoose.createConnection(config.db);
-
 var FileContainerSchema = mongoose.Schema({
     parentId:      { type: Object,  required: true },       // Owner
     fileId:        { type: Object,  required: true },       // File itself
@@ -20,7 +17,7 @@ var FileContainerSchema = mongoose.Schema({
     lastUpdated:   { type: Number, 'default': Date.now },   // Last modified 
     comments  :    { type: [],     'default': [] },         // List of comment IDs
     statistics:    { type: Object, 'default': {} }, 
-    settings:      { type: Object, 'default': {} },        // Display settings. Don't know what ths will look like yet
+    settings:      { type: Object, 'default': {} },         // Display settings. Don't know what ths will look like yet
     bulletLink:    { type: String } 
 });
 
@@ -95,13 +92,17 @@ FileContainerSchema.post('save', function(){
 FileContainerSchema.pre('remove', function(next) {
     var options = {_id: this.fileId, root: 'uploads'};
     var fileContainer = this;
+    console.log(options);
     console.log('FILECONTAINER: in remove');
+    
+    grid.mongo = mongoose.mongo;
+    var conn   = mongoose.createConnection(config.db);
     
     // Delete file
     conn.once('open', function () {
 	grid(conn.db).remove( options, function (err) {
 	    if (err) return handleError(err);
-	    res.send(200);
+	   console.log('File removed', options._id);
 	});	
     });
     
