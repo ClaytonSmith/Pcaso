@@ -29,21 +29,25 @@ V1
   - [X] Sessions 
   - [ ] Alerts 
   - [X] Remove account
-  - [ ] Email authentication
+  - [ ] Email authentication - Almost
+    - [X] Unique registration link
+    - [X] Email capabilities 
 - [ ] File management
   - [X] File upload
   - [X] File download
-  - [ ] Priviaged file viewing 
+  - [ ] Privileged file viewing 
   - [X] Bind files to user accounts 
   - [ ] Modify privacy settings
   - [ ] Pretty "bullet" URLs to files 
 - [ ] Comments
-  - [ ] Bind comments to user accounts or files
+  - [X] Bind comments to user accounts or files
   - [ ] Remove comments
   - [ ] Edit comments?? - Maybe
 - [ ] Statistics
   - [ ] File "view" count
   - [ ] Traffic
+
+
 
 
 

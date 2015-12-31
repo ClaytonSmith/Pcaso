@@ -3,6 +3,6 @@
 
 // DEV DB server
 module.exports = {
-    db: 'mongodb://localhost/pcaso',
+    db: 'mongodb://localhost/pcaso'
 }
 

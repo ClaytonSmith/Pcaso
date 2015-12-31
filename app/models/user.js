@@ -1,52 +1,43 @@
 // load the things we need
-var mongoose = require('mongoose');
-var bcrypt   = require('bcrypt-nodejs');
-
+var mongoose       = require('mongoose');
+var bcrypt         = require('bcrypt-nodejs');
+var extend         = require('mongoose-schema-extend')
 var FileContainers = mongoose.model('FileContainer');
 
-// define the schema for our user model
-var UserSchema = mongoose.Schema({
-    
+var BaseUserSchema = mongoose.Schema({    
     // User accound and reg
-    local: {
-        email: String,
-        password: String
+    
+    email:          { type: String, required: true },
+    password:       { type: String, required: true },
+    name: { 
+        first:          { type: String, required: true },
+	last:           { type: String, required: true }
     },
-    facebook: {
-        id: String,
-        token: String,
-        email: String,
-        name: String
-    },
-    twitter: {
-        id: String,
-        token: String,
-        displayName: String,
-        username: String
-    },
-    google: {
-        id: String,
-        token: String,
-        email: String,
-        name: String
-    },
-    userInformation: {
-	firstName: String,
-	lastName: String,
-	avitar: String	
-    },
-
-    // account info 
-    dateAdded:       { type: Number, default: Date.now },            // Join date
-    lastUpdated:     { type: Number, default: Date.now },            // Last seen
-    fileIDs:         { type: [], default: [] },                      // List of mongoId for containers
-    notifications:   { new:  [], all: [] },                          // List of new and all notifications, hide this
-    comments:        { type: [], default: [] },                      // Comments left by user
+    dateAdded:      { type: Number, default: Date.now },            // Join date
+    lastUpdated:    { type: Number, default: Date.now },            // Last seen
+    fileIDs:        { type: [],     default: [] },                  // List of mongoId for containers
+    comments:       { type: [],     default: [] },                  // Comments left by user
+    notifications:  { new:  [], all: [] },                          // List of new and all notifications, hide this   
     settings: {
 	defaultVisibility: {type: String, default: 'PRIVATE'},
 	accountVisivility: {type: String, default: 'PRIVATE'}  
     }    
 });
+
+var UnauthenticatedUserSchema  = BaseUserSchema.extend({});
+var UserSchema                 = BaseUserSchema.extend({});
+
+UnauthenticatedUserSchema.method({
+    /******* Security *******/
+    generateHash: function(password) {
+	return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
+    },
+    
+    validPassword: function(password) {
+	return bcrypt.compareSync(password, this.password);
+    }
+});
+    
 
 
 UserSchema.method({
@@ -137,14 +128,11 @@ UserSchema.method({
     },
     
     validPassword: function(password) {
-	return bcrypt.compareSync(password, this.local.password);
-    },
-    
-    isTempAccount: function(){
-	return false;
+	return bcrypt.compareSync(password, this.password);
     }
+
 });
-				 
+
 // Update dates 
 UserSchema.pre('save', function(next) {
     this.lastUpdated = Date.now();
@@ -185,12 +173,17 @@ UserSchema.pre('remove', function(next) {
   ToDo: http://stackoverflow.com/questions/11160955/how-to-exclude-some-fields-from-the-document
 
   userSchema.methods.clean = function() {
-    var cleanData = this.toObject();
+  var cleanData = this.toObject();
 
-    delete cleanData.password;
-    
-    return cleanData;
-} */
+  delete cleanData.password;
+  
+  return cleanData;
+  } */
+
+//});
 
 // create the model for users and expose it to our app
 module.exports = mongoose.model('User', UserSchema);
+
+// User accounts are stored here untill they click the registration link
+module.exports = mongoose.model('UnauthenticatedUser', UnauthenticatedUserSchema);

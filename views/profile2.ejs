@@ -23,11 +23,11 @@
           <div class="well">
             <h3><span class="fa fa-user"></span> Local</h3>
 
-            <% if (user.local.email) { %>
+            <% if (user.email) { %>
             <p>
               <strong>id</strong>: <%= user._id %><br>
-              <strong>email</strong>: <%= user.local.email %><br>
-              <strong>password</strong>: <%= user.local.password %>
+              <strong>email</strong>: <%= user.email %><br>
+              <strong>password</strong>: <%= user.password %>
             </p>
             
 	    <h1> Still logged in</h1>
