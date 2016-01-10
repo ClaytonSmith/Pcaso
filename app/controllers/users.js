@@ -82,7 +82,11 @@ exports.authenticateAccount = function(req, res){
 	} else {
 	    
 	    // Copy unauthenticated user to regular user collection
-	    var newUser = new Users( unauthenticatedUser );
+	    var newUser = new Users( {
+                name: unauthenticatedUser.name,
+                email: unauthenticatedUser.email,
+                password: unauthenticatedUser.password
+            });
 	    
 	    newUser.save(function(err) {
 		if (err) return handleError( err );

@@ -82,4 +82,18 @@ for( var client in config.secrets.emailCredentials ){
     }
 };
 
+
+exports.useTemplate = function(templateName, variables){
+    // find template file
+    // populate template
+    // return error if no file/template exists
+    
+    var suffix = '.js';
+    var templateDir = './email-templates/'
+    // check if templateDir + templateName exists
+    // return error
+    
+    
+}
+
 exports.mailClients = mailClients;

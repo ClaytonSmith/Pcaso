@@ -9,7 +9,7 @@ var multipart    = require('multipart');
 var config       = require('../../config/config');
 
 // Load other models
-var User          = mongoose.model('User');
+var Users         = mongoose.model('User');
 var FileContainer = mongoose.model('FileContainer');
 
 // used to tell if a sequence is a valid bullet 
@@ -21,17 +21,29 @@ exports.isBullet = function(req, res, next) {
 
 // GET
 exports.download = function(req, res){
+    // container ID not grindFS id
     console.log( req.params.fileId ) ;
-    var options = {_id: req.params.fileId, root: 'uploads'};
-
-
-    grid.mongo = mongoose.mongo;
-    var conn   = mongoose.createConnection(config.db);
+    function loadFile(fileId){
+        grid.mongo = mongoose.mongo;
+        var conn   = mongoose.createConnection(config.db);
+        var options = {_id: fileId, root: 'uploads'};    
+        conn.once('open', function () {
+	    var gfs = grid(conn.db);
+	    
+	    gfs.createReadStream( options ).pipe(res);
+        });
+    };
     
-    conn.once('open', function () {
-	var gfs = grid(conn.db);
-	
-	gfs.createReadStream( options ).pipe(res);
+    
+    FileContainer.findOne({_id: req.params.fileId}, function( err, doc ){
+        if( err ) return handleError( error );
+        if( !doc ) res.send(404);
+        
+        if( doc.viewableTo( req.user ) ){
+            loadFile( doc.fileId );
+        } else {
+            res.send(404);
+        }
     });
 }
 
@@ -108,9 +120,8 @@ exports.deleteFile = function(req, res){
 // POST
 // Can only get here if user is authenticated
 exports.upload = function(req, res) {
-    console.log('Hello');
+    console.log('Hello', req.user);
     var form = new formidable.IncomingForm();
-    var user = req.user;
     var documentId = mongoose.Types.ObjectId();        		
     
 
@@ -157,22 +168,39 @@ exports.upload = function(req, res) {
     
     form.on('end', function() {       
 
-	var fileContainer = new FileContainer({
-	    parentId: user._id,
-	    fileId: documentId,
-	    visibility: user.settings.defaultVisibility
-	});
-	
-	user.attachFile( fileContainer._id );
-	
-
-	user.save();
-	fileContainer.save();
-	
-	console.log(user, fileContainer);
-	
-	res.send(200);
-    });   
+	// var fileContainer = new FileContainer({
+	//     parent: {
+        //         id: req.user._id,
+        //         collection: 
+	//         fileId: documentId,
+	//         visibility: req.user.settings.defaultVisibility
+	//     });
+        
+        Users.findOne( {_id: req.user._id }, function( err, user ){
+            if( err ) return handleError( err ) ;
+            if( !user ) res.send( 504 );
+          
+            var fileContainer = new FileContainer({
+	        parent: {
+                    id: user._id,
+                    collection: user.__t
+                },
+	        fileId: documentId,
+	        visibility: user.settings.defaultVisibility
+	    });
+            
+	    user.files.push( fileContainer._id );
+	    
+            console.log(user);
+	    user.save();
+	   
+            fileContainer.save();
+	    
+	    console.log(user, fileContainer);
+	    
+	    res.send(200);
+        });   
+    });
 };
 
 
