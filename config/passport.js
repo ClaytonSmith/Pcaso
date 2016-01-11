@@ -103,6 +103,7 @@ module.exports = function(passport) {
 				// Make account
 				var newUser         = new UnauthenticatedUsers();
 				
+				console.log('REQ BODY**************************\n', req.body)
 				newUser.email       = email.toLowerCase();
 				newUser.password    = newUser.generateHash(password);
 				newUser.name.first  = req.body.firstName;
@@ -113,6 +114,8 @@ module.exports = function(passport) {
 				    return done(null, newUser); 
 				});
 				
+
+				console.log('/authenticate-account/' + newUser._id );
 				//return done(null, false, req.flash('signupMessage', 'That email is already in use.')); 
 				console.log('Time to send the email');
 				// Send email

@@ -40,7 +40,7 @@ V1 Backend
 - [ ] File management
   - [X] File upload
   - [X] File download
-  - [ ] Privileged file viewing - ### IN DEVELOPMENT
+  - [X] Privileged file viewing
   - [X] Bind files to user accounts 
   - [ ] Modify privacy settings
   - [ ] Pretty "bullet" URLs to files 

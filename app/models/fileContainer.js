@@ -14,7 +14,6 @@ var FileContainerSchema = new mongoose.Schema({
     
     dateAdded:      { type: Number,  default: Date.now },            // Join date
     lastUpdated:    { type: Number,  default: Date.now },            // Last seen
-
     parent: {
         collection:    { type: String,  required: true },    // collection
         id:            { type: String,  required: true }    // id
@@ -22,7 +21,7 @@ var FileContainerSchema = new mongoose.Schema({
     fileId:          { type: Object,  required: true },       // File itself
     visibility:      { type: String, 'default': 'PRIVATE' },  // Visibility
     sharedWith:      { type: [],     'default': [] },         // List of entities who can access the file
-    comments:        { type: [],     default: [] },
+    comments:        { type: [],     'default': [] },
     statistics:      { type: Object, 'default': {} },
     metaData:        { type: Object, 'default': {} },         // File metadata
     Displayettings:  { type: Object, 'default': {} },         // Display settings.
@@ -79,18 +78,17 @@ FileContainerSchema.method({
         var fileContainer = this;
         
         // Is file public 
-        if( fileContainer.visiblity === 'PUBLIC' ) return true;
+	if( fileContainer.visiblity === 'PUBLIC') return true;
         
-        console.log( entity );
         // Does entity exist and is it an entity
         if( !entity || !entity._id ) return false ;
         
-        console.log('Am I the owner?', ( fileContainer.parent.id === entity._id ));
-        // Entity is owner 
-        if( fileContainer.parent.id === entity._id ) return true;
+	// Entity is owner 
+        // Stringify and compaire because we don't know if `entity._id` will be ObjectID or String	
+	if( String( fileContainer.parent.id ) === String( entity._id ) ) return true;
 
-        
         // File is private and entity is on the shared list
+        console.log('Am I a shared user?', fileContainer.sharedWith.indexOf( entity._id ) );
         return fileContainer.visibility === 'PRIVATE' &&
             ( fileContainer.sharedWith.indexOf( entity._id ) !== -1 ) ;
         
@@ -102,8 +100,8 @@ FileContainerSchema.method({
 
 // Update dates 
 FileContainerSchema.pre('save', function(next){
-    //this.lastUpdated = Date.now();
     var fileContainer = this;
+
     fileContainer.lastUpdated = Date.now();
     
     next();

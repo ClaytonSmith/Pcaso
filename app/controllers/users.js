@@ -82,14 +82,20 @@ exports.authenticateAccount = function(req, res){
 	} else {
 	    
 	    // Copy unauthenticated user to regular user collection
+	    console.log( unauthenticatedUser );
 	    var newUser = new Users( {
-                name: unauthenticatedUser.name,
-                email: unauthenticatedUser.email,
+                name: {
+		    last: unauthenticatedUser.name.last,
+                    first:  unauthenticatedUser.name.first,
+		},
+		email: unauthenticatedUser.email,
                 password: unauthenticatedUser.password
             });
 	    
 	    newUser.save(function(err) {
-		if (err) return handleError( err );
+		if (err) {
+		    console.log('BAD ERROR', err );
+		    return new Error( err ) ;}
 	    });	    	    
 	    
 	    // Delete temp account

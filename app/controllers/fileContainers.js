@@ -37,8 +37,12 @@ exports.download = function(req, res){
     
     FileContainer.findOne({_id: req.params.fileId}, function( err, doc ){
         if( err ) return handleError( error );
-        if( !doc ) res.send(404);
-        
+        if( !doc ) {
+	    console.log('I AM DONE! I GOT NOTHING');
+	    res.send(404);
+        }
+	console.log(!doc, {_id: req.params.fileId});
+	
         if( doc.viewableTo( req.user ) ){
             loadFile( doc.fileId );
         } else {
@@ -115,7 +119,12 @@ exports.deleteFile = function(req, res){
 };
 */
 
-
+exports.addSharedUser = function( req, res){
+    // Owner 
+    // File
+    // Shared with user
+    // How to store the shared records
+}
 
 // POST
 // Can only get here if user is authenticated
