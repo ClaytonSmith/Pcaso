@@ -9,8 +9,9 @@ var multipart    = require('multipart');
 var config       = require('../../config/config');
 
 // Load other models
-var Users          = mongoose.model('User');
-var FileContainers = mongoose.model('FileContainer');
+var Users                 = mongoose.model('User');
+var UnauthenticatedUsers  = mongoose.model('UnauthenticatedUser');
+var FileContainers        = mongoose.model('FileContainer');
 
 grid.mongo = mongoose.mongo;
 var conn   = mongoose.createConnection(config.db);
@@ -33,10 +34,21 @@ exports.deleteFile = function(req, res){
 exports.deleteFiles = function(req, res){
     // is owner?
     // log
-    Users.find({_id: req.body ._id}, function(err, user){
-	if( err || !user ) return handleError( err );
-	req.body.files.forEach( function(file){ user.deleteFile( file ); });	
-	res.send(200);
+    var query = { _id: req.body._id };
+    
+    Users.find( query, function(err, user){
+	if( err ){
+	    res.render('520.ejs'); 
+	    return handleError( err );
+	    
+	} else if( !user ){
+	    res.send('404.ejs');
+	
+	} else {
+
+	    req.body.files.forEach( function(file){ user.deleteFile( file ); });	
+	    res.send(200);
+	}
     });
 }
 
@@ -51,4 +63,47 @@ exports.displayAccountPage = function(req, res){
     });
 }
 
+// Moves user accounts from the 'Unauthenticated' collection to the regular user space 
+exports.authenticateAccount = function(req, res){
+    var query = { _id: req.params.authenticationCode };
+    console.log( query );
+    UnauthenticatedUsers.findOne( query, function(err, unauthenticatedUser){
+	if( err ){
+	    //res.render('520.ejs');
+	    console.log('error :(');
+	    res.render('index.ejs');
+	    return handleError( err );
+	    
+	} else if( !unauthenticatedUser){
+	    console.log('not found');
+	    //res.render('404.ejs');
+	    res.render('index.ejs');
 
+	} else {
+	    
+	    // Copy unauthenticated user to regular user collection
+	    console.log( unauthenticatedUser );
+	    var newUser = new Users( {
+                name: {
+		    last: unauthenticatedUser.name.last,
+                    first:  unauthenticatedUser.name.first,
+		},
+		email: unauthenticatedUser.email,
+                password: unauthenticatedUser.password
+            });
+	    
+	    newUser.save(function(err) {
+		if (err) {
+		    console.log('BAD ERROR', err );
+		    return new Error( err ) ;}
+	    });	    	    
+	    
+	    // Delete temp account
+	    unauthenticatedUser.remove();
+	    
+	    res.render('login.ejs', {
+		message: req.flash('loginMessage') 
+	    });
+	}
+    });
+}
