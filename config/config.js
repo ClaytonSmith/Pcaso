@@ -21,7 +21,8 @@ var notifier = {
 
 var defaults = {
     root: path.join(__dirname, '..'),
-    secrets: secrets
+    secrets: secrets,
+        
     //notifier: notifier
 };
 

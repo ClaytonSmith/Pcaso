@@ -3,9 +3,13 @@
 module.exports = {
     sessionKey: "Your session key",
     emailCredentials: {
-	'account-name': {
-            user: 'accout-name@website.com',
-            pass: 'cool passoword'
-        }
+	'no-reply': {
+            user: 'no-reply@pcaso.io',
+            pass: 'pcasono-reply.io.2015'
+        },
+	'mail': {
+            user: 'mail@pcaso.io',
+            pass: 'pcasomail.io.2015'
+	}
     }
 }
