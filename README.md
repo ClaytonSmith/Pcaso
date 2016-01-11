@@ -33,7 +33,7 @@ V1 Backend
   - [X] Remove account
   - [ ] Email authentication - Almost
     - [X] Unique registration link
-    - [ ] Email registration link - ###IN DEVELOPMENT
+    - [ ] Email( verb ) registration link - ###IN DEVELOPMENT
 - [ ] Email service
   - [X] Able to end emails through Pcaso domain
   - [ ] Email templating using EJS - ###IN DEVELOPMENT
