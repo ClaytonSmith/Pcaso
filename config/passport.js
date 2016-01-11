@@ -1,22 +1,15 @@
 // load all the things we need
-var LocalStrategy    = require('passport-local').Strategy;
-var FacebookStrategy = require('passport-facebook').Strategy;
-var TwitterStrategy  = require('passport-twitter').Strategy;
-var GoogleStrategy   = require('passport-google-oauth').OAuth2Strategy;
-var Async            = require('async');
+var LocalStrategy         = require('passport-local').Strategy;
+var Async                 = require('async');
+var mongoose              = require('mongoose');
 
-//var OpenIDStrategy   = requrie('passpot-openid').Strategy;
-// load up the user model
-
-
-var mongoose     = require('mongoose');
-
-
-var Users                         = mongoose.model('User');
-var UnauthenticatedUsers          = mongoose.model('UnauthenticatedUser');
+var Users                 = mongoose.model('User');
+var UnauthenticatedUsers  = mongoose.model('UnauthenticatedUser');
 
 // load the auth variables
-var configAuth                    = require('./auth'); // use this one for testing
+var configAuth            = require('./auth'); // use this one for testing
+
+var mailer                = require('./mailer');
 
 module.exports = function(passport) {
 
@@ -103,6 +96,7 @@ module.exports = function(passport) {
 				// Make account
 				var newUser         = new UnauthenticatedUsers();
 				
+				console.log('REQ BODY**************************\n', req.body)
 				newUser.email       = email.toLowerCase();
 				newUser.password    = newUser.generateHash(password);
 				newUser.name.first  = req.body.firstName;
@@ -110,12 +104,15 @@ module.exports = function(passport) {
 				
 				newUser.save(function(err) {
 				    if (err) return done(err);    
+				    console.log('In save');
+				    mailer.useTemplate( 'test', newUser) 
+				    
 				    return done(null, newUser); 
 				});
 				
+				
+				console.log('/authenticate-account/' + newUser._id );
 				//return done(null, false, req.flash('signupMessage', 'That email is already in use.')); 
-				console.log('Time to send the email');
-				// Send email
 			    });
 			
 			// if the user is logged in but has no local account...
@@ -138,10 +135,7 @@ module.exports = function(passport) {
 			    user.save(function (err) {
 				if (err) return done(err);
 				return done(null,user);
-			    });
-			    
-			    // email
-			    
+			    });			    
 			});
 		    } else {
 			// user is logged in and already has a local account. Ignore signup. (You should log out before trying to create a new account, user!)

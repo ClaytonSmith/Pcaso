@@ -51,9 +51,10 @@ module.exports = function(app, passport) {
     
     app.get('/authentication-login', function(req, res){
 	req.logout();
-	res.render('login.ejs', { message: req.flash('loginMessage', 'Please check your email for an authentication link.') });
+	res.render('login.ejs', { user: req.user, message: req.flash('loginMessage', 'Please check your email for an authentication link.') });
     });
-
+    
+    app.post('/api/add-shared-user', files.addSharedUser); 
     /*== API =================================================================================*/   
     //app.delete('/api/delete-files',  users. -- );   
     //app.delete('/api/delete-account', users. -- );

@@ -21,27 +21,32 @@ By default, the server will run on port 3000. If you wish to change the port num
 
 ## Features
 
-V1 
+V1 Backend 
 
 - [ ] User accounts 
   - [X] Login 
   - [X] Logout
   - [X] Sessions 
   - [ ] Alerts 
+    - [ ] Email
+    - [ ] In app
   - [X] Remove account
   - [ ] Email authentication - Almost
     - [X] Unique registration link
-    - [X] Email capabilities 
+    - [ ] Email( verb ) registration link - ###IN DEVELOPMENT
+- [ ] Email service
+  - [X] Able to end emails through Pcaso domain
+  - [ ] Email templating using EJS - ###IN DEVELOPMENT
 - [ ] File management
   - [X] File upload
   - [X] File download
-  - [ ] Privileged file viewing 
+  - [X] Privileged file viewing
   - [X] Bind files to user accounts 
   - [ ] Modify privacy settings
   - [ ] Pretty "bullet" URLs to files 
 - [ ] Comments
-  - [X] Bind comments to user accounts or files
-  - [ ] Remove comments
+  - [X] Bind comments to entities 
+  - [ ] Remove comments - ###IN DEVELOPMENT
   - [ ] Edit comments?? - Maybe
 - [ ] Statistics
   - [ ] File "view" count
