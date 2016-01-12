@@ -57,10 +57,10 @@ V1 Backend
   - [ ] File "view" count
   - [ ] Traffic
 
-
-
-
-
+- [ ] Garbage collection
+  - [ ] Comments
+  - [ ] Files
+  - [ ] User
 
 
  
