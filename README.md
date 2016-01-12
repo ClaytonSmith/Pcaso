@@ -24,9 +24,9 @@ By default, the server will run on port 3000. If you wish to change the port num
 V1 Backend 
 
 - [ ] User accounts 
-  - [x] Login 
-  - [x] Logout
-  - [x] Sessions 
+  - [X] Login 
+  - [X] Logout
+  - [X] Sessions 
   - [ ] Alerts 
     - [ ] Email
     - [ ] In app
