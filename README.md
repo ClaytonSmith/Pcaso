@@ -31,12 +31,15 @@ V1 Backend
     - [ ] Email
     - [ ] In app
   - [X] Remove account
-  - [ ] Email authentication - Almost
+  - [X] Email authentication
     - [X] Unique registration link
-    - [ ] Email( verb ) registration link - ###IN DEVELOPMENT
-- [ ] Email service
+    - [X] Email( verb ) registration link
+    
+- [X] Email service
   - [X] Able to end emails through Pcaso domain
-  - [ ] Email templating using EJS - ###IN DEVELOPMENT
+  - [X] Email templating using EJS
+    - [ ] Add more templates
+ 
 - [ ] File management
   - [X] File upload
   - [X] File download
@@ -44,10 +47,12 @@ V1 Backend
   - [X] Bind files to user accounts 
   - [ ] Modify privacy settings
   - [ ] Pretty "bullet" URLs to files 
+
 - [ ] Comments
   - [X] Bind comments to entities 
-  - [ ] Remove comments - ###IN DEVELOPMENT
+  - [ ] Remove comments - IN DEVELOPMENT
   - [ ] Edit comments?? - Maybe
+
 - [ ] Statistics
   - [ ] File "view" count
   - [ ] Traffic
