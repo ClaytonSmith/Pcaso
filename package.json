@@ -5,6 +5,7 @@
     "async": "^1.5.0",
     "bcrypt-nodejs": "latest",
     "body-parser": "~1.0.0",
+    "chai": "^3.4.1",
     "co-express": "^1.2.1",
     "connect-flash": "~0.1.1",
     "cookie-parser": "~1.0.0",
@@ -16,6 +17,7 @@
     "fs": "0.0.2",
     "gridfs-stream": "^1.1.1",
     "method-override": "~1.0.0",
+    "mocha": "^2.3.4",
     "mongoose": "~3.8.1",
     "mongoose-schema-extend": "^0.2.0",
     "morgan": "~1.0.0",
@@ -30,6 +32,8 @@
     "passport-openid": "^0.4.0",
     "passport-twitter": "~1.0.2",
     "path": "^0.12.7",
+    "sinon": "^1.17.2",
+    "sinon-chai": "^2.8.0",
     "util": "^0.10.3"
   }
 }
