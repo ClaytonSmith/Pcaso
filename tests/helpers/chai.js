@@ -1,7 +1,6 @@
 var chai = require('chai');
 
-
-chai.configure.includeStack = true;
+chai.config.includeStack = true;
 
 global.expect          = chai.expect;
 global.AssertionError  = chai.AssertionError;

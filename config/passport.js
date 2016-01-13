@@ -38,7 +38,6 @@ module.exports = function(passport) {
             passReqToCallback : true
 	},
 	function(req, email, password, done) {
-	    console.log(User,mongoose);
 	    if (email)	    
 		process.nextTick(function() {
 		    Users.findOne({ 'email' : email.toLowerCase() }, function(err, user) {

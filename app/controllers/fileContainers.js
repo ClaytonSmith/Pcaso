@@ -200,13 +200,10 @@ exports.upload = function(req, res) {
             
 	    user.files.push( fileContainer._id );
 	    
-            console.log(user);
 	    user.save();
 	   
             fileContainer.save();
-	    
-	    console.log(user, fileContainer);
-	    
+	   	    
 	    res.send(200);
         });   
     });

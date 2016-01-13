@@ -25,7 +25,11 @@ var FileContainerSchema = new mongoose.Schema({
     statistics:      { type: Object, 'default': {} },
     metaData:        { type: Object, 'default': {} },         // File metadata
     Displayettings:  { type: Object, 'default': {} },         // Display settings.
-    bulletLink:      { type: String }
+    bulletLink:      { type: String },
+    settings: {
+        acceptFiles:   { type: Boolean, 'default': false },
+        commentable:   { type: Boolean, 'default': true }
+    }
 });
 
 
@@ -121,13 +125,13 @@ FileContainerSchema.pre('remove', function(next) {
     conn.once('open', function () {
 	grid(conn.db).remove( fileQuery, function (err) {
 	    if (err) return handleError(err);
-	    console.log('File removed', options._id);
+	    // console.log('File removed', options._id);
 	});	
     });
     
     // pop pop pop
     while( fileContainer.comments.length !== 0 ){
-	console.log('Deleting file', fileContainer.comments[0]);
+	// console.log('Deleting file', fileContainer.comments[0]);
 	fileContainer.removeComment( user.fileIDs[0] );
     };     
     
