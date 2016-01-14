@@ -12,13 +12,19 @@ var BaseSchema     = require('./base-schema');
 
 var FileContainerSchema = new mongoose.Schema({
     
-    dateAdded:      { type: Number,  default: Date.now },            // Join date
-    lastUpdated:    { type: Number,  default: Date.now },            // Last seen
+    dateAdded:      { type: Number,  default: Date.now },     // Join date
+    lastUpdated:    { type: Number,  default: Date.now },     // Last seen
     parent: {
-        collection:    { type: String,  required: true },    // collection
-        id:            { type: String,  required: true }    // id
+        collection:    { type: String,  required: true },     // collection
+        id:            { type: String,  required: true }      // id
     },
-    fileId:          { type: Object,  required: true },       // File itself
+    // file: {
+    // 	name: { type: String,  required: true },       // Path to file
+    // 	path: { type: String,  required: true },       // Path to file
+    // 	id:   { type: Object, 'default': null }        // File ID, will be set my model
+    // },    
+    filePath:        { type: String, 'default': '' },       // Path to file
+    fileId:          { type: Object, 'default': null },       // File ID, will be set my model
     visibility:      { type: String, 'default': 'PRIVATE' },  // Visibility
     sharedWith:      { type: [],     'default': [] },         // List of entities who can access the file
     comments:        { type: [],     'default': [] },
@@ -75,9 +81,9 @@ FileContainerSchema.method({
     },
     
     getFile: function(){
-	// update view count
-	
+	// update view count	
     },
+
     viewableTo: function( entity ){ 
         var fileContainer = this;
         
@@ -101,16 +107,43 @@ FileContainerSchema.method({
     
 });
 
+//FileContainerSchema.pre('init', function(next){
+  //  console.log)
 
 // Update dates 
 FileContainerSchema.pre('save', function(next){
     var fileContainer = this;
-
     fileContainer.lastUpdated = Date.now();
     
+    if( fileContainer.isNew ){
+	
+	// grid.mongo = mongoose.mongo;
+	// var conn   = mongoose.createConnection(config.db);
+	
+	// console.log('Am I connected?');
+        // conn.once('open', function () {
+	    
+	//     var gfs = grid(conn.db);
+	    	    
+	//     console.log(files.file);
+	    
+	//     var writestream = gfs.createWriteStream({
+
+	// 	filename: files.file.name,
+	// 	root: 'uploads',
+	// 	mode: 'w'		    
+	//     });
+	    
+	    
+	//     console.log('doc', writestream._id);
+	    
+	    //fs.createReadStream(files.file.path).pipe(writestream)
+	    
+	    //fs.unlinkSync(files.file.path);
+    }
+
     next();
 });
-
 
 // Before a user deletes their account, remove all of their files and directory
 

@@ -5,9 +5,9 @@ var sinonChai            = require("sinon-chai");
 
 var UnauthenticatedUser  = mongoose.model('UnauthenticatedUser');
 var User                 = mongoose.model('User');
+
 chai.should();
 chai.use( sinonChai );
-
 
 var expect = chai.expect;
 
@@ -34,26 +34,22 @@ describe('UnauthenticatedUser', function(){
 	});
     });
     
-    afterEach(function(done){
+    afterEach(function(){
 	unauthUser.remove();
-	done();	
     });
     
-    it('Ensure unauthenticated user has been saved', function(done){
+    it('Ensure unauthenticated user has been saved', function(){
 	expect( unauthUser ).to.exist;
-	done();
     });
 
-    it('Password encription', function(done){
+    it('Password encription', function(){
 	expect( unauthUser ).not.equal( userTemplate.password );
-	done();
     });
     
-    it('User information saved correctly', function(done){
+    it('User information saved correctly', function(){
 	expect( unauthUser.name.first ).equal( userTemplate.name.first );
 	expect( unauthUser.name.last ).equal( userTemplate.name.last );
 	expect( unauthUser.email ).equal( userTemplate.email );
-	done();
     });
 });
 
@@ -86,32 +82,28 @@ describe('User', function(){
     });
     
 
-    it('Ensure user has been saved', function(done){
+    it('Ensure user has been saved', function(){
 	expect( user ).to.exist;
-	done();
     });
 
-    it('Password encription', function(done){
+    it('Password encription', function(){
 	expect( user ).not.equal( userTemplate.password );
-	done();
     });
     
-    it('User information saved correctly', function(done){
+    it('User information saved correctly', function(){
 	expect( user.name.first ).equal( userTemplate.name.first );
 	expect( user.name.last ).equal( userTemplate.name.last );
 	expect( user.email ).equal( userTemplate.email );
-	done();
     });
 
-    it('Attach file', function(done){
+    it('Attach file', function(){
 	var file = mongoose.Types.ObjectId(); // fake the obejct ID
 	user.attachFile( file ); //
 	expect( user.files.length ).to.equal( 1 );
 	expect( user.files ).to.include( file  );
-	done();
     });
     
-    it('Attach and remove file', function(done){
+    it('Attach and remove file', function(){
 	var file = mongoose.Types.ObjectId(); // fake the obejct ID
 	user.attachFile( file ); //
 	expect( user.files.length ).to.equal( 1 );
@@ -120,20 +112,54 @@ describe('User', function(){
 	user.removeFile( file );
 	expect( user.files.length ).to.equal( 0 );
 	expect( user.files ).to.not.include( file  );
-	
-	done();
     });
 
-    it('Add comment', function(done){
+    it('Add comment', function(){
 	var comment = mongoose.Types.ObjectId(); // fake the obejct ID
 	user.addComment(comment);
 	
 	expect( user.comments.length ).to.equal( 1 );
 	expect( user.comments ).to.include( comment  );
-	done();
     });
+
+    //it('Add new notification', function(){
+	// create notification
+	//var notification = new Notification({ -- });
+	//use.addNotification( notification );
+	//expect( user.notifications.length ).to.equal( 1 );
+    //});
+
+    //it('Mark notification as read', function(){
+    // create notification
+    // var notification = new Notification({ -- });
+    // use.addNotification( notification );
+    // expect( user.notifications.length ).to.equal( 1 );
+    // user.markNotificationAsRead( notification );
+    // expect( user.notifications.length ).to.equal( 1 );
+    // expect( user.notifications[0] ).to.equal( -- );
+    //});
     
-    it('Add and remove comment', function(done){
+    // it('Add new notification', function(){
+    // create notification
+    // var notification = new Notification({ -- });
+    // use.addNotification( notification );
+    // expect( user.notifications.length ).to.equal( 1 );
+    // user.removeNotification( notification );
+    // expect( user.notifications.length ).to.equal( 0 );
+    // });
+    
+
+    // it('Add comment, expect notification', function(){
+    // 	var comment = mongoose.Types.ObjectId(); // fake the obejct ID
+    // 	user.addComment(comment);
+	
+    // 	expect( user.comments.length ).to.equal( 1 );
+    // 	expect( user.comments ).to.include( comment  );
+	
+    // 	expect( user.notifications.length ).to.equal( 1 );
+    // });
+    
+    it('Add and remove comment', function(){
 	var comment = mongoose.Types.ObjectId(); // fake the obejct ID
 	user.addComment(comment);
 	
@@ -143,7 +169,16 @@ describe('User', function(){
 	user.removeComment( comment );
 	expect( user.comments.length ).to.equal( 0 );
 	expect( user.comments ).to.not.include( comment  );
+    });
+    
+    
+    
+    it('Update email and expect notification', function(){
+	var newEmailAddr = 'me@newTest.com';
 	
-	done();
+	user.updateEmail( newEmailAddr );
+
+	expect(user.email).to.equal( newEmailAddr );
+	//expect(user.notifications.length).to.equal( 1 );
     });
 });

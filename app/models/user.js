@@ -188,7 +188,6 @@ UserSchema.method({
     validPassword: function(password) {
 	return bcrypt.compareSync(password, this.password);
     }
-
 });
 
 // Update dates 
@@ -202,7 +201,7 @@ UserSchema.pre('save', function(next) {
 UserSchema.pre('remove', function(next) {
     var user = this; 
     
-//    user.basePreRemove();
+    //  user.basePreRemove();
     
     // pop pop pop
     while( user.files.length !== 0 ){
@@ -227,6 +226,7 @@ UserSchema.pre('remove', function(next) {
 
     next();
 });
+
 
 
 

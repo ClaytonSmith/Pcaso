@@ -97,8 +97,8 @@ function MailClient( client ){
 	if( !valid ) return new Error( 'Malformed email, all fields must be filled' );
 	
 	// send
-	transport.sendMail(newClient.message, callback);
-	//callback( false, {});
+	//transport.sendMail(newClient.message, callback);
+	callback( false, {});
     }
     
     return  newClient;

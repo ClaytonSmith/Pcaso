@@ -76,49 +76,6 @@ exports.deleteFile = function(req, res){
 
 }
 
-/*exports.upload = function(req, res) {
-    var form = new formidable.IncomingForm();
-    form.uploadDir = __dirname + "../../../data/temp";
-    form.keepExtensions = true;
-    console.log(req.isAuthenticated());
-    var user = req.isAuthenticated() ? req.user : User.find({});
-
-    // var fileInfo = // check req	
-    form.parse(req, function(err, fields, files) {
-	
-	if (!err) {
-            console.log('File uploaded : ' + files.file.path);	    
-	    grid.mongo = mongoose.mongo;
-	    var conn   = mongoose.createConnection(config.db);
-	    
-            conn.once('open', function () {
-		var gfs = grid(conn.db);
-		
-		// generate new ID for the document
-		var documentID = mongoose.Types.ObjectId();        
-		
-		var writestream = gfs.createWriteStream({
-		    _id: documentID,
-		    filename: files.file.name,
-		    root: 'uploads',
-		    mode: 'w'		    
-		});
-		
-		console.log('cool doc', documentID);
-		
-		fs.createReadStream(files.file.path).pipe(writestream)
-		fs.unlinkSync(files.file.path);
-		
-	    });
-	}        
-    });
-    
-    form.on('end', function() {       
-	res.send(200);
-    });   
-};
-*/
-
 exports.addSharedUser = function( req, res){
     // Owner 
     // File
@@ -148,12 +105,10 @@ exports.upload = function(req, res) {
   
 	    console.log('Am I connected?');
             conn.once('open', function () {
+
 		var gfs = grid(conn.db);
 		
-		console.log('cool doc', documentId);
-		
-		// generate new ID for the document
-
+		console.log('cool doc', documentId);		
 		
 		console.log(files.file);
 

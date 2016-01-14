@@ -57,7 +57,7 @@ V1 Backend
   - [ ] Files
   - [ ] User
 - [ ] Unit tests 
-  - [ ] User accounts
+  - [X] User accounts
   - [ ] Email services
   - [ ] File managment	
   - [ ] Comments
