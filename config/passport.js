@@ -96,7 +96,6 @@ module.exports = function(passport) {
 				// Make account
 				var newUser         = new UnauthenticatedUsers();
 				
-				console.log('REQ BODY**************************\n', req.body)
 				newUser.email       = email.toLowerCase();
 				newUser.password    = newUser.generateHash(password);
 				newUser.name.first  = req.body.firstName;

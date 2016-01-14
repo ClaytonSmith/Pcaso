@@ -12,29 +12,29 @@ var BaseSchema     = require('./base-schema');
 
 var FileContainerSchema = new mongoose.Schema({
     
-    dateAdded:      { type: Number,  default: Date.now },     // Join date
-    lastUpdated:    { type: Number,  default: Date.now },     // Last seen
+    dateAdded:       { type: Number,  default: Date.now },     // Join date
+    lastUpdated:     { type: Number,  default: Date.now },     // Last seen
     parent: {
-        collection:    { type: String,  required: true },     // collection
-        id:            { type: String,  required: true }      // id
+        collection:      { type: String,  required: true },     // collection
+        id:              { type: String,  required: true }      // id
     },
-    // file: {
-    // 	name: { type: String,  required: true },       // Path to file
-    // 	path: { type: String,  required: true },       // Path to file
-    // 	id:   { type: Object, 'default': null }        // File ID, will be set my model
-    // },    
-    filePath:        { type: String, 'default': '' },       // Path to file
-    fileId:          { type: Object, 'default': null },       // File ID, will be set my model
+    file: {
+     	name:            { type: String,  required: true },              // Path to file
+	path:            { type: String,  required: true },              // Path to file
+     	id:              { type: Object, 'default': mongoose.Types.ObjectId().toString() } 
+    },    
     visibility:      { type: String, 'default': 'PRIVATE' },  // Visibility
     sharedWith:      { type: [],     'default': [] },         // List of entities who can access the file
     comments:        { type: [],     'default': [] },
     statistics:      { type: Object, 'default': {} },
-    metaData:        { type: Object, 'default': {} },         // File metadata
-    Displayettings:  { type: Object, 'default': {} },         // Display settings.
-    bulletLink:      { type: String },
+    metaData: {
+	veiws:            { type: Number, 'default': 0 }      // File metadata
+    },
+    displaySettings:  { type: Object, 'default': {} },         // Display settings.
+    bulletLink:       { type: String },
     settings: {
-        acceptFiles:   { type: Boolean, 'default': false },
-        commentable:   { type: Boolean, 'default': true }
+        acceptFiles:      { type: Boolean, 'default': false },
+        commentable:      { type: Boolean, 'default': true }
     }
 });
 
@@ -112,36 +112,40 @@ FileContainerSchema.method({
 
 // Update dates 
 FileContainerSchema.pre('save', function(next){
+    // TODO error checking
+
     var fileContainer = this;
     fileContainer.lastUpdated = Date.now();
     
     if( fileContainer.isNew ){
 	
-	// grid.mongo = mongoose.mongo;
-	// var conn   = mongoose.createConnection(config.db);
-	
-	// console.log('Am I connected?');
-        // conn.once('open', function () {
-	    
-	//     var gfs = grid(conn.db);
-	    	    
-	//     console.log(files.file);
-	    
-	//     var writestream = gfs.createWriteStream({
+	grid.mongo = mongoose.mongo;
+	var conn   = mongoose.createConnection(config.db);
+	var documentId = mongoose.Types.ObjectId();        		
 
-	// 	filename: files.file.name,
-	// 	root: 'uploads',
-	// 	mode: 'w'		    
-	//     });
+        conn.once('open', function(){
 	    
+	    var gfs = grid(conn.db);
 	    
-	//     console.log('doc', writestream._id);
+	    var writestream = gfs.createWriteStream({
+		_id: fileContainer.file.id,
+		parent: {
+		    id: fileContainer._id,
+		    collection: fileContainer.__t
+		},
+ 		filename: fileContainer.file.name,
+		create: Date.now,
+		root: 'uploads',
+	 	mode: 'w'		    
+	    });
 	    
-	    //fs.createReadStream(files.file.path).pipe(writestream)
+	    fs.createReadStream(fileContainer.file.path).pipe(writestream);
 	    
-	    //fs.unlinkSync(files.file.path);
+	    // May want to keep some files around
+	    if( !fileContainer.keepFile ) fs.unlinkSync(fileContainer.file.path);	    
+	});
     }
-
+    
     next();
 });
 
@@ -168,12 +172,6 @@ FileContainerSchema.pre('remove', function(next) {
 	fileContainer.removeComment( user.fileIDs[0] );
     };     
     
-    //fileContainer.comments.forEach( function(comment){
-    // delete every comment 
-    //fileContainer.deleteComment( comment );
-    //});
-    
-       
     next();
 });
 
