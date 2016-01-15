@@ -10,11 +10,16 @@ lint:
 
 test: test-all
 
-test-all: lint unit-test
+test-all: | lint unit-test system-test
 
 unit-test: 
 	@${MOCHA} \
 	  --growl \
 	  tests/server/unit/controller.js
+
+system-test: 
+	@${MOCHA} \
+	  --growl \
+	  tests/server/system/controller.js
 
 .PHONY: test
