@@ -3,14 +3,20 @@ var chai                 = require('chai');
 var sinon                = require('sinon');
 var sinonChai            = require('sinon-chai');
 var fs                   = require('fs');
-
+var devNullStream        = require('dev-null-stream');
 var FileContainer        = mongoose.model('FileContainer');
 
 chai.should();
 chai.use( sinonChai );
 
-
 var expect = chai.expect;
+
+var devNullOpts = {
+    highWaterMark: 2
+}
+
+var devNull = new devNullStream( devNullOpts);
+
 
 describe('FileContainer', function(){
     
@@ -43,10 +49,12 @@ describe('FileContainer', function(){
     afterEach( function(done){
 	fileCntr.remove( done );
     });
+
     
     it('Container should exist', function(){
 	expect( fileCntr ).to.exist;
     });
+
     
     it('Parent ID and collection type should match', function(){
 	expect( fileCntr.parent.id ).to.equal( fileTemplate.parent.id );
@@ -56,23 +64,33 @@ describe('FileContainer', function(){
 
     it('Add comment', function(){
 	var comment = mongoose.Types.ObjectId(); // fake the obejct ID
-	fileCntr.addComment(comment);
 
+	fileCntr.addComment(comment);
 	expect( fileCntr.comments.length ).to.equal( 1 );
-	expect( fileCntr.comments ).to.include( comment  );
+	expect( fileCntr.comments ).to.include( comment );
     });
+
     
     it('Add and remove comment', function(){
-	var comment = mongoose.Types.ObjectId(); // fake the obejct ID
-	    
-	fileCntr.addComment(comment);
+	var comment1 = mongoose.Types.ObjectId(); // fake the obejct ID
+	var comment2 = mongoose.Types.ObjectId(); // fake the obejct ID
 	
+	fileCntr.addComment(comment1);
 	expect( fileCntr.comments.length ).to.equal( 1 );
-	expect( fileCntr.comments ).to.include( comment  );
+	expect( fileCntr.comments ).to.include( comment1  );
 	
-	fileCntr.removeComment( comment );
+	fileCntr.addComment(comment2);
+	expect( fileCntr.comments.length ).to.equal( 2 );
+	expect( fileCntr.comments ).to.include( comment2  );
+	
+	fileCntr.removeComment( comment1 );
+	expect( fileCntr.comments.length ).to.equal( 1 );
+	expect( fileCntr.comments ).to.not.include( comment1 );
+
+	fileCntr.removeComment( comment2 );
 	expect( fileCntr.comments.length ).to.equal( 0 );
-	expect( fileCntr.comments ).to.not.include( comment  );
+	expect( fileCntr.comments ).to.not.include( comment2 );
+	
     });
     
     it('Add shared entity', function(){
@@ -158,5 +176,42 @@ describe('FileContainer', function(){
 	).to.be.true;
     });
     
+    it('Get file', function(done){
+	var path = './data/test/temp.txt';
+	var write = fs.createWriteStream(path);
+	
+	write.on('ERROR', console.log);		
+	write.on('finish', function(){
+	    fs.unlinkSync(path);	    
+	    done();
+	});		
+	
+	fileCntr.getFile(write);	
+    });
     
+    it('View counter', function(done){
+	var path = './data/test/temp.txt';
+	var write = fs.createWriteStream(path);
+
+	expect( fileCntr.statistics.viewCount ).to.equal( 0 );
+	
+	write.on('ERROR', console.log);		
+	write.on('finish', function(){
+	    fs.unlinkSync(path);	    
+	    expect( fileCntr.statistics.viewCount ).to.equal( 1 );    
+	    done()
+	});		
+
+	fileCntr.getFile(write);
+    });
+    
+    it('Save display settings', function(){
+	var displaySettings ={
+	    cat: 'dog',
+	    cow: 'horse'
+	}
+	
+	fileCntr.saveDisplaySettings( displaySettings );
+	expect( fileCntr.displaySettings ).to.eql( displaySettings );
+    });       
 });

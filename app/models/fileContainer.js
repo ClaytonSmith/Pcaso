@@ -6,8 +6,8 @@ var grid         = require('gridfs-stream');
 var fs           = require('fs');
 var util         = require('util');
 var multipart    = require('multipart');
-var config       = require('../../config/config');
 
+var config       = require('../../config/config');
 var BaseSchema   = require('./base-schema');
 var Comments     = require('./comments');
 
@@ -28,9 +28,9 @@ var FileContainerSchema = new mongoose.Schema({
     visibility:      { type: String,  default: 'PRIVATE' },  // Visibility
     sharedWith:      { type: [],      default: [] },
     comments:        { type: [],      default: [] },
-    statistics:      { type: Object,  default: {} },
-    metaData: {
-	veiws:            { type: Number, default: 0 }      // File metadata
+    metaData:        { type: Object,  default: {} },
+    statistics: {
+	viewCount:       { type: Number, default: 0 }      // File metadata
     },
     displaySettings:  { type: Object, default: {} },         // Display settings.
     bulletLink:       { type: String },
@@ -78,24 +78,31 @@ FileContainerSchema.method({
 	return ( index >= 0 ) ? this.sharedWith.splice( index, 1) : [] ;
     },
     
-    updateSettings: function( newSettings ){
+    saveDisplaySettings: function( newSettings ){
 	// Maybe want to keep history 
         // array of objects perhaps?
-        return this.settings = newSettings; 
+        return this.displaySettings = newSettings; 
     },
     
     getFile: function( dest ){
 	
 	grid.mongo  = mongoose.mongo;
         var conn    = mongoose.createConnection(config.db);
-        var options = {_id: this.file.id, root: 'uploads'};    
+        var options = { _id: this.file.id, root: 'uploads'};    
 	
 	conn.once('open', function () {
 	    var gfs = grid(conn.db);
-	    gfs.createReadStream( options ).pipe(dest);
-        });
-
-	this.metaData.views += 1;
+	    
+	    var read = gfs.createReadStream( options );
+	    
+	    read.on('error', function(err){
+		console.log( 'I HAVE ENCOUNTERED AN ERROR: ',err);
+	    });
+	    
+	    read.pipe(dest);
+	});
+	
+	this.statistics.viewCount += 1;
     },
     
     viewableTo: function( entity ){ 
@@ -123,9 +130,6 @@ FileContainerSchema.method({
     }
     
 });
-
-//FileContainerSchema.pre('init', function(next){
-  //  console.log)
 
 // Update dates 
 FileContainerSchema.pre('save', function(next){
@@ -156,14 +160,21 @@ FileContainerSchema.pre('save', function(next){
 	 	mode: 'w'		    
 	    });
 	    
-	    fs.createReadStream(fileContainer.file.path).pipe(writestream);
+	    var read = fs.createReadStream(fileContainer.file.path)
+	     
+	    // TODO
+	    //read.on('error', );
+	    //writestream.on('error', throw new Error);
+	    writestream.on('finish', function(){
+		if( !fileContainer.keepFile ) fs.unlinkSync(fileContainer.file.path);	    
+		next();
+	    });
 	    
-	    // May want to keep some files around
-	    if( !fileContainer.keepFile ) fs.unlinkSync(fileContainer.file.path);	    
+	    read.pipe(writestream);
 	});
+    } else { 	
+	next();
     }
-    
-    next();
 });
 
 // Before a user deletes their account, remove all of their files and directory
@@ -177,9 +188,10 @@ FileContainerSchema.pre('remove', function(next) {
     
     // Delete file
     conn.once('open', function () {
-	grid(conn.db).remove( fileQuery, function (err) {
+	grid(conn.db).remove( fileQuery, function(err){
 	    if (err) return handleError(err);
 	    // console.log('File removed', options._id);
+	    next();
 	});	
     });
     
@@ -189,7 +201,7 @@ FileContainerSchema.pre('remove', function(next) {
     // fileContainer.removeComment( user.files[0] );
     // };     
     
-    next();
+    
 });
 
 module.exports = mongoose.model('FileContainer', FileContainerSchema);

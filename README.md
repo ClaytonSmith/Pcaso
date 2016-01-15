@@ -57,18 +57,15 @@ V1 Backend
   - [ ] Files
   - [ ] User
 - [ ] Test
-  - [ ] Unit tests 
+  - [X] Unit tests 
     - [X] User accounts
-    - [ ] Email services
-    - [ ] File managment	
-    - [ ] Comments
-    - [ ] Statistics
-    - [ ] Garbage collection
+    - [X] Email services
+    - [X] File managment	
+    - [X] Comments
   - System 
     - [ ] User accounts
     - [ ] Email services
     - [ ] File managment	
     - [ ] Comments
-    - [ ] Statistics
     - [ ] Garbage collection
     - [ ] API

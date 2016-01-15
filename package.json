@@ -12,6 +12,7 @@
     "co-express": "^1.2.1",
     "connect-flash": "~0.1.1",
     "cookie-parser": "~1.0.0",
+    "dev-null-stream": "0.0.1",
     "ejs": "~0.8.5",
     "email-templates": "^2.0.1",
     "eslint": "^1.10.3",

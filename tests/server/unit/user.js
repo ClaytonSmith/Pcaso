@@ -13,7 +13,6 @@ var expect = chai.expect;
 
 describe('UnauthenticatedUser', function(){
     
-    // Our soon to be unregistered user
     var unauthUser = null;
     var userTemplate = {
 	name: {
@@ -28,8 +27,7 @@ describe('UnauthenticatedUser', function(){
 	
 	unauthUser = UnauthenticatedUser(userTemplate);
 	unauthUser.save( function( err ){
-	    if( err ) throw err 
-	    
+	    if( err ) throw err ;
 	    done();
 	});
     });

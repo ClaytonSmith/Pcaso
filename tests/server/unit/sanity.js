@@ -56,5 +56,9 @@ describe('Santiy check.', function(){
 	var model = mongoose.model('Comment');
 	expect( model ).to.exist;
     });
-    
+
+    it('Ensure mailer has been loaded', function(){
+	var mailer = require('../../../config/mailer');
+	expect( mailer ).to.exist;
+    });
 });
