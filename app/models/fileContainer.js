@@ -6,34 +6,47 @@ var grid         = require('gridfs-stream');
 var fs           = require('fs');
 var util         = require('util');
 var multipart    = require('multipart');
-var config       = require('../../config/config');
 
-var BaseSchema     = require('./base-schema');
+var config       = require('../../config/config');
+var BaseSchema   = require('./base-schema');
+var Comments     = require('./comments');
 
 var FileContainerSchema = new mongoose.Schema({
     
-    dateAdded:      { type: Number,  default: Date.now },            // Join date
-    lastUpdated:    { type: Number,  default: Date.now },            // Last seen
+    dateAdded:       { type: Number,  default: Date.now },     // Join date
+    lastUpdated:     { type: Number,  default: Date.now },     // Last seen
     parent: {
-        collection:    { type: String,  required: true },    // collection
-        id:            { type: String,  required: true }    // id
+        collectionName:  { type: String,  required: true },     // collection
+        id:              { type: String,  required: true }      // id
     },
-    fileId:          { type: Object,  required: true },       // File itself
-    visibility:      { type: String, 'default': 'PRIVATE' },  // Visibility
-    sharedWith:      { type: [],     'default': [] },         // List of entities who can access the file
-    comments:        { type: [],     'default': [] },
-    statistics:      { type: Object, 'default': {} },
-    metaData:        { type: Object, 'default': {} },         // File metadata
-    Displayettings:  { type: Object, 'default': {} },         // Display settings.
-    bulletLink:      { type: String }
+    file: {
+     	name:            { type: String,  required: true },              // Path to file
+	path:            { type: String,  required: true },              // Path to file
+     	id:              { type: Object, default: mongoose.Types.ObjectId().toString() } 
+    },     
+    keepFile:        { type: Boolean, default: false }, 
+    visibility:      { type: String,  default: 'PRIVATE' },  // Visibility
+    sharedWith:      { type: [],      default: [] },
+    comments:        { type: [],      default: [] },
+    metaData:        { type: Object,  default: {} },
+    statistics: {
+	viewCount:       { type: Number, default: 0 }      // File metadata
+    },
+    displaySettings:  { type: Object, default: {} },         // Display settings.
+    bulletLink:       { type: String },
+    settings: {
+        acceptFiles:      { type: Boolean, default: false },
+        commentable:      { type: Boolean, default: true }
+    }
 });
 
 
 FileContainerSchema.method({
+
     // Adds new comment ID to list of comments IFF commenting is enabled
     addComment: function(commentID){
-        if( !this.commentable )
-            return new Error( 'Commenting is not allowed on this object' );
+        if( !this.settings.commentable )
+            return new Error( 'Commenting is disallowed on this' + this.__t);
         return this.comments.push( commentID );
     },
     
@@ -46,7 +59,8 @@ FileContainerSchema.method({
 	var deleted = this.deleteComment( commentID );
         if( deleted.length && this._id !== commentID ){
             Comments.findOne({ _id: commentID }, function(err, doc){
-		console.log('Found the comment');
+		if( err ) throw new Error( err );
+		if( !doc ) return true; 
 		doc.remove();
 	    });   
 	}
@@ -54,59 +68,114 @@ FileContainerSchema.method({
 	return deleted;
     },
     
-    addSharedUser: function( newSharedUserID ){
-        this.sharedWithIDs.push( newSharedUserID );
+    addSharedEntity: function( sharedEntity ){
+	this.sharedWith.push( sharedEntity );
 	// email user
     },
 
-    deleteSharedUser: function( sharedUserID ){
-	var index = this.sharedWithIDs.indexOf( sharedUserID );
+    deleteSharedEntity: function( sharedEntity ){
+	var index = this.sharedWith.indexOf( sharedEntity );
 	return ( index >= 0 ) ? this.sharedWith.splice( index, 1) : [] ;
     },
     
-    updateSettings: function( newSettings ){
+    saveDisplaySettings: function( newSettings ){
 	// Maybe want to keep history 
         // array of objects perhaps?
-        return this.settings = newSettings; 
+        return this.displaySettings = newSettings; 
     },
     
-    getFile: function(){
-	// update view count
+    getFile: function( dest ){
 	
+	grid.mongo  = mongoose.mongo;
+        var conn    = mongoose.createConnection(config.db);
+        var options = { _id: this.file.id, root: 'uploads'};    
+	
+	conn.once('open', function () {
+	    var gfs = grid(conn.db);
+	    
+	    var read = gfs.createReadStream( options );
+	    
+	    read.on('error', function(err){
+		console.log( 'I HAVE ENCOUNTERED AN ERROR: ',err);
+	    });
+	    
+	    read.pipe(dest);
+	});
+	
+	this.statistics.viewCount += 1;
     },
+    
     viewableTo: function( entity ){ 
         var fileContainer = this;
         
         // Is file public 
-	if( fileContainer.visiblity === 'PUBLIC') return true;
-        
+	if( fileContainer.visibility === 'PUBLIC') return true;
+
         // Does entity exist and is it an entity
-        if( !entity || !entity._id ) return false ;
-        
+        if( !entity || typeof( entity ) !== 'object' || !entity._id ) return false ;
+
 	// Entity is owner 
         // Stringify and compaire because we don't know if `entity._id` will be ObjectID or String	
-	if( String( fileContainer.parent.id ) === String( entity._id ) ) return true;
-
+	if( String( fileContainer.parent.id ) === String( entity._id ) &&
+	    fileContainer.parent.collectionName === entity.__t ) return true;
+	
         // File is private and entity is on the shared list
-        console.log('Am I a shared user?', fileContainer.sharedWith.indexOf( entity._id ) );
-        return fileContainer.visibility === 'PRIVATE' &&
-            ( fileContainer.sharedWith.indexOf( entity._id ) !== -1 ) ;
+        var idIndex         = fileContainer.sharedWith.map( function(e){ return e.id } ).indexOf( entity._id );
+	var collectionIndex = fileContainer.sharedWith.map( function(e){ return e.collectionName } ).indexOf( entity.__t );
+	
+        if( idIndex === collectionIndex && idIndex !== -1 ) return true
         
+	return false;
         // TODO: Error checking for not public or private 
     }
     
 });
 
-
 // Update dates 
 FileContainerSchema.pre('save', function(next){
-    var fileContainer = this;
+    // TODO error checking
 
+    var fileContainer = this;
     fileContainer.lastUpdated = Date.now();
     
-    next();
-});
+    if( fileContainer.isNew ){
+	
+	grid.mongo = mongoose.mongo;
+	var conn   = mongoose.createConnection(config.db);
+	var documentId = mongoose.Types.ObjectId();        		
 
+        conn.once('open', function(){
+	    
+	    var gfs = grid(conn.db);
+	    
+	    var writestream = gfs.createWriteStream({
+		_id: fileContainer.file.id,
+		parent: {
+		    id: fileContainer._id,
+		    collection: fileContainer.__t
+		},
+ 		filename: fileContainer.file.name,
+		create: Date.now,
+		root: 'uploads',
+	 	mode: 'w'		    
+	    });
+	    
+	    var read = fs.createReadStream(fileContainer.file.path)
+	     
+	    // TODO
+	    //read.on('error', );
+	    //writestream.on('error', throw new Error);
+	    writestream.on('finish', function(){
+		if( !fileContainer.keepFile ) fs.unlinkSync(fileContainer.file.path);	    
+		next();
+	    });
+	    
+	    read.pipe(writestream);
+	});
+    } else { 	
+	next();
+    }
+});
 
 // Before a user deletes their account, remove all of their files and directory
 
@@ -115,29 +184,24 @@ FileContainerSchema.pre('remove', function(next) {
     
     grid.mongo = mongoose.mongo;
     var conn   = mongoose.createConnection(config.db);
-    var fileQuery = {_id: this.fileId, root: 'uploads'};
+    var fileQuery = {_id: fileContainer.file.id, root: 'uploads'};
     
     // Delete file
     conn.once('open', function () {
-	grid(conn.db).remove( fileQuery, function (err) {
+	grid(conn.db).remove( fileQuery, function(err){
 	    if (err) return handleError(err);
-	    console.log('File removed', options._id);
+	    // console.log('File removed', options._id);
+	    next();
 	});	
     });
     
     // pop pop pop
-    while( fileContainer.comments.length !== 0 ){
-	console.log('Deleting file', fileContainer.comments[0]);
-	fileContainer.removeComment( user.fileIDs[0] );
-    };     
+    // while( fileContainer.comments.length !== 0 ){
+    // console.log('Deleting file', fileContainer.comments[0]);
+    // fileContainer.removeComment( user.files[0] );
+    // };     
     
-    //fileContainer.comments.forEach( function(comment){
-    // delete every comment 
-    //fileContainer.deleteComment( comment );
-    //});
     
-       
-    next();
 });
 
 module.exports = mongoose.model('FileContainer', FileContainerSchema);

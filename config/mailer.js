@@ -8,11 +8,9 @@ var async          = require('async');
 
 var templateDir    = path.resolve(__dirname, '.', 'email-templates');
 
-// Create a SMTP transporter object
 
 
-var mailClients = {};
-
+// Document this
 var templateClients = {
     'test': { 
 	subject: 'Cool Test',
@@ -28,8 +26,13 @@ function templateResourceCollector(objA){
 }
 
 function MailClient( client ){
+    if( !config.secrets.emailCredentials.hasOwnProperty( client ))
+	return new Error( 'Unknown client' );
+
     var newClient   = this;    
     var okayToSend  = { from: false, to: false, subject: false, body: false } 
+    
+    // Create a SMTP transporter object
     var transport   =  nodemailer.createTransport({
 	host: 'smtpout.secureserver.net', 
 	port: 465, 
@@ -93,12 +96,14 @@ function MailClient( client ){
 	
 	// Check that all required fields have been filled
 	var valid = Object.keys( okayToSend ).reduce( function( predicate, val ){ return okayToSend[ val ] && predicate; }, true );
-	if( !valid ) console.log( 'Malformed email, all fields must be filled' );
-	if( !valid ) return new Error( 'Malformed email, all fields must be filled' );
-	
+	if( !valid ) callback( new Error( 'Malformed email, all fields must be filled' ));
+
 	// send
-	transport.sendMail(newClient.message, callback);
-	//callback( false, {});
+	
+	if( process.env['NODE_ENV'] === 'test' )
+	    callback( false, {});
+	else 
+	    transport.sendMail(newClient.message, callback);
     }
     
     return  newClient;
@@ -114,7 +119,6 @@ exports.useTemplate = function(templateName, recipients){
     
     // Create the template from the mailer
     var template = new EmailTemplate( path.join(templateDir, templateName));
-    //console.log(path.join(templateDir, templateName));
 
     // load in the mailer client
     //console.log('NEW MAILER',mailer, mailClients);
@@ -144,9 +148,6 @@ exports.useTemplate = function(templateName, recipients){
 	    mailClient.html( results.html );
 	    mailClient.text( results.text );
 	    
-	    
-	    
-
 	    //console.log('Constructed email', mailClient);
 	    mailClient.send( function(error, status) {
 		//console.log('Here', error);
@@ -162,6 +163,4 @@ exports.useTemplate = function(templateName, recipients){
     });
 };
 
-
-exports.newClient = undefined;
-exports.mailClients = mailClients;
+exports.newClient = MailClient;

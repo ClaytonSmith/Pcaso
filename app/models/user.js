@@ -29,6 +29,8 @@ var bcrypt         = require('bcrypt-nodejs');
 var extend         = require('mongoose-schema-extend');
 
 //var BaseSchema     = mongoose.model('BaseSchema');
+var FileContainers = mongoose.model('FileContainer');
+var Comments       = mongoose.model('Comment');
 
 var BaseUserSchema = new mongoose.Schema({// BaseSchema.extend({    
     // User accound and reg
@@ -43,23 +45,23 @@ var BaseUserSchema = new mongoose.Schema({// BaseSchema.extend({
         first:          { type: String, required: true },
 	last:           { type: String, required: true }
     },
-
-    notifications: { type: [], default: [] },                                                                // List of new and all notifications, hide this       
-    files:          { type: [], default: [] },                        // List of mongoId for containers
-    comments:       { type: [], default: [] },                        // Comments left on this entity, NOT by this entity
-    settings: {
-	defaultVisibility:  { type: String,  'default': 'PRIVATE'}, // default file visibility, set for every future upload
-	accountVisivility:  { type: String,  'default': 'PRIVATE'}, // Account visibility, who can see this profile
-        commentable:        { type: Boolean, 'default': true },             // default commenting on account
-        acceptFiles:        { type: Boolean, 'default': true }              // Will tell whether commenting is allowed, it is not by default
-    }
+    notifications: { type: [], default: [] }                         // List of new and all notifications, hide this       
 });
 
 var UnauthenticatedUserSchema  = BaseUserSchema.extend({});
 
 
 // Regular users can have files
-var UserSchema                 = BaseUserSchema.extend({});
+var UserSchema                 = BaseUserSchema.extend({
+    files:          { type: [], default: [] },                        // List of mongoId for containers
+    comments:       { type: [], default: [] },                        // List of mongoId for comments left by user
+    settings: {
+	defaultVisibility:  { type: String,  'default': 'PRIVATE'},   // default file visibility, set for every future upload
+	accountVisivility:  { type: String,  'default': 'PRIVATE'},   // Account visibility, who can see this profile
+        commentable:        { type: Boolean, 'default': true },             // default commenting on account
+        acceptFiles:        { type: Boolean, 'default': true }              // Will tell whether commenting is allowed, it is not by default
+    }
+});
 
 UnauthenticatedUserSchema.method({
 
@@ -91,64 +93,29 @@ UserSchema.method({
     
     // file will be removed from DB
     removeFile: function(fileID){	
-
         var deleted = this.deleteFile( fileID );        
         if( deleted.length ){
 	    FileContainers.findOne({ '_id': fileID, 'parent.id': this._id }, function(err, doc){
-	
+		
 		if( err )  return handleError( err );
                 if( !doc ) return true;
-                console.log('Found the doc');
                 doc.remove();
 	    });
 	}
         
 	return deleted;
     },
-    
-    // transferFileOwnership: function( entityID, collection, fileID ){
-        
-    //     FileContainers.findOne({ _id: fileID }, function(ferr, file){
-    //         if( ferr )  return handleError( err );
-    //         if( !file ) return; // Do something here
-            
-    //         // This is really cool
-    //         var   = mongoose.model('User');
-            
-    //         collection.findOne({ _id: entityID}, function(err, recipient){
-    //             if( derr ) return handleError( derr );
-                
-    //             // Can't give a file to something that doesn't exist
-    //             if( !recipient ) return false;
-                
-    //             // Cant give a file to someone who doesn't want it
-    //             if( !recipient.acceptFiles ) return false;
-                
-    //             // Tell file it has a new parent 
-    //             file.assignNewOwner( recipient );
-                
-    //             // tell recipient it now owns a new file
-    //             recipient.attachFile( fileID );
-                
-    //             var index = this.files.indexOf( file._id );
-                
-    //             // We know the file does exist, just being save 
-    //             if( index !== -1 ){
-    //                 return this.files.splice( index, 1);
-    //             } else {
-    //                 return [];
-    //             }
-    //         });
-    //     });
-    // },
-    
-    /** Comment management *****************************************/
 
     // Adds new comment ID to list of comments IFF commenting is enabled
     addComment: function(commentID){
-        if( !this.commentable )
-            return new Error( 'Commenting is not allowed on this object' );
-        return this.comments.push( commentID );
+        if( !this.settings.commentable ){	    
+            //new Error( 'Commenting is not allowed on this object' );
+	    return false;
+	}
+	
+	// add notification
+	
+	return this.comments.push( commentID );
     },
     
     deleteComment: function( commentID ){
@@ -158,11 +125,11 @@ UserSchema.method({
     
     removeComment: function(commentID){	
 	var deleted = this.deleteComment( commentID );
-        if( deleted.length ){
+        
+	if( deleted.length ){
             Comments.findOne({ _id: commentID, 'parent.id': this._id }, function(err, doc){
                 if( err ) return handleError( err );
                 if( !doc ) return true;
-                console.log('Found the comment');
 		doc.remove();
 	    });   
 	}
@@ -221,14 +188,12 @@ UserSchema.method({
     validPassword: function(password) {
 	return bcrypt.compareSync(password, this.password);
     }
-
 });
 
 // Update dates 
 UserSchema.pre('save', function(next) {
     var user = this;
-    user.lastUpdated = Date.now();
-    
+    user.lastUpdated = Date.now();    
     next();
 });
 
@@ -236,18 +201,16 @@ UserSchema.pre('save', function(next) {
 UserSchema.pre('remove', function(next) {
     var user = this; 
     
-//    user.basePreRemove();
+    //  user.basePreRemove();
     
     // pop pop pop
-    while( user.fileIDs.length !== 0 ){
-	console.log('Deleting file', user.fileIDs[0]);
-	user.removeFile( user.fileIDs[0] );
+    while( user.files.length !== 0 ){
+	user.removeFile( user.files[0] );
     };
 
     // pop pop pop
     while( user.comments.length !== 0 ){
-	console.log('Deleting file', user.commentss[0]);
-	user.removeComment( user.fileIDs[0] );
+	user.removeComment( user.comments[0] );
     }; 
     
     // pop pop pop
@@ -263,6 +226,7 @@ UserSchema.pre('remove', function(next) {
 
     next();
 });
+
 
 
 
