@@ -170,8 +170,7 @@ describe('User', function(){
 	expect( user.comments.length ).to.equal( 0 );
 	expect( user.comments ).to.not.include( comment  );
     });
-    
-    
+        
     
     it('Update email and expect notification', function(){
 	var newEmailAddr = 'me@newTest.com';

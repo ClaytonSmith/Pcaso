@@ -4,4 +4,4 @@ require('../../helpers/helper');
 
 require('./sanity');
 require('./user');
-
+require('./fileContainer');

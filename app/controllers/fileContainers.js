@@ -20,29 +20,14 @@ exports.isBullet = function(req, res, next) {
 }
 
 // GET
-exports.download = function(req, res){
-    // container ID not grindFS id
-    console.log( req.params.fileId ) ;
-    function loadFile(fileId){
-	
-        grid.mongo = mongoose.mongo;
-        var conn   = mongoose.createConnection(config.db);
-        var options = {_id: fileId, root: 'uploads'};    
-        console.log(options);
-	conn.once('open', function () {
-	    var gfs = grid(conn.db);
-	    gfs.createReadStream( options ).pipe(res);
-        });
-    };
-    
-    
+exports.download = function(req, res){   
     FileContainer.findOne({_id: req.params.fileId}, function( err, doc ){
         if( err ) return handleError( error );
         
 	if( !doc ) {
 	    res.send(404);
 	} else if( doc.viewableTo( req.user ) ){
-            loadFile( doc.file.id );
+            loadFile( doc.getFile( res ) );
         } else {
             res.send(404);
         }
@@ -51,31 +36,16 @@ exports.download = function(req, res){
 
 // DELETE
 exports.deleteFile = function(req, res){
-    
-    var options = {_id: req.params.fileId, root: 'uploads'};
-    grid.mongo = mongoose.mongo;
-    var conn   = mongoose.createConnection(config.db);
-    
-    conn.once('open', function () {
-	var gfs = grid(conn.db);
-	
-	gfs.remove( options, function (err) {
-	    if (err){
-		console.log('not found');
-		res.send(204);
-		return handleError(err);
-	    } else {
-		res.send(200);
-	    }
-	});
-    });
+    // need owner id 
+    // need container id
+    // proven to be authenticated user 
     
     res.send(200);
 }
 
 exports.addSharedUser = function( req, res){
-    // Owner 
-    // File
+    // need owner id 
+    // need container id
     // Shared with user
     // How to store the shared records
 }
