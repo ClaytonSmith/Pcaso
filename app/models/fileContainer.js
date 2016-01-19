@@ -166,7 +166,7 @@ FileContainerSchema.pre('save', function(next){
 	    //read.on('error', );
 	    //writestream.on('error', throw new Error);
 	    writestream.on('finish', function(){
-		if( !fileContainer.keepFile ) fs.unlinkSync(fileContainer.file.path);	    
+		//if( !fileContainer.keepFile ) fs.unlinkSync(fileContainer.file.path);	    
 		next();
 	    });
 	    

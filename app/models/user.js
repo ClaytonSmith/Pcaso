@@ -44,17 +44,17 @@ var BaseUserSchema = new mongoose.Schema({// BaseSchema.extend({
     name: { 
         first:          { type: String, required: true },
 	last:           { type: String, required: true }
-    },
-    notifications: { type: [], default: [] }                         // List of new and all notifications, hide this       
+    }
 });
 
 var UnauthenticatedUserSchema  = BaseUserSchema.extend({});
-
 
 // Regular users can have files
 var UserSchema                 = BaseUserSchema.extend({
     files:          { type: [], default: [] },                        // List of mongoId for containers
     comments:       { type: [], default: [] },                        // List of mongoId for comments left by user
+    userComments:   { type: [], default: [] },                        // List of mongoId for comments left by user
+    notifications:  { type: [], default: [] },                         // List of new and all notifications, hide this       
     settings: {
 	defaultVisibility:  { type: String,  'default': 'PRIVATE'},   // default file visibility, set for every future upload
 	accountVisivility:  { type: String,  'default': 'PRIVATE'},   // Account visibility, who can see this profile
@@ -118,22 +118,49 @@ UserSchema.method({
 	return this.comments.push( commentID );
     },
     
-    deleteComment: function( commentID ){
-	var index = this.comments.indexOf( commentID );     
-        return ( index >= 0 ) ? this.comments.splice( index, 1) : [] ;
+    
+    leaveComment: function( entity, subject, commentBody, callback ){
+	var user = this;
+	var comment = Comments.register( user, entity, this.name.first, subject, commentBody);
+
+	comment.save(function(err){
+	    if( err ) callback( err ) ;
+	    
+	    user.userComments.push( comment._id );	
+	    
+	    callback( null );	    
+	});
+	
+	return comment._id;
     },
     
-    removeComment: function(commentID){	
+    deleteComment: function( commentID ){
+	
+	var indexA = this.comments.indexOf( commentID );     
+	var indexB = this.userComments.indexOf( commentID );
+	
+	var deletedA = ( indexA >= 0 ) ? this.comments.splice( indexA, 1) : [ ] ;
+	var deletedB = ( indexB >= 0 ) ? this.userComments.splice( indexB, 1) : [ ] ;
+	
+	return deletedA.concat( deletedB );
+    },
+    
+    
+    removeComment: function(commentID, callback){	
 	var deleted = this.deleteComment( commentID );
-        
-	if( deleted.length ){
-            Comments.findOne({ _id: commentID, 'parent.id': this._id }, function(err, doc){
-                if( err ) return handleError( err );
-                if( !doc ) return true;
-		doc.remove();
+	
+	if( deleted.length > 0 ){
+	    Comments.findOne( {  _id: commentID }, function(err, doc){
+		if( err  ) return callback( err );
+		if( !doc ) return callback( null );
+		
+		doc.remove( callback );
 	    });   
+	    
+	} else {
+	    callback( null );
 	}
-        
+
 	return deleted;
     },
     
@@ -200,18 +227,23 @@ UserSchema.pre('save', function(next) {
 // Before a user deletes their account, remove all of their files and directory
 UserSchema.pre('remove', function(next) {
     var user = this; 
-    
-    //  user.basePreRemove();
-    
-    // pop pop pop
+   
+       // pop pop pop
     while( user.files.length !== 0 ){
-	user.removeFile( user.files[0] );
+	user.removeFile( user.files[0]);//, function(err){});
     };
-
+    
     // pop pop pop
     while( user.comments.length !== 0 ){
-	user.removeComment( user.comments[0] );
+	user.removeComment( user.comments[0], function(err){});
     }; 
+    
+    while( user.userComments.length !== 0 ){
+	console.log('in a loop');
+	//console.log(user.userComments, this.userComments, user.userComments.length, user.userComments.length !== 0);
+	user.removeComment( user.userComments[0], function(err){});
+    };
+    
     
     // pop pop pop
     // while( user.notifications.all.length !== 0 ){
@@ -239,7 +271,7 @@ UserSchema.pre('remove', function(next) {
   var cleanData = this.toObject();
 
   delete cleanData.password;
-  
+x  
   return cleanData;
   } */
 

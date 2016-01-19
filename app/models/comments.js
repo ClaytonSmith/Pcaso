@@ -4,24 +4,25 @@ var formidable   = require('formidable');
 var mongoose     = require('mongoose');
 var util         = require('util');
 var extend       = require('mongoose-schema-extend')
-
+var async        = require('async');
 var config       = require('../../config/config');
 
 //var BaseSchema   = mongoose.model("BaseSchema");
 
 var CommentSchema = new mongoose.Schema({
-    dateAdded:      { type: Number,  default: Date.now },            // Join date
-    lastUpdated:    { type: Number,  default: Date.now },             // Last seen
+    dateAdded:      { type: Number,  default: Date.now },     // Join date
+    lastUpdated:    { type: Number,  default: Date.now },     // Last seen
     
-    parent: {                                                // who left comment
+    parent: {                                                 // who left comment
         collectionName: { type: String,  required: true },    // collection
         id:             { type: String,  required: true }     // id
     },
-    subject: {                                               // What comment is on
+    target: {                                                 // What comment is on
         collectionName: { type: String,  required: true },    // collection
         id:             { type: String,  required: true }     // id
     },
-    children:   { type: [],     default: [] },            // Comments on comment
+    subject:    { type: String,  required: true },
+    children:   { type: [],     default: [] },                // Comments on comment
     from:       { type: String, required: true },
     body:       { type: String, required: true },
     settings: {
@@ -41,25 +42,49 @@ CommentSchema.method({
     
     deleteComment: function( commentID ){
         var index = this.children.indexOf( commentID );
-        return ( index >= 0 ) ? this.children.splice( index, 1 ) : [] ;
+        return ( index >= 0 ) ? this.children.splice( index, 1 ) : [ ] ;
     },
     
-    removeComment: function( commentID ){
+    removeComment: function( commentID, callback ){
         var Comments = mongoose.model('Comment');
 	
         var deleted = this.deleteComment( commentID );
         
         if( deleted.length && this._id !== commentID ){
 	    Comments.findOne({ _id: commentID }, function(err, doc){
-                if( err ) return handleError( err );
-                if( !doc ) return true;
+                if( err ) return callback( err );
+                if( !doc ) return callback( null );
                 
-		doc.remove();
+		doc.remove( callback );
 	    });
 	}
         
         return deleted;
     }
+
+});
+
+CommentSchema.static({
+    register: function(parent, target, from, subject, body){
+
+	var newComment = new this({
+	    parent: {
+		id: parent._id,
+		collectionName: parent.__t
+	    },
+	    target: {
+		id: parent._id,
+		collectionName: target.__t
+	    },
+	    from: from,
+	    subject: subject,
+	    body: body
+	});
+	
+	target.addComment( newComment._id );
+	
+	return newComment;
+    }    
 });
 
 CommentSchema.pre('save', function( next ){
@@ -71,38 +96,47 @@ CommentSchema.pre('save', function( next ){
 
                   
 CommentSchema.pre('remove', function( next ){
+    
 
     var comment = this;
     
     var parentCollection  = mongoose.model( comment.parent.collectionName );
-    var subjectCollection = mongoose.model( comment.subject.collectionName );
+    var subjectCollection = mongoose.model( comment.target.collectionName );
     
-    function deleteFrom( collection, searchQuery ){
+    function deleteFrom( collection, searchQuery, callback ){
         
-        collection.findOne( searchQuery, function( err, doc ){
+        collection.findOne( { _id: searchQuery }, function( err, doc ){
             
-            if( err ) handelError( err );
-            
+            if( err ) return callback( err );
+
             // Parent has been removed
-            if( !doc ) return true;
+            if( !doc ) return callback( null );
             
             // Make sure doc deletes the comment
             // if doc is the caller, then the comment has allready been deleted.
             doc.deleteComment( comment._id );
+	    doc.save( callback );
         });
     };
     
-    // TODO: night need asyn to 
     // remove from parent and subject
-    deleteFrom( parentCollection,  { _id: comment.parent.id  } );
-    deleteFrom( subjectCollection, { _id: comment.subject.id } );
+    async.map(comment.children, function(id, callback){
+	comment.removeComment( id, callback );
+    }, function(err, results){
 
-    // pop pop pop
-    while( comment.children.length !== 0 ){
-	comment.deleteComment( comment.children[0] );
-    };
-    
-    next();
+	if( err ) return next( err );
+	
+	var promise = new Promise( function(resolve, reject){
+	    deleteFrom( parentCollection, comment.parent.id, function(err){
+		if( err ) next( err );
+		else resolve();
+	    });
+	});
+	
+	promise.then(function(){
+	    deleteFrom( subjectCollection, comment.subject.id, next );
+	});
+    });		  
 });
 
 module.exports = mongoose.model('Comment', CommentSchema);

@@ -5,7 +5,7 @@
 
 ### Installation
 
-Pcaso is meant to run in a linux environment. Assuming [nodejs](https://nodejs.org/en/download/package-manager/) has been installed, 
+Pcaso is meant to run in a linux environment. Assuming [nodejs V5.3.0^](https://nodejs.org/en/download/package-manager/) has been installed, 
 
 Run the following:
 > git clone http://github.com/claytonsmith/pcaso
@@ -63,9 +63,9 @@ V1 Backend
     - [X] File managment	
     - [X] Comments
   - System 
-    - [ ] User accounts
+    - [ ] User accounts - In development
     - [ ] Email services
     - [ ] File managment	
     - [ ] Comments
-    - [ ] Garbage collection
+    - [ ] Garbage collection - In development
     - [ ] API

@@ -11,9 +11,9 @@ chai.use( sinonChai );
 
 var expect = chai.expect;
 
-describe('UnauthenticatedUser', function(){
-    
-    var unauthUser = null;
+describe('Unauthenticated user', function(){
+        // Our soon to be unregistered user
+    var user = null;
     var userTemplate = {
 	name: {
 	    first: "Testy",
@@ -25,30 +25,33 @@ describe('UnauthenticatedUser', function(){
     
     beforeEach( function(done){
 	
-	unauthUser = UnauthenticatedUser(userTemplate);
-	unauthUser.save( function( err ){
-	    if( err ) throw err ;
+	user = UnauthenticatedUser(userTemplate);
+	user.save( function( err ){
+	    if( err ) throw err;
 	    done();
 	});
     });
     
-    afterEach(function(){
-	unauthUser.remove();
+    afterEach(function(done){
+	user.remove();
+	done();	
     });
     
-    it('Ensure unauthenticated user has been saved', function(){
-	expect( unauthUser ).to.exist;
+
+    it('Ensure user has been saved', function(){
+	expect( user ).to.exist;
     });
 
     it('Password encription', function(){
-	expect( unauthUser ).not.equal( userTemplate.password );
+	expect( user ).not.equal( userTemplate.password );
     });
     
     it('User information saved correctly', function(){
-	expect( unauthUser.name.first ).equal( userTemplate.name.first );
-	expect( unauthUser.name.last ).equal( userTemplate.name.last );
-	expect( unauthUser.email ).equal( userTemplate.email );
+	expect( user.name.first ).equal( userTemplate.name.first );
+	expect( user.name.last ).equal( userTemplate.name.last );
+	expect( user.email ).equal( userTemplate.email );
     });
+
 });
 
 
@@ -75,8 +78,7 @@ describe('User', function(){
     });
     
     afterEach(function(done){
-	user.remove();
-	done();	
+	user.remove(done);
     });
     
 
@@ -157,16 +159,18 @@ describe('User', function(){
     // 	expect( user.notifications.length ).to.equal( 1 );
     // });
     
-    it('Add and remove comment', function(){
+    it('Add and remove comment', function(done){
 	var comment = mongoose.Types.ObjectId(); // fake the obejct ID
 	user.addComment(comment);
 	
 	expect( user.comments.length ).to.equal( 1 );
 	expect( user.comments ).to.include( comment  );
 	
-	user.removeComment( comment );
-	expect( user.comments.length ).to.equal( 0 );
-	expect( user.comments ).to.not.include( comment  );
+	user.removeComment( comment, function(err){
+	    expect( user.comments.length ).to.equal( 0 );
+	    expect( user.comments ).to.not.include( comment  );
+	    done();
+	});
     });
         
     

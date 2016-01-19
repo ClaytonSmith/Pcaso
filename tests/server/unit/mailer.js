@@ -54,7 +54,7 @@ describe('Mailer', function(){
     });
 
     it('Ensure that all required fields are set: TEXT and HTML', function(){
-	var spy = sinon.spy();;
+	var spy = sinon.spy();
 	
 	// Nothing set
 	mailer.send(spy);
