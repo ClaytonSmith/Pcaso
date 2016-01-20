@@ -45,15 +45,16 @@ V1 Backend
   - [X] Bind files to user accounts 
   - [ ] Modify privacy settings
   - [ ] Pretty "bullet" URLs to files 
-- [ ] Comments
+- [X] Comments
   - [X] Bind comments to entities 
-  - [ ] Remove comments - IN DEVELOPMENT
-  - [ ] Edit comments?? - Maybe
+  - [X] Remove comments
+  - [X] Edit comments
 - [ ] Statistics
   - [ ] File "view" count
   - [ ] Traffic
+- [ ] API for the above 
 - [ ] Garbage collection
-  - [ ] Comments
+  - [X] Comments 
   - [ ] Files
   - [ ] User
 - [ ] Test
@@ -62,7 +63,7 @@ V1 Backend
     - [X] Email services
     - [X] File managment	
     - [X] Comments
-  - System 
+  - [ ] System 
     - [ ] User accounts - In development
     - [ ] Email services
     - [ ] File managment	
