@@ -38,7 +38,7 @@ var FileContainerSchema = new mongoose.Schema({
         acceptFiles:      { type: Boolean, default: false },
         commentable:      { type: Boolean, default: true }
     }
-});
+}).extend({});
 
 
 FileContainerSchema.method({
@@ -130,6 +130,25 @@ FileContainerSchema.method({
     }
     
 });
+
+FileContainerSchema.static({
+    register: function(parent, file, settings){
+	
+	var fileContainer = new FileContainer({
+	    parent: {
+		id: parent._id,
+		collection: parent.__t
+            },
+	    file: {
+		name: files.file.name,
+		path: files.file.path
+	    },
+	    visibility: settings.visibility
+	});
+	
+	return fileContainer;
+    }
+});	
 
 // Update dates 
 FileContainerSchema.pre('save', function(next){

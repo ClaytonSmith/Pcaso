@@ -79,10 +79,28 @@ UnauthenticatedUserSchema.method({
 // Unregistered users dont get these cool features. They get nothing 
 UserSchema.method({
 
-    // Saves file's ID in list of files
     attachFile: function(fileID){
-	return this.files.push(fileID);
+	return this.files.push( fileID );
     },
+
+    // Saves file's ID in list of files
+    addFile: function(file, settings, callback){
+	
+	var user = this;
+	var fileContainer = FileContainers.register(this, file, settings);
+	
+	fileContainer.save(function(err){
+	    if( err ) callback( err ) ;
+	    
+	    user.attachFile( fileContainer._id );	
+	    
+	    callback( null );	    
+	});
+	
+	return fileContainer;
+    },
+    
+    
 
     // Removes a file from the user's list of files    
     deleteFile: function( fileID ){
@@ -128,14 +146,14 @@ UserSchema.method({
 	    
 	    user.userComments.push( comment._id );	
 	    
-	    callback( null );	    
+	    entity.save( callback );	    
 	});
 	
-	return comment._id;
+	return comment;
     },
     
     deleteComment: function( commentID ){
-	
+	//console.log('I %s have been asked to remove %s', this.name.first, commentID);
 	var indexA = this.comments.indexOf( commentID );     
 	var indexB = this.userComments.indexOf( commentID );
 	
@@ -154,6 +172,7 @@ UserSchema.method({
 		if( err  ) return callback( err );
 		if( !doc ) return callback( null );
 		
+		//console.log('USER: calling remove on comment', deleted);
 		doc.remove( callback );
 	    });   
 	    
@@ -239,8 +258,6 @@ UserSchema.pre('remove', function(next) {
     }; 
     
     while( user.userComments.length !== 0 ){
-	console.log('in a loop');
-	//console.log(user.userComments, this.userComments, user.userComments.length, user.userComments.length !== 0);
 	user.removeComment( user.userComments[0], function(err){});
     };
     

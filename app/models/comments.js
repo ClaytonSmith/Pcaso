@@ -29,7 +29,7 @@ var CommentSchema = new mongoose.Schema({
         acceptFiles:   { type: Boolean, 'default': true },
         commentable:   { type: Boolean, 'default': true }
     }
-});
+}).extend({});
 
 
 CommentSchema.method({
@@ -73,7 +73,7 @@ CommentSchema.static({
 		collectionName: parent.__t
 	    },
 	    target: {
-		id: parent._id,
+		id: target._id,
 		collectionName: target.__t
 	    },
 	    from: from,
@@ -97,14 +97,14 @@ CommentSchema.pre('save', function( next ){
                   
 CommentSchema.pre('remove', function( next ){
     
-
     var comment = this;
     
+    //console.log('Comment in remove. Parent: %s, Target %s', comment.parent.id, comment.target.id); 
     var parentCollection  = mongoose.model( comment.parent.collectionName );
     var subjectCollection = mongoose.model( comment.target.collectionName );
     
     function deleteFrom( collection, searchQuery, callback ){
-        
+        //console.log('Attempting to remove comment from parent %s: %s', collection, searchQuery);
         collection.findOne( { _id: searchQuery }, function( err, doc ){
             
             if( err ) return callback( err );
@@ -114,7 +114,7 @@ CommentSchema.pre('remove', function( next ){
             
             // Make sure doc deletes the comment
             // if doc is the caller, then the comment has allready been deleted.
-            doc.deleteComment( comment._id );
+	    doc.deleteComment( comment._id );
 	    doc.save( callback );
         });
     };
@@ -134,7 +134,9 @@ CommentSchema.pre('remove', function( next ){
 	});
 	
 	promise.then(function(){
-	    deleteFrom( subjectCollection, comment.subject.id, next );
+	    deleteFrom( subjectCollection, comment.target.id,function(err){
+		next(err);
+	    });
 	});
     });		  
 });

@@ -56,6 +56,20 @@ describe('Comments', function(){
 	expect( comment ).to.exist;
     });
     
+    it('Fields are filled in correctly', function(){
+	
+	expect( comment.parent.id ).to.equal( parent._id.toString() );
+	expect( comment.parent.collectionName ).to.equal( parent.__t );
+	
+	expect( comment.target.id ).to.equal( target._id.toString() );
+	expect( comment.target.collectionName ).to.equal( target.__t );
+    
+	expect( comment.subject ).to.equal( commentTemplate.subject );
+	expect( comment.from ).to.equal( commentTemplate.from );
+	expect( comment.body ).to.equal( commentTemplate.body );
+
+    });
+    
     it('Add comment', function(){
 	var comment1 = mongoose.Types.ObjectId(); // fake the obejct ID
 	

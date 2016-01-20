@@ -3,4 +3,5 @@
 require('../../../helpers/helper');
 
 
-require('./user');
+require('./user-comments');
+require('./user-fileContainer');
