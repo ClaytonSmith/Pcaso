@@ -27,6 +27,7 @@
 var mongoose       = require('mongoose');
 var bcrypt         = require('bcrypt-nodejs');
 var extend         = require('mongoose-schema-extend');
+var async          = require('async');
 
 //var BaseSchema     = mongoose.model('BaseSchema');
 var FileContainers = mongoose.model('FileContainer');
@@ -52,11 +53,16 @@ var UnauthenticatedUserSchema  = BaseUserSchema.extend({});
 // Regular users can have files
 var UserSchema                 = BaseUserSchema.extend({
     files:          { type: [], default: [] },                        // List of mongoId for containers
+    fileSettings: {
+	defaults: {
+	    visibility:  { type: String,  'default': 'PRIVATE'},      // default file visibility, set for every future upload
+	    commentable:        { type: Boolean, 'default': true }    // default commenting on account
+	},
+    },
     comments:       { type: [], default: [] },                        // List of mongoId for comments left by user
     userComments:   { type: [], default: [] },                        // List of mongoId for comments left by user
     notifications:  { type: [], default: [] },                         // List of new and all notifications, hide this       
     settings: {
-	defaultVisibility:  { type: String,  'default': 'PRIVATE'},   // default file visibility, set for every future upload
 	accountVisivility:  { type: String,  'default': 'PRIVATE'},   // Account visibility, who can see this profile
         commentable:        { type: Boolean, 'default': true },             // default commenting on account
         acceptFiles:        { type: Boolean, 'default': true }              // Will tell whether commenting is allowed, it is not by default
@@ -74,7 +80,7 @@ UnauthenticatedUserSchema.method({
 	return bcrypt.compareSync(password, this.password);
     }
 });
-    
+
 
 // Unregistered users dont get these cool features. They get nothing 
 UserSchema.method({
@@ -84,9 +90,13 @@ UserSchema.method({
     },
 
     // Saves file's ID in list of files
-    addFile: function(file, settings, callback){
+    registerFile: function(file, settings, callback){
 	
 	var user = this;
+
+	settings.displaySettings = settings.displaySettings || {} ;
+	settings.displaySettings.visibility =  settings.displaySettings.visibility || this.fileSettings.defaults.visibility;
+	
 	var fileContainer = FileContainers.register(this, file, settings);
 	
 	fileContainer.save(function(err){
@@ -110,17 +120,18 @@ UserSchema.method({
     
     
     // file will be removed from DB
-    removeFile: function(fileID){	
-        var deleted = this.deleteFile( fileID );        
+    removeFile: function(fileID, callback){	
+        var deleted = this.deleteFile( fileID, callback );        
         if( deleted.length ){
 	    FileContainers.findOne({ '_id': fileID, 'parent.id': this._id }, function(err, doc){
-		
-		if( err )  return handleError( err );
-                if( !doc ) return true;
-                doc.remove();
+		if( err  ) return callback( err );
+		if( !doc ) return callback( null );
+		doc.remove( callback );
 	    });
+	} else {
+	    callback( null );
 	}
-        
+	    
 	return deleted;
     },
 
@@ -246,34 +257,39 @@ UserSchema.pre('save', function(next) {
 // Before a user deletes their account, remove all of their files and directory
 UserSchema.pre('remove', function(next) {
     var user = this; 
-   
-       // pop pop pop
-    while( user.files.length !== 0 ){
-	user.removeFile( user.files[0]);//, function(err){});
-    };
     
-    // pop pop pop
-    while( user.comments.length !== 0 ){
-	user.removeComment( user.comments[0], function(err){});
-    }; 
-    
-    while( user.userComments.length !== 0 ){
-	user.removeComment( user.userComments[0], function(err){});
-    };
-    
-    
-    // pop pop pop
-    // while( user.notifications.all.length !== 0 ){
-    //     console.log('Deleting notification', user.notification.all[0]);
-    //     user.deleteNotification( user.notification.all[0] );
-    // };
-
-    // Remove comments left by user
-    // Remove notifications
-    
-    // Send goodby email
-
-    next();
+    async.series(
+	[
+	    function(parellelCB){
+		async.map(user.comments, function(id, mapCB){    		
+		    user.removeComment( id, mapCB );
+		}, function(err, results){
+		    // No need for error checking here
+		    parellelCB( err, results );
+		});
+	    },
+	    
+	    function(parellelCB){
+		async.map(user.userComments, function(id, mapCB){
+    		    user.removeComment( id, mapCB );
+		}, function(err, results){
+		    // No need for error checking here
+		    parellelCB( err, results );
+		});
+	    },
+	    
+	    function(parellelCB){
+		async.map(user.files, function(id, mapCB){
+    		    user.removeFile( id, mapCB );
+		}, function(err, results){
+		    // No need for error checking here
+		    parellelCB( err, results );
+		});
+	    }
+	],
+	function(err, results){
+	    next(err, results);
+	});	    
 });
 
 
@@ -286,13 +302,9 @@ UserSchema.pre('remove', function(next) {
 
   userSchema.methods.clean = function() {
   var cleanData = this.toObject();
-
-  delete cleanData.password;
-x  
-  return cleanData;
   } */
 
-//});
+
 
 // create the model for users and expose it to our app
 module.exports = mongoose.model('User', UserSchema);

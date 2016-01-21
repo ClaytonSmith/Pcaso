@@ -59,8 +59,7 @@ describe('User comments integration test', function(){
 
     it('Ensure test object exist', function(){
 	expect( user1 ).to.not.be.null;
-	expect( user2 ).to.not.be.null;
-	
+	expect( user2 ).to.not.be.null;	
     });
 
     it('User comments on themself', function(done){

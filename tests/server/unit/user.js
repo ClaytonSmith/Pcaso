@@ -33,8 +33,7 @@ describe('Unauthenticated user', function(){
     });
     
     afterEach(function(done){
-	user.remove();
-	done();	
+	user.remove(done);	
     });
     
 
@@ -78,7 +77,7 @@ describe('User', function(){
     });
     
     afterEach(function(done){
-	user.remove(done);
+	user.remove( done );
     });
     
 
@@ -103,15 +102,18 @@ describe('User', function(){
 	expect( user.files ).to.include( file  );
     });
     
-    it('Attach and remove file', function(){
+    it('Attach and remove file', function(done){
 	var file = mongoose.Types.ObjectId(); // fake the obejct ID
 	user.attachFile( file ); //
 	expect( user.files.length ).to.equal( 1 );
 	expect( user.files ).to.include( file  );
 	
-	user.removeFile( file );
-	expect( user.files.length ).to.equal( 0 );
-	expect( user.files ).to.not.include( file  );
+	user.removeFile( file, function(err){
+	    if( err ) done(err);
+	    expect( user.files.length ).to.equal( 0 );
+	    expect( user.files ).to.not.include( file  );
+	    done();
+	});
     });
 
     it('Add comment', function(){

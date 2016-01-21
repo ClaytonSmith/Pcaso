@@ -24,10 +24,12 @@ var devNull = new devNullStream( devNullOpts);
 describe('User File Container integration test', function(){
     
     // Our soon to be unregistered user
-    var fileCntr = null;   
+    
+    
     var user1    = null;
     var user2    = null;
-    
+    var fileCntr = null;
+
     var userTemplate = {
 	email: 'Test@cool.com',
 	password: 'Super Secure'
@@ -38,7 +40,14 @@ describe('User File Container integration test', function(){
 	    name: 'test file',
 	    path: './data/test/test-file.txt'
 	},
-	keepFile: true
+	settings:{
+	    fileOptions: {
+		keepFile: true
+	    },
+	    displaySettings:{
+		// null
+	    }
+	}
     };
     
     before( function(done){
@@ -70,10 +79,29 @@ describe('User File Container integration test', function(){
     });
 
     
-    it('Container should exist', function(){
+    it('Users should exist', function(){
+	expect( user1 ).to.not.be.null;
+	expect( user2 ).to.not.be.null;	
+    });
+
+    it('Register file with user1', function(done){
 	
-	// fileCntr = new FileContainer( fileTemplate );
-	// fileCntr.save(done);
-	// expect( fileCntr ).to.exist;
+	function check(f){ try{ f() }catch( e ){ done(e); };};
+	
+	var promise = new Promise( function(resolve, reject){
+	    fileCntr = user1.registerFile(fileTemplate.file, fileTemplate.settings, function(err){
+		if( err ) reject( done, err );
+		else resolve( fileCntr );
+	    });
+	});
+	
+	promise.then(function( fc ){
+	    check(function(){
+		expect( user1.files ).to.include( fc._id );
+		expect( fc.parent.id ).to.equal( user1._id.toString() );
+		expect( fc.parent.collectionName ).to.equal( user1.__t );
+		done();
+	    });
+	}).catch( function(d,e){d(e)} );
     });
 });

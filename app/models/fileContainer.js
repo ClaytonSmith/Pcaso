@@ -24,7 +24,9 @@ var FileContainerSchema = new mongoose.Schema({
 	path:            { type: String,  required: true },              // Path to file
      	id:              { type: Object, default: mongoose.Types.ObjectId().toString() } 
     },     
-    keepFile:        { type: Boolean, default: false }, 
+    fileOptions: {
+	keepFile:        { type: Boolean, default: false }, 
+    },
     visibility:      { type: String,  default: 'PRIVATE' },  // Visibility
     sharedWith:      { type: [],      default: [] },
     comments:        { type: [],      default: [] },
@@ -134,18 +136,19 @@ FileContainerSchema.method({
 FileContainerSchema.static({
     register: function(parent, file, settings){
 	
-	var fileContainer = new FileContainer({
+	var fileContainer = new this({
 	    parent: {
 		id: parent._id,
-		collection: parent.__t
+		collectionName: parent.__t
             },
 	    file: {
-		name: files.file.name,
-		path: files.file.path
+		name: file.name,
+		path: file.path
 	    },
-	    visibility: settings.visibility
+	    displaySettings: settings.displaySettings,
+	    fileOptions: settings.fileOptions
 	});
-	
+
 	return fileContainer;
     }
 });	
@@ -185,7 +188,7 @@ FileContainerSchema.pre('save', function(next){
 	    //read.on('error', );
 	    //writestream.on('error', throw new Error);
 	    writestream.on('finish', function(){
-		//if( !fileContainer.keepFile ) fs.unlinkSync(fileContainer.file.path);	    
+		if( !fileContainer.fileOptions.keepFile ) fs.unlinkSync(fileContainer.file.path);	    
 		next();
 	    });
 	    
