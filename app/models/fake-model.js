@@ -12,14 +12,25 @@ var config       = require('../../config/config');
 var FakeSchema = new mongoose.Schema({
     dateAdded:      { type: Number,  default: Date.now },            // Join date
     lastUpdated:    { type: Number,  default: Date.now },            // Last seen
-    comments:       { type: [],      default: [] }
 }).extend({});
 
 
 FakeSchema.method({    
     addComment:    function(id){ return id; },
     deleteComment: function(id){ return id; },
-    removeComment: function(id){ return id; }
+    removeComment: function(id){ return id; },
+    deleteFile:    function(id){ return id; }
+});
+
+FakeSchema.static({
+    generateDoc: function(){
+	var document = {
+	    _id:  mongoose.Types.ObjectId().toString(),
+	    __t: 'FakeModel'
+	}
+
+	return document;
+    }
 });
 
 FakeSchema.pre('save', function( next ){

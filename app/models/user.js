@@ -93,12 +93,15 @@ UserSchema.method({
     registerFile: function(file, settings, callback){
 	
 	var user = this;
+	var options = JSON.parse(JSON.stringify( settings ));
+	
+	options.displaySettings = JSON.parse(JSON.stringify( settings.displaySettings || {} )) ;
+	options.fileOptions     = JSON.parse(JSON.stringify( settings.fileOptions     || {} )) ;
 
-	settings.displaySettings = settings.displaySettings || {} ;
-	settings.displaySettings.visibility =  settings.displaySettings.visibility || this.fileSettings.defaults.visibility;
-	
-	var fileContainer = FileContainers.register(this, file, settings);
-	
+	options.displaySettings.visibility = options.displaySettings.visibility || this.fileSettings.defaults.visibility;
+
+	var fileContainer = FileContainers.register(this, file, options);
+
 	fileContainer.save(function(err){
 	    if( err ) callback( err ) ;
 	    
@@ -258,7 +261,7 @@ UserSchema.pre('save', function(next) {
 UserSchema.pre('remove', function(next) {
     var user = this; 
     
-    async.series(
+    async.parallel(
 	[
 	    function(parellelCB){
 		async.map(user.comments, function(id, mapCB){    		

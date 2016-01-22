@@ -16,7 +16,7 @@ chai.use( sinonChai );
 var expect = chai.expect;
 var assert = chai.assert;
 
-describe('User comments integration test', function(){
+describe('User - Comments: Integration test', function(){
     
     var user1 = null;
     var user2 = null;

@@ -27,14 +27,15 @@ var FileContainerSchema = new mongoose.Schema({
     fileOptions: {
 	keepFile:        { type: Boolean, default: false }, 
     },
-    visibility:      { type: String,  default: 'PRIVATE' },  // Visibility
     sharedWith:      { type: [],      default: [] },
     comments:        { type: [],      default: [] },
     metaData:        { type: Object,  default: {} },
     statistics: {
 	viewCount:       { type: Number, default: 0 }      // File metadata
     },
-    displaySettings:  { type: Object, default: {} },         // Display settings.
+    displaySettings: {
+	visibility:      { type: String,  default: 'PRIVATE', required: true},  // Visibility
+    },
     bulletLink:       { type: String },
     settings: {
         acceptFiles:      { type: Boolean, default: false },
@@ -70,7 +71,12 @@ FileContainerSchema.method({
 	return deleted;
     },
     
+    // Should only be given mongo documents that have been extended
+    // with the .extend({}) method.
+    // { _id: ---, __t: ---} 
     addSharedEntity: function( sharedEntity ){
+	//TODO: error checking
+
 	this.sharedWith.push( sharedEntity );
 	// email user
     },
@@ -83,7 +89,16 @@ FileContainerSchema.method({
     saveDisplaySettings: function( newSettings ){
 	// Maybe want to keep history 
         // array of objects perhaps?
-        return this.displaySettings = newSettings; 
+	
+	var settings = JSON.parse(JSON.stringify( newSettings ));
+	
+	// If/when more settings are added, this method will become more usefull
+	settings.visibility = newSettings.visibility || this.displaySettings.visibility;
+	
+
+	this.displaySettings = settings;
+    
+	return this.displaySettings;
     },
     
     getFile: function( dest ){
@@ -111,21 +126,21 @@ FileContainerSchema.method({
         var fileContainer = this;
         
         // Is file public 
-	if( fileContainer.visibility === 'PUBLIC') return true;
-
+	if( fileContainer.displaySettings.visibility === 'PUBLIC') return true;
+	
         // Does entity exist and is it an entity
         if( !entity || typeof( entity ) !== 'object' || !entity._id ) return false ;
 
 	// Entity is owner 
         // Stringify and compaire because we don't know if `entity._id` will be ObjectID or String	
-	if( String( fileContainer.parent.id ) === String( entity._id ) &&
+	if( String( fileContainer.parent.id ) === entity._id.toString() &&
 	    fileContainer.parent.collectionName === entity.__t ) return true;
 	
         // File is private and entity is on the shared list
-        var idIndex         = fileContainer.sharedWith.map( function(e){ return e.id } ).indexOf( entity._id );
-	var collectionIndex = fileContainer.sharedWith.map( function(e){ return e.collectionName } ).indexOf( entity.__t );
-	
-        if( idIndex === collectionIndex && idIndex !== -1 ) return true
+        var idIndex         = fileContainer.sharedWith.map( function(e){ return String( e._id ) } ).indexOf( String( entity._id ));
+	var collectionIndex = fileContainer.sharedWith.map( function(e){ return e.__t } ).indexOf( entity.__t );
+
+        if( idIndex !== -1 && idIndex === collectionIndex ) return true
         
 	return false;
         // TODO: Error checking for not public or private 
@@ -148,7 +163,7 @@ FileContainerSchema.static({
 	    displaySettings: settings.displaySettings,
 	    fileOptions: settings.fileOptions
 	});
-
+	
 	return fileContainer;
     }
 });	
@@ -221,9 +236,7 @@ FileContainerSchema.pre('remove', function(next) {
     // while( fileContainer.comments.length !== 0 ){
     // console.log('Deleting file', fileContainer.comments[0]);
     // fileContainer.removeComment( user.files[0] );
-    // };     
-    
-    
+    // };         
 });
 
 module.exports = mongoose.model('FileContainer', FileContainerSchema);

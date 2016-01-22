@@ -102,6 +102,8 @@ CommentSchema.pre('remove', function( next ){
     //console.log('Comment in remove. Parent: %s, Target %s', comment.parent.id, comment.target.id); 
     var parentCollection  = mongoose.model( comment.parent.collectionName );
     var subjectCollection = mongoose.model( comment.target.collectionName );
+
+
     
     function deleteFrom( collection, searchQuery, callback ){
         //console.log('Attempting to remove comment from parent %s: %s', collection, searchQuery);
@@ -119,26 +121,29 @@ CommentSchema.pre('remove', function( next ){
         });
     };
     
-    // remove from parent and subject
-    async.map(comment.children, function(id, callback){
-	comment.removeComment( id, callback );
-    }, function(err, results){
+    async.series(
+	[
+	    function(parellelCB){	
+		async.map(comment.children, function(id, mapCB){
+		    comment.removeComment( id, mapCB );
+		}, function(err, results){
+		    parellelCB( err, results );
+		});
+	    },
+	    function(parellelCB){	
+		deleteFrom( parentCollection, comment.parent.id, function(err, results){
+		    parellelCB( err, results );
+		});
+	    },
+	    function(parellelCB){	
+		deleteFrom( subjectCollection, comment.target.id, function(err, results){
+		     parellelCB( err, results );
+		});
+	    },
+	], function(err, results){
+	    next(err, results);
+	});
+});		  
 
-	if( err ) return next( err );
-	
-	var promise = new Promise( function(resolve, reject){
-	    deleteFrom( parentCollection, comment.parent.id, function(err){
-		if( err ) next( err );
-		else resolve();
-	    });
-	});
-	
-	promise.then(function(){
-	    deleteFrom( subjectCollection, comment.target.id,function(err){
-		next(err);
-	    });
-	});
-    });		  
-});
 
 module.exports = mongoose.model('Comment', CommentSchema);

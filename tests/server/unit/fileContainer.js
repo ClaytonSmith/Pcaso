@@ -96,10 +96,7 @@ describe('FileContainer', function(){
     });
     
     it('Add shared entity', function(){
-    	var entity = {
-	    collectionName: 'user',       // fake collection name
-	    id: mongoose.Types.ObjectId() // fake the obejct ID
-    	};
+    	var entity = FakeModel.generateDoc();
 	
 	fileCntr.addSharedEntity(entity);
 	expect( fileCntr.sharedWith.length ).to.equal( 1 );
@@ -108,15 +105,8 @@ describe('FileContainer', function(){
     
     it('Add and remove shared entity', function(){
     	
-	var entity1 = {
-	    collectionName: 'user',       // fake collection name
-	    id: mongoose.Types.ObjectId() // fake the obejct ID
-	};    	
-	
-	var entity2 = {
-	    collectionName: 'user',       // fake collection name
-	    id: mongoose.Types.ObjectId() // fake the obejct ID
-	};
+	var entity1 = FakeModel.generateDoc();
+	var entity2 = FakeModel.generateDoc();
 	
 	fileCntr.addSharedEntity(entity1);	
     	expect( fileCntr.sharedWith.length ).to.equal( 1 );
@@ -137,45 +127,32 @@ describe('FileContainer', function(){
     });
     
     it('Visibility checker: PUBLIC', function(){
-	fileCntr.visibility ='PUBLIC';
+	fileCntr.displaySettings.visibility ='PUBLIC';
 	expect( fileCntr.viewableTo( 'Everyone' ) ).to.be.true;
     });
     
     it('Visibility checker: PRIVATE', function(){
-	var sharedWithEntity = {
-	    collectionName: 'user',       // fake collection name
-	    id: mongoose.Types.ObjectId() // fake the obejct ID
-	};
+	
+	var sharedWithEntity = FakeModel.generateDoc();
+	var nonSharedEntity  = FakeModel.generateDoc();
 
-	var nonSharedEntity = {
-	    collectionName: 'user',       // fake collection name
-	    id: mongoose.Types.ObjectId() // fake the obejct ID
-	};    	
+	sharedWithEntity.__t = "FakeModel";
 
 	fileCntr.addSharedEntity( sharedWithEntity );	
     	expect( fileCntr.sharedWith.length ).to.equal( 1 );
     	expect( fileCntr.sharedWith ).to.include( sharedWithEntity );
 	
 	// parent 
-	expect(
-	    fileCntr.viewableTo( { _id: parent.id, __t: parent.collectionName } )
-	).to.be.true;
+	expect( fileCntr.viewableTo( { _id: parent.id, __t: parent.collectionName } ) ).to.be.true;
 	
 	// not parent or shared with
-	expect(
-	    fileCntr.viewableTo( { _id: nonSharedEntity.id, __t: nonSharedEntity.collectionName } )
-	).to.be.false;
+	expect( fileCntr.viewableTo( nonSharedEntity ) ).to.be.false;
 	
 	// Not a model 
-	expect(
-	    fileCntr.viewableTo( null )
-	).to.be.false;
-		
-
+	expect( fileCntr.viewableTo( null ) ).to.be.false;
+	
 	// Shared with
-	expect(
-	    fileCntr.viewableTo( { _id: sharedWithEntity.id, __t: sharedWithEntity.collectionName } )
-	).to.be.true;
+	expect( fileCntr.viewableTo( sharedWithEntity ) ).to.be.true;
     });
     
     it('Get file', function(done){
@@ -209,12 +186,11 @@ describe('FileContainer', function(){
     
     it('Save display settings', function(){
 	var displaySettings ={
-	    cat: 'dog',
-	    cow: 'horse'
+	    visibility: "test test test"
 	}
 	
 	fileCntr.saveDisplaySettings( displaySettings );
-	expect( fileCntr.displaySettings ).to.eql( displaySettings );
+	expect( fileCntr.displaySettings.toObject() ).to.eql( displaySettings );
     });       
 });
 
@@ -315,16 +291,9 @@ describe('FileContainer created using .register', function(){
     });
     
     it('Add and remove shared entity', function(){
-    	
-	var entity1 = {
-	    collectionName: 'user',       // fake collection name
-	    id: mongoose.Types.ObjectId() // fake the obejct ID
-	};    	
-	
-	var entity2 = {
-	    collectionName: 'user',       // fake collection name
-	    id: mongoose.Types.ObjectId() // fake the obejct ID
-	};
+
+	var entity1 = FakeModel.generateDoc();   	
+	var entity2 = FakeModel.generateDoc();
 	
 	fileCntr.addSharedEntity(entity1);	
     	expect( fileCntr.sharedWith.length ).to.equal( 1 );
@@ -345,45 +314,29 @@ describe('FileContainer created using .register', function(){
     });
     
     it('Visibility checker: PUBLIC', function(){
-	fileCntr.visibility ='PUBLIC';
+	fileCntr.displaySettings.visibility ='PUBLIC';
 	expect( fileCntr.viewableTo( 'Everyone' ) ).to.be.true;
     });
     
     it('Visibility checker: PRIVATE', function(){
-	var sharedWithEntity = {
-	    collectionName: 'user',       // fake collection name
-	    id: mongoose.Types.ObjectId() // fake the obejct ID
-	};
-
-	var nonSharedEntity = {
-	    collectionName: 'user',       // fake collection name
-	    id: mongoose.Types.ObjectId() // fake the obejct ID
-	};    	
+	var sharedWithEntity = FakeModel.generateDoc();
+	var nonSharedEntity  = FakeModel.generateDoc();
 
 	fileCntr.addSharedEntity( sharedWithEntity );	
     	expect( fileCntr.sharedWith.length ).to.equal( 1 );
     	expect( fileCntr.sharedWith ).to.include( sharedWithEntity );
 	
 	// parent 
-	expect(
-	    fileCntr.viewableTo( parent )
-	).to.be.true;
+	expect( fileCntr.viewableTo( parent ) ).to.be.true;
 	
 	// not parent or shared with
-	expect(
-	    fileCntr.viewableTo( { _id: nonSharedEntity.id, __t: nonSharedEntity.collectionName } )
-	).to.be.false;
+	expect( fileCntr.viewableTo( nonSharedEntity.collectionName) ).to.be.false;
 	
 	// Not a model 
-	expect(
-	    fileCntr.viewableTo( null )
-	).to.be.false;
+	expect( fileCntr.viewableTo( null ) ).to.be.false;
 		
-
 	// Shared with
-	expect(
-	    fileCntr.viewableTo( { _id: sharedWithEntity.id, __t: sharedWithEntity.collectionName } )
-	).to.be.true;
+	expect( fileCntr.viewableTo( sharedWithEntity ) ).to.be.true;
     });
     
     it('Get file', function(done){
@@ -417,11 +370,12 @@ describe('FileContainer created using .register', function(){
     
     it('Save display settings', function(){
 	var displaySettings ={
-	    cat: 'dog',
-	    cow: 'horse'
+	    visibility: "test test test"
 	}
 	
+	
 	fileCntr.saveDisplaySettings( displaySettings );
-	expect( fileCntr.displaySettings ).to.eql( displaySettings );
+	console.log( fileCntr.displaySettings.toObject(), displaySettings);
+	expect( fileCntr.displaySettings.toObject() ).to.eql( displaySettings );
     });       
 });
