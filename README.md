@@ -43,20 +43,20 @@ V1 Backend
   - [X] File download
   - [X] Privileged file viewing
   - [X] Bind files to user accounts 
-  - [ ] Modify privacy settings
+  - [X] Modify privacy settings
   - [ ] Pretty "bullet" URLs to files 
 - [X] Comments
   - [X] Bind comments to entities 
   - [X] Remove comments
   - [X] Edit comments
 - [ ] Statistics
-  - [ ] File "view" count
-  - [ ] Traffic
+  - [X] File "view" count
+  - [ ] Traffic - views per day...
 - [ ] API for the above 
 - [ ] Garbage collection
   - [X] Comments 
   - [ ] Files
-  - [ ] User
+  - [X] User
 - [ ] Test
   - [X] Unit tests 
     - [X] User accounts
@@ -64,9 +64,8 @@ V1 Backend
     - [X] File managment	
     - [X] Comments
   - [ ] System 
-    - [ ] User accounts - In development
-    - [ ] Email services
+    - [X] User accounts - In development
     - [ ] File managment	
-    - [ ] Comments
-    - [ ] Garbage collection - In development
+    - [X] Comments
+    - [X] Garbage collection - In development
     - [ ] API

@@ -98,15 +98,10 @@ CommentSchema.pre('save', function( next ){
 CommentSchema.pre('remove', function( next ){
     
     var comment = this;
-    
-    //console.log('Comment in remove. Parent: %s, Target %s', comment.parent.id, comment.target.id); 
     var parentCollection  = mongoose.model( comment.parent.collectionName );
     var subjectCollection = mongoose.model( comment.target.collectionName );
-
-
     
     function deleteFrom( collection, searchQuery, callback ){
-        //console.log('Attempting to remove comment from parent %s: %s', collection, searchQuery);
         collection.findOne( { _id: searchQuery }, function( err, doc ){
             
             if( err ) return callback( err );

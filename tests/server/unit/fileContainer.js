@@ -23,9 +23,11 @@ describe('FileContainer', function(){
     
     // Our soon to be unregistered user
     var fileCntr = null;
+    
+    var p = FakeModel.generateDoc();
     var parent = {
-	id: String(mongoose.Types.ObjectId().toString()),
-	collectionName: 'collection'
+	id: p._id,
+	collectionName: p.__t
     };
     
     var fileTemplate = {
@@ -73,7 +75,7 @@ describe('FileContainer', function(){
     });
 
     
-    it('Add and remove comment', function(){
+    it('Add and remove comment', function(done){
 	var comment1 = mongoose.Types.ObjectId(); // fake the obejct ID
 	var comment2 = mongoose.Types.ObjectId(); // fake the obejct ID
 	
@@ -85,14 +87,19 @@ describe('FileContainer', function(){
 	expect( fileCntr.comments.length ).to.equal( 2 );
 	expect( fileCntr.comments ).to.include( comment2  );
 	
-	fileCntr.removeComment( comment1 );
-	expect( fileCntr.comments.length ).to.equal( 1 );
-	expect( fileCntr.comments ).to.not.include( comment1 );
-
-	fileCntr.removeComment( comment2 );
-	expect( fileCntr.comments.length ).to.equal( 0 );
-	expect( fileCntr.comments ).to.not.include( comment2 );
-	
+	fileCntr.removeComment( comment1, function(err){
+	    expect( err ).to.be.null;
+	    expect( fileCntr.comments.length ).to.equal( 1 );
+	    expect( fileCntr.comments ).to.not.include( comment1 );
+	    
+	    fileCntr.removeComment( comment2, function(error){
+		expect( error ).to.be.null;
+		expect( fileCntr.comments.length ).to.equal( 0 );
+		expect( fileCntr.comments ).to.not.include( comment2 );
+		
+		done();
+	    });
+	});
     });
     
     it('Add shared entity', function(){
@@ -257,7 +264,7 @@ describe('FileContainer created using .register', function(){
     });
 
     
-    it('Add and remove comment', function(){
+    it('Add and remove comment', function(done){
 	var comment1 = mongoose.Types.ObjectId(); // fake the obejct ID
 	var comment2 = mongoose.Types.ObjectId(); // fake the obejct ID
 	
@@ -269,14 +276,19 @@ describe('FileContainer created using .register', function(){
 	expect( fileCntr.comments.length ).to.equal( 2 );
 	expect( fileCntr.comments ).to.include( comment2  );
 	
-	fileCntr.removeComment( comment1 );
-	expect( fileCntr.comments.length ).to.equal( 1 );
-	expect( fileCntr.comments ).to.not.include( comment1 );
-
-	fileCntr.removeComment( comment2 );
-	expect( fileCntr.comments.length ).to.equal( 0 );
-	expect( fileCntr.comments ).to.not.include( comment2 );
-	
+	fileCntr.removeComment( comment1, function(err1){
+	    expect( err1 ).to.be.null;
+	    expect( fileCntr.comments.length ).to.equal( 1 );
+	    expect( fileCntr.comments ).to.not.include( comment1 );
+	    
+	    
+	    fileCntr.removeComment( comment2, function(err2){
+		expect( err2 ).to.be.null;
+		expect( fileCntr.comments.length ).to.equal( 0 );
+		expect( fileCntr.comments ).to.not.include( comment2 );
+		done();
+	    });
+	});
     });
     
     it('Add shared entity', function(){
@@ -375,7 +387,6 @@ describe('FileContainer created using .register', function(){
 	
 	
 	fileCntr.saveDisplaySettings( displaySettings );
-	console.log( fileCntr.displaySettings.toObject(), displaySettings);
 	expect( fileCntr.displaySettings.toObject() ).to.eql( displaySettings );
     });       
 });

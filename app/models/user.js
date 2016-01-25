@@ -154,10 +154,9 @@ UserSchema.method({
     leaveComment: function( entity, subject, commentBody, callback ){
 	var user = this;
 	var comment = Comments.register( user, entity, this.name.first, subject, commentBody);
-
+	
 	comment.save(function(err){
 	    if( err ) callback( err ) ;
-	    
 	    user.userComments.push( comment._id );	
 	    
 	    entity.save( callback );	    
@@ -167,7 +166,7 @@ UserSchema.method({
     },
     
     deleteComment: function( commentID ){
-	//console.log('I %s have been asked to remove %s', this.name.first, commentID);
+	
 	var indexA = this.comments.indexOf( commentID );     
 	var indexB = this.userComments.indexOf( commentID );
 	
@@ -186,7 +185,6 @@ UserSchema.method({
 		if( err  ) return callback( err );
 		if( !doc ) return callback( null );
 		
-		//console.log('USER: calling remove on comment', deleted);
 		doc.remove( callback );
 	    });   
 	    
@@ -260,7 +258,7 @@ UserSchema.pre('save', function(next) {
 // Before a user deletes their account, remove all of their files and directory
 UserSchema.pre('remove', function(next) {
     var user = this; 
-    
+
     async.parallel(
 	[
 	    function(parellelCB){

@@ -1,15 +1,15 @@
 'user strict'
 
-var formidable   = require('formidable');
-var mongoose     = require('mongoose');
-var grid         = require('gridfs-stream');
-var fs           = require('fs');
-var util         = require('util');
-var multipart    = require('multipart');
-
-var config       = require('../../config/config');
-var BaseSchema   = require('./base-schema');
-var Comments     = require('./comments');
+var formidable     = require('formidable');
+var mongoose       = require('mongoose');
+var grid           = require('gridfs-stream');
+var fs             = require('fs');
+var util           = require('util');
+var multipart      = require('multipart');
+var async          = require('async');
+var config         = require('../../config/config');
+var BaseSchema     = require('./base-schema');
+var Comments       = require('./comments');
 
 var FileContainerSchema = new mongoose.Schema({
     
@@ -58,14 +58,19 @@ FileContainerSchema.method({
         return ( index >= 0 ) ? this.comments.splice( index, 1) : [] ;
     },
     
-    removeComment: function(commentID){	
+    removeComment: function(commentID, callback){	
+
 	var deleted = this.deleteComment( commentID );
-        if( deleted.length && this._id !== commentID ){
-            Comments.findOne({ _id: commentID }, function(err, doc){
-		if( err ) throw new Error( err );
-		if( !doc ) return true; 
-		doc.remove();
+	if( deleted.length > 0 ){
+	    Comments.findOne( {  _id: commentID }, function(err, doc){
+		if( err  ) return callback( err );
+		if( !doc ) return callback( null );
+		
+		doc.remove( callback );
 	    });   
+	    
+	} else {
+	    callback( null );
 	}
 
 	return deleted;
@@ -222,21 +227,53 @@ FileContainerSchema.pre('remove', function(next) {
     grid.mongo = mongoose.mongo;
     var conn   = mongoose.createConnection(config.db);
     var fileQuery = {_id: fileContainer.file.id, root: 'uploads'};
-    
+
+
+    var parentCollection  = mongoose.model( fileContainer.parent.collectionName );    
+    function deleteFrom( collection, searchQuery, callback ){
+        collection.findOne( { _id: searchQuery }, function( err, doc ){
+            
+            if( err ) return callback( err );
+	    
+            // Parent has been removed
+            if( !doc ) return callback( null );
+            
+            // Make sure doc deletes the comment
+            // if doc is the caller, then the comment has allready been deleted.
+	    doc.deleteFile( fileContainer._id );
+	    doc.save( callback );
+        });
+    };
+
     // Delete file
-    conn.once('open', function () {
-	grid(conn.db).remove( fileQuery, function(err){
-	    if (err) return handleError(err);
-	    // console.log('File removed', options._id);
-	    next();
-	});	
-    });
-    
-    // pop pop pop
-    // while( fileContainer.comments.length !== 0 ){
-    // console.log('Deleting file', fileContainer.comments[0]);
-    // fileContainer.removeComment( user.files[0] );
-    // };         
+    async.parallel(
+	[
+	    function(parellelCB){
+		async.map(fileContainer.comments, function(id, mapCB){    		
+		    fileContainer.removeComment( id, mapCB );
+		}, function(err, results){
+		    // No need for error checking here
+		    parellelCB( err, results );
+		});
+	    },
+	    
+	    function(parellelCB){
+		conn.once('open', function () {
+		    grid(conn.db).remove( fileQuery, function(err){
+			parellelCB(err, null);
+		    });	
+		});
+	    },
+	    function(parellelCB){
+		deleteFrom( parentCollection, fileContainer.parent.id, function(err, results){
+		    parellelCB( err, results );
+		});
+	    }
+	],
+	function(err, results){
+	    next(err, results);
+	});
 });
+
 
 module.exports = mongoose.model('FileContainer', FileContainerSchema);
