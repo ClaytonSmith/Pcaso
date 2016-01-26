@@ -13,7 +13,7 @@ var CommentSchema = new mongoose.Schema({
     dateAdded:      { type: Number,  default: Date.now },     // Join date
     lastUpdated:    { type: Number,  default: Date.now },     // Last seen
     
-    parent: {                                                 // who left comment
+    parent: {                                                 // who left comment/owner
         collectionName: { type: String,  required: true },    // collection
         id:             { type: String,  required: true }     // id
     },

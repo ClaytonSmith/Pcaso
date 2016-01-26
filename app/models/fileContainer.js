@@ -78,7 +78,8 @@ FileContainerSchema.method({
     // { _id: ---, __t: ---} 
     addSharedEntity: function( sharedEntity ){
 	//TODO: error checking
-
+	
+	// Email if entity is user
 	this.sharedWith.push( sharedEntity );
 	// email user
     },
@@ -122,7 +123,7 @@ FileContainerSchema.method({
 	this.statistics.viewCount += 1;
     },
     
-    viewableTo: function( entity ){ 
+    viewableTo: function(entity){ 
         var fileContainer = this;
         
         // Is file public 
@@ -144,8 +145,7 @@ FileContainerSchema.method({
         
 	return false;
         // TODO: Error checking for not public or private 
-    }
-    
+    }    
 });
 
 FileContainerSchema.static({

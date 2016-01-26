@@ -33,6 +33,7 @@ var config         = require('../../config/config');
 //var BaseSchema     = mongoose.model('BaseSchema');
 var FileContainers = mongoose.model('FileContainer');
 var Comments       = mongoose.model('Comment');
+var Notification   = mongoose.model('Notification');
 
 var BaseUserSchema = new mongoose.Schema({// BaseSchema.extend({    
     // User accound and reg
@@ -149,8 +150,14 @@ UserSchema.method({
 	comment.save(function(err){
 	    if( err ) callback( err ) ;
 	    user.userComments.push( comment._id );	
+	
+	    var notificationTitle = user.username + " has commented on your " + entity.__t;
+	    var notification = Notification.register(entity.parent || entity, comment, notificationTitle );
 	    
-	    entity.save( callback );	    
+	    entity.save( function(err2){
+		if( err2 ) callback( err2 ) ;	
+		notification.save( callback );
+	    });
 	});
 	
 	return comment;
