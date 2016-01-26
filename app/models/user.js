@@ -24,16 +24,18 @@
 
 
 
-var mongoose       = require('mongoose');
-var bcrypt         = require('bcrypt-nodejs');
-var extend         = require('mongoose-schema-extend');
-var async          = require('async');
+var mongoose             = require('mongoose');
+var bcrypt               = require('bcrypt-nodejs');
+var extend               = require('mongoose-schema-extend');
+var async                = require('async');
+var Promise              = require('bluebird');
 
 //var BaseSchema     = mongoose.model('BaseSchema');
-var FileContainers = mongoose.model('FileContainer');
-var Comments       = mongoose.model('Comment');
-
-var BaseUserSchema = new mongoose.Schema({// BaseSchema.extend({    
+var FileContainers       = mongoose.model('FileContainer');
+var Comments             = mongoose.model('Comment');
+var Notification         = mongoose.model('Notification');
+var mailer               = require('../../config/mailer');
+var BaseUserSchema       = new mongoose.Schema({// BaseSchema.extend({    
     // User accound and reg
 
     dateAdded:      { type: Number,  default: Date.now },            // Join date
@@ -45,7 +47,8 @@ var BaseUserSchema = new mongoose.Schema({// BaseSchema.extend({
     name: { 
         first:          { type: String, required: true },
 	last:           { type: String, required: true }
-    }
+    },
+    notifications:  { type: [],      default: [] },                        // List of new and all notifications, hide this       
 });
 
 var UnauthenticatedUserSchema  = BaseUserSchema.extend({});
@@ -61,7 +64,7 @@ var UserSchema                 = BaseUserSchema.extend({
     },
     comments:       { type: [], default: [] },                        // List of mongoId for comments left by user
     userComments:   { type: [], default: [] },                        // List of mongoId for comments left by user
-    notifications:  { type: [], default: [] },                         // List of new and all notifications, hide this       
+    link:           { type: String, default: ''},                     // Todo
     settings: {
 	accountVisivility:  { type: String,  'default': 'PRIVATE'},   // Account visibility, who can see this profile
         commentable:        { type: Boolean, 'default': true },             // default commenting on account
@@ -70,6 +73,54 @@ var UserSchema                 = BaseUserSchema.extend({
 });
 
 UnauthenticatedUserSchema.method({
+
+    notify: function(subject, regarding, callback){
+	var user = this;
+	var notification = Notification.register(this, subject, regarding);
+	
+	user.addNotification( notification._id );
+	
+	notification.save( callback );
+	
+	return notification;
+    },
+
+    // Add new notification to list of all notifications
+    addNotification: function(notificationID){
+        this.notifications.push( notificationID );
+	return null;
+    },
+    
+    markNotificationAsRead: function(notificationID, callback){
+	Notifications.findOne( { _id: notificationID, 'target.id': this._id }, function( err, doc ){
+            if( err || !doc) return callback( err, doc );
+	    doc.read = true;
+            doc.save( callback );
+        });
+    },
+    
+    // deletes the notification 
+    deleteNotification: function(notificationID){
+        var index = this.notifications.indexOf( notificationID );
+        return ( index >= 0 ) ? notifications.splice( index, 1): []; 
+    },
+    
+     // remove notification ID from notification list
+    removeNotification: function(notificationID, callback){
+	
+        var deleted = this.deleteNotification( notificationID );
+        
+        if( deleted.length >= 0 ){
+            Commentes.findOne({ _id: notificationID, 'target.id': this._id }, function( err, doc ){
+		if( err || !doc ) return callback( err, doc );
+		doc.remove( callback );
+	    });
+	} else {
+	    callback( null );
+	}
+        
+        return deleted;
+    },
 
     /******* Security *******/
     generateHash: function(password) {
@@ -140,27 +191,41 @@ UserSchema.method({
 
     // Adds new comment ID to list of comments IFF commenting is enabled
     addComment: function(commentID){
+	// Comment only if allowed
         if( !this.settings.commentable ){	    
-            //new Error( 'Commenting is not allowed on this object' );
 	    return false;
 	}
-	
-	// add notification
-	
+		
 	return this.comments.push( commentID );
     },
     
     
     leaveComment: function( entity, subject, commentBody, callback ){
 	var user = this;
-	var comment = Comments.register( user, entity, this.name.first, subject, commentBody);
 	
-	comment.save(function(err){
-	    if( err ) callback( err ) ;
-	    user.userComments.push( comment._id );	
-	    
-	    entity.save( callback );	    
-	});
+	if( !this.settings.commentable ){
+	    return callback( new Error( "Entity is not commentable") );
+	}
+	
+	var comment      = null;
+	var notification = null;
+
+	
+	
+	async.series(
+	    [ 
+		function(waterfallCB){
+		    comment = Comments.register( user, entity, user.name.first, subject, commentBody);
+		    user.userComments.push( comment._id );	
+		    comment.save( waterfallCB );
+		},
+		function(waterfallCB){
+		    notification = Notification.register(entity, "COMMENT", comment /*, CUSTOM TITLE*/);
+		    notification.save( waterfallCB );
+		}
+	    ], function(err, results){
+		callback( err, results );
+	    });
 	
 	return comment;
     },
@@ -195,37 +260,48 @@ UserSchema.method({
 	return deleted;
     },
     
+    notify: function(subject, regarding, callback){
+	var user = this;
+	var notification = Notification.register(this, subject, regarding);
+	
+	user.addNotification( notification._id );
+	
+	notification.save( callback );
+	
+	return notification;
+    },
+
     // Add new notification to list of all notifications
     addNotification: function(notificationID){
         this.notifications.push( notificationID );
-	return null;
     },
     
-    markNotificationAsRead: function(notificationID){
-        // Notifications.findOne({ _id: notificationID }, function( err, doc ){
-        // if( err ) return handleError( err );
-        // if( !doc ) return true;
-        // doc.read = true;
-        // doc.save();
-        // });
-    },
-    
-    // remove notification ID from notification list
-    deleteNotification: function(notificationID){
-        var index = this.notifications.indexOf( notificationID );
-        return ( index >= 0 ) ? notifications.splice( index, 1): []; 
+    markNotificationAsRead: function(notificationID, callback){
+	Notifications.findOne( { _id: notificationID, 'target.id': this._id }, function( err, doc ){
+            if( err || !doc) return callback( err, doc );
+	    doc.read = true;
+            doc.save( callback );
+        });
     },
     
     // deletes the notification 
-    removeNotification: function(notificationID){
-
+    deleteNotification: function(notificationID){
+	var index = this.notifications.indexOf( notificationID );
+	return ( index >= 0 ) ? this.notifications.splice( index, 1): []; 
+    },
+    
+     // remove notification ID from notification list
+    removeNotification: function(notificationID, callback){
+	
         var deleted = this.deleteNotification( notificationID );
         
-        if( deleted.length ){
-            // Commentes.findOne({ _id: notificationID }function( err, doc ){
-            // if( err ) return handleError( err );
-            // if( !doc ) return true;
-            // doc.remove();
+        if( deleted.length >= 0 ){
+            Notification.findOne({ _id: notificationID, 'target.id': this._id }, function( err, doc ){
+		if( err || !doc ) return callback( err, doc );
+		doc.remove( callback );
+	    });
+	} else {
+	    callback( null );
 	}
         
         return deleted;
@@ -252,6 +328,7 @@ UserSchema.method({
 UserSchema.pre('save', function(next) {
     var user = this;
     user.lastUpdated = Date.now();    
+    console.log( 'In save for %s', this.name.first);
     next();
 });
 
@@ -262,7 +339,7 @@ UserSchema.pre('remove', function(next) {
     async.parallel(
 	[
 	    function(parellelCB){
-		async.map(user.comments, function(id, mapCB){    		
+		async.map( user.comments, function(id, mapCB){    		
 		    user.removeComment( id, mapCB );
 		}, function(err, results){
 		    // No need for error checking here
@@ -271,7 +348,7 @@ UserSchema.pre('remove', function(next) {
 	    },
 	    
 	    function(parellelCB){
-		async.map(user.userComments, function(id, mapCB){
+		async.map( user.userComments, function(id, mapCB){
     		    user.removeComment( id, mapCB );
 		}, function(err, results){
 		    // No need for error checking here
@@ -280,19 +357,74 @@ UserSchema.pre('remove', function(next) {
 	    },
 	    
 	    function(parellelCB){
-		async.map(user.files, function(id, mapCB){
+		async.map( user.files, function(id, mapCB){
     		    user.removeFile( id, mapCB );
 		}, function(err, results){
 		    // No need for error checking here
 		    parellelCB( err, results );
 		});
+	    },
+
+	    function(parellelCB){
+		async.map( user.notifications, function(id, mapCB){
+    		    user.removeNotification( id, mapCB );
+		}, function(err, results){
+		    // No need for error checking here
+		    parellelCB( err, results );
+		});
 	    }
-	],
+	], 
 	function(err, results){
 	    next(err, results);
 	});	    
 });
 
+
+UnauthenticatedUserSchema.pre('remove', function(next) {
+    var user = this; 
+
+    async.parallel(
+	[
+	    function(parellelCB){
+		async.map( user.comments, function(id, mapCB){    		
+		    user.removeComment( id, mapCB );
+		}, function(err, results){
+		    // No need for error checking here
+		    parellelCB( err, results );
+		});
+	    },
+	    
+	    function(parellelCB){
+		async.map( user.userComments, function(id, mapCB){
+    		    user.removeComment( id, mapCB );
+		}, function(err, results){
+		    // No need for error checking here
+		    parellelCB( err, results );
+		});
+	    },
+	    
+	    function(parellelCB){
+		async.map( user.files, function(id, mapCB){
+    		    user.removeFile( id, mapCB );
+		}, function(err, results){
+		    // No need for error checking here
+		    parellelCB( err, results );
+		});
+	    },
+
+	    function(parellelCB){
+		async.map( user.notifications, function(id, mapCB){
+    		    user.removeNotification( id, mapCB );
+		}, function(err, results){
+		    // No need for error checking here
+		    parellelCB( err, results );
+		});
+	    }
+	], 
+	function(err, results){
+	    next(err, results);
+	});	    
+});
 
 
 
@@ -309,6 +441,7 @@ UserSchema.pre('remove', function(next) {
 
 // create the model for users and expose it to our app
 module.exports = mongoose.model('User', UserSchema);
+
 
 // User accounts are stored here untill they click the registration link
 module.exports = mongoose.model('UnauthenticatedUser', UnauthenticatedUserSchema);

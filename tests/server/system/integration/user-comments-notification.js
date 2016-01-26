@@ -3,12 +3,14 @@ var chai                 = require("chai");
 var sinon                = require("sinon");
 var sinonChai            = require("sinon-chai");
 var devNullStream        = require('dev-null-stream');
+var Promise              = require('bluebird');
 
 var FileContainer        = mongoose.model('FileContainer');
 var UnauthenticatedUser  = mongoose.model('UnauthenticatedUser');
 var Comment              = mongoose.model('Comment');
 var User                 = mongoose.model('User');
 var FakeModel            = mongoose.model('FakeModel');
+var Notification         = mongoose.model('Notification');
 
 chai.should();
 chai.use( sinonChai );
@@ -62,11 +64,28 @@ describe('User - Comments: Integration test', function(){
 	expect( user2 ).to.not.be.null;	
     });
 
-    it('User comments on themself', function(done){
-	var spy = sinon.spy();
+    it('User comments on themself, expect notification', function(done){
+
+	var comment = null;	
 	
-	var comment = user1.leaveComment(user1, commentTemplate.subject, commentTemplate.body, function(err){
-	    expect( err ).to.equal.null
+	function check(f){ try{ f() }catch( e ){ throw new Error( done(e) ); };};
+
+	var promise = new Promise( function(resolve, reject){
+	    comment = user1.leaveComment(user1, commentTemplate.subject, commentTemplate.body, function(err){
+		if( err ) reject( done, err );
+		else resolve( comment );
+	    });
+	});
+	
+	promise.then( function(comment){
+	    user1.save(function(err){
+		if( err ) reject( done, err );
+		else resolve();
+	    });
+	}).catch( function(d,e){d(e)} ).then(function(){
+	    
+	    
+		expect( err ).to.equal.null
 	    
 	    expect( user1.userComments.length ).to.equal( 1 );
 	    expect( user1.comments.length ).to.equal( 1 );
@@ -170,7 +189,6 @@ describe('User - Comments: Integration test', function(){
 	// Create comment
 	var promise= new Promise( function(resolve, reject){
 	    comment = user1.leaveComment(user2, commentTemplate.subject, commentTemplate.body, function(err){
-		console.log('Leave comment', err );
 		if( err ) done( err );
 		else resolve( comment );
 	    });
@@ -397,10 +415,8 @@ describe('User - Comments: Integration test', function(){
     	    //--------------------------------------------------
     	    // Reload first user and check that comments were removed
     	    return new Promise(function(resolve, reject){
-		console.log( user1 );
     		User.findOne({ _id: user1._id}, function(err, updatedUser){
-    		    console.log( err, updatedUser );
-		    if( err ) reject( done, err);
+    		    if( err ) reject( done, err);
     		    else resolve( updatedUser );
 		    
     		});

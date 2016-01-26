@@ -57,6 +57,11 @@ describe('Santiy check.', function(){
 	expect( model ).to.exist;
     });
 
+        it('Ensure model `Notification` has been loaded', function(){
+	var model = mongoose.model('Notification');
+	expect( model ).to.exist;
+    });
+
     it('Ensure model `FakeModel` has been loaded', function(){
 	var model = mongoose.model('FakeModel');
 	expect( model ).to.exist;

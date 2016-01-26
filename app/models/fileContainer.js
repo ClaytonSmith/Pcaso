@@ -37,6 +37,7 @@ var FileContainerSchema = new mongoose.Schema({
 	visibility:      { type: String,  default: 'PRIVATE', required: true},  // Visibility
     },
     bulletLink:       { type: String },
+    link:             { type: String, default: ''},                     // Todo
     settings: {
         acceptFiles:      { type: Boolean, default: false },
         commentable:      { type: Boolean, default: true }
@@ -149,6 +150,10 @@ FileContainerSchema.method({
         
 	return false;
         // TODO: Error checking for not public or private 
+    },
+    
+    addNotification: function(commentID){
+	console.log('I am here');
     }
     
 });

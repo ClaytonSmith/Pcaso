@@ -61,8 +61,13 @@ describe('User - FileContainer - Comments: Integration test', function(){
 	user2 = User(userTemplate);
 	
 	user1.save(function(err){
+	    console.log( err);
 	    if( err ) done( err );
-	    user2.save(done);
+	    user2.save(function(err2){
+
+		console.log( err2);
+		done();
+	    });
 	});
     });
     
@@ -219,7 +224,7 @@ describe('User - FileContainer - Comments: Integration test', function(){
 		expect( fc.comments ).to.include( comment._id );
 		done();
 	    });
-	}).catch( function(d,e){d(e)} );
+	}).catch( function(d,e){console.log(e); done( e ); } );
     });
 
     it("User2's comments on User1's file removed when file is removed", function(done){
@@ -336,7 +341,7 @@ describe('User - FileContainer - Comments: Integration test', function(){
 		expect( user1.comments.length ).to.equal( 0 );
 		done();
 	    });
-	});
+	}).catch( function(d,e){console.log(e); done(e);} );
     });
 });
 

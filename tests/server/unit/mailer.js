@@ -2,7 +2,7 @@ var mongoose             = require('mongoose');
 var chai                 = require("chai");
 var sinon                = require("sinon");
 var sinonChai            = require("sinon-chai");
-var MailClient           = require('../../../config/mailer').newClient;
+var MailClient           = require('../../../config/mailer');
 
                                             
 chai.should();
@@ -14,15 +14,20 @@ describe('Mailer', function(){
     
     var mailer = null;
     var clientName = 'no-reply';
-    
+    var user = {name: { first: 'John', last: 'Doe' }, email: 'cool@domain.com' };
+
     beforeEach( function(){
-	mailer = new MailClient( clientName ); 
+	mailer = new MailClient.newClient( clientName ); 
     });
     
     it('Mail client should exist', function(){
 	expect( mailer ).to.exist;
     });
     
+    it('Ensure mail templates are build and sent', function(done){
+	MailClient.useTemplate( 'test', user, done);
+    });
+       
     it('Ensure that all required fields are set: TEXT', function(){
 	var spy = sinon.spy();;
 	
@@ -31,7 +36,7 @@ describe('Mailer', function(){
 	expect( spy ).to.have.been.calledWith( new Error( 'Malformed email, all fields must be filled' ) );
 	
 	// To field set
-	mailer.to({name: { first: 'John', last: 'Doe' }, email: 'Haha@domain.com' });
+	mailer.to( user );
 	spy = sinon.spy(); // renew spy before each call
 	mailer.send(spy);
 	expect( spy ).to.have.been.calledWith( new Error( 'Malformed email, all fields must be filled' ) );
@@ -61,7 +66,7 @@ describe('Mailer', function(){
 	expect( spy ).to.have.been.calledWith( new Error( 'Malformed email, all fields must be filled' ) );
 	
 	// To field set
-	mailer.to({name: { first: 'John', last: 'Doe' }, email: 'Haha@domain.com' });
+	mailer.to( user );
 	spy = sinon.spy(); // renew spy before each call
 	mailer.send(spy);
 	expect( spy ).to.have.been.calledWith( new Error( 'Malformed email, all fields must be filled' ) );

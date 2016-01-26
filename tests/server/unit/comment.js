@@ -5,6 +5,7 @@ var sinonChai            = require("sinon-chai");
 
 var Comment              = mongoose.model('Comment');
 var FakeModel            = mongoose.model('FakeModel');                                            
+
 chai.should();
 chai.use( sinonChai );
 
@@ -44,7 +45,7 @@ describe('Comments', function(){
 	    commentTemplate.from,
 	    commentTemplate.subject,
 	    commentTemplate.body);
-
+	
 	comment.save(done);
     });
     

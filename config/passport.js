@@ -104,9 +104,10 @@ module.exports = function(passport) {
 				newUser.save(function(err) {
 				    if (err) return done(err);    
 				    console.log('In save');
-				    mailer.useTemplate( 'test', newUser) 
 				    
-				    return done(null, newUser); 
+				    newUser.notify( "USER_AUTH", newUser, function(err){			    
+					return done(null, newUser); 
+				    });
 				});
 				
 				

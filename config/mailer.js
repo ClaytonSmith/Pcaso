@@ -96,12 +96,11 @@ function MailClient( client ){
 	
 	// Check that all required fields have been filled
 	var valid = Object.keys( okayToSend ).reduce( function( predicate, val ){ return okayToSend[ val ] && predicate; }, true );
-	if( !valid ) callback( new Error( 'Malformed email, all fields must be filled' ));
-
-	// send
+	if( !valid ) return callback( new Error( 'Malformed email, all fields must be filled' ));
 	
+	// send
 	if( process.env['NODE_ENV'] === 'test' )
-	    callback( false, {});
+	    callback( null, {status: 'Mail sent'});
 	else 
 	    transport.sendMail(newClient.message, callback);
     }
@@ -109,13 +108,13 @@ function MailClient( client ){
     return  newClient;
 }
 
-exports.useTemplate = function(templateName, recipients){
+exports.useTemplate = function(templateName, recipients, callback){
     
     // Get the mailer for the template 
     var mailer = templateClients[ templateName ];
     
     // If the mailer in undefined, there there is no template that uses it
-    if( mailer === undefined ) return new Error( 'Template undefined' );
+    if( mailer === undefined ) return callback( new Error( 'Template undefined' ) );
     
     // Create the template from the mailer
     var template = new EmailTemplate( path.join(templateDir, templateName));
@@ -130,17 +129,13 @@ exports.useTemplate = function(templateName, recipients){
 
     // turn recipients into array
     recipients = Array.isArray( recipients ) ? recipients : [ recipients ] ;
-    
-    console.log('just befor build');
+ 
     // Be aware of plural and singular recipient/s
     async.mapLimit( recipients, 10, function( recipient, next){
-	console.log('builder');
+
 	// render single recipient
 	template.render( templateResourceCollector(recipient), function( err, results){
-	    console.log('in render', recipient, err);
-	    console.log('Result', results.html);	    
-	    
-	    if(err) return new Error(err);
+	    if( err ) return next( err );
 	    
 	    mailClient.from( mailer.client );
 	    mailClient.to( recipient );
@@ -148,18 +143,10 @@ exports.useTemplate = function(templateName, recipients){
 	    mailClient.html( results.html );
 	    mailClient.text( results.text );
 	    
-	    //console.log('Constructed email', mailClient);
-	    mailClient.send( function(error, status) {
-		//console.log('Here', error);
-		if(error) return new Error( error );
-		
-		console.log('Server responded with "%s\n%s"', status.response, status.message);
-		next( null, status.message);
-	    });
+	    mailClient.send( next );
 	});
-    }, function(err){
-	if(err) return new Error( err );
-	console.log('Sent %s messages', recipients.length );
+    }, function(err, results){
+	callback( err, results );
     });
 };
 

@@ -25,6 +25,7 @@ var CommentSchema = new mongoose.Schema({
     children:   { type: [],     default: [] },                // Comments on comment
     from:       { type: String, required: true },
     body:       { type: String, required: true },
+    link:       { type: String, default: ''},                     // Todo
     settings: {
         acceptFiles:   { type: Boolean, 'default': true },
         commentable:   { type: Boolean, 'default': true }
@@ -60,13 +61,20 @@ CommentSchema.method({
 	}
         
         return deleted;
+    },
+    addNotification: function(commentID){
+	console.log('I am here');
     }
-
+    
 });
 
 CommentSchema.static({
     register: function(parent, target, from, subject, body){
-
+		
+	if( target.settings.commentable === false ){
+	    return false;
+	}
+	
 	var newComment = new this({
 	    parent: {
 		id: parent._id,

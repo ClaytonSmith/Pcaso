@@ -50,7 +50,6 @@ describe('Unauthenticated user', function(){
 	expect( user.name.last ).equal( userTemplate.name.last );
 	expect( user.email ).equal( userTemplate.email );
     });
-
 });
 
 
@@ -123,7 +122,7 @@ describe('User', function(){
 	expect( user.comments.length ).to.equal( 1 );
 	expect( user.comments ).to.include( comment  );
     });
-
+    
     //it('Add new notification', function(){
 	// create notification
 	//var notification = new Notification({ -- });
