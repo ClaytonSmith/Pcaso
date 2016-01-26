@@ -1,3 +1,8 @@
+'use strict'
+
+var helper = require('../../helpers/helper');
+
+var faker                = require('faker');
 var mongoose             = require('mongoose');
 var chai                 = require("chai");
 var sinon                = require("sinon");

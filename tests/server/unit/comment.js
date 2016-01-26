@@ -1,7 +1,12 @@
+'use strict'
+
+var helper = require('../../helpers/helper');
+
 var mongoose             = require('mongoose');
 var chai                 = require("chai");
 var sinon                = require("sinon");
 var sinonChai            = require("sinon-chai");
+var faker                = require('faker');
 
 var Comment              = mongoose.model('Comment');
 var FakeModel            = mongoose.model('FakeModel');                                            
@@ -32,9 +37,10 @@ describe('Comments', function(){
     });
     
     var commentTemplate = {
-	subject: 'Hello',
-	from: 'John Doe',
-	body: 'cat dog cow horse'
+	subject: faker.commerce.productName(),
+
+	from: faker.name.findName(),
+	body: faker.lorem.sentence()
     }
     
     beforeEach( function(done){
@@ -67,7 +73,8 @@ describe('Comments', function(){
 	expect( comment.subject ).to.equal( commentTemplate.subject );
 	expect( comment.from ).to.equal( commentTemplate.from );
 	expect( comment.body ).to.equal( commentTemplate.body );
-
+	
+	expect( comment.displaySettings.parentLink).to.equal( parent.displaySettings.link ); 
     });
     
     it('Add comment', function(){

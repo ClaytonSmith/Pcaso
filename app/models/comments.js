@@ -25,9 +25,9 @@ var CommentSchema = new mongoose.Schema({
     children:   { type: [],     default: [] },                // Comments on comment
     from:       { type: String, required: true },
     body:       { type: String, required: true },
-    settings: {
-        acceptFiles:   { type: Boolean, 'default': true },
-        commentable:   { type: Boolean, 'default': true }
+    displaySettings: {
+	parentLink:     { type: String, required: true },
+	link:           { type: String, required: true }
     }
 }).extend({});
 
@@ -35,8 +35,6 @@ var CommentSchema = new mongoose.Schema({
 CommentSchema.method({
     
     addComment: function(commentID){
-        if( !this.settings.commentable )
-            return new Error( 'Commenting is disallowed on this' + this.__t);
         return this.children.push( commentID );
     },
     
@@ -78,7 +76,11 @@ CommentSchema.static({
 	    },
 	    from: from,
 	    subject: subject,
-	    body: body
+	    body: body,
+	    displaySettings: {
+		parentLink: parent.displaySettings.link,
+		link: target.displaySettings.link, // Will add comment direct link
+	    }
 	});
 	
 	target.addComment( newComment._id );
@@ -86,6 +88,8 @@ CommentSchema.static({
 	return newComment;
     }    
 });
+
+CommentSchema.set('versionKey', false);
 
 CommentSchema.pre('save', function( next ){
     var comment = this;

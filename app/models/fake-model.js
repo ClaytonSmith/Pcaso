@@ -12,6 +12,9 @@ var config       = require('../../config/config');
 var FakeSchema = new mongoose.Schema({
     dateAdded:      { type: Number,  default: Date.now },            // Join date
     lastUpdated:    { type: Number,  default: Date.now },            // Last seen
+    displaySettings: {
+	link: { type: String, default: "http://localhost/3000/cool" }
+    }
 }).extend({});
 
 
@@ -26,12 +29,17 @@ FakeSchema.static({
     generateDoc: function(){
 	var document = {
 	    _id:  mongoose.Types.ObjectId().toString(),
-	    __t: 'FakeModel'
+	    __t: 'FakeModel',
+	    displaySettings: {
+		link: "http://localhost/3000/cool"
+	    }
 	}
 
 	return document;
     }
 });
+
+FakeSchema.set('versionKey', false);
 
 FakeSchema.pre('save', function( next ){
     var fake = this;

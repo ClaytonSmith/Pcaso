@@ -1,14 +1,21 @@
+'use strict'
+
+var helper               = require('../../../helpers/helper');
 var mongoose             = require('mongoose');
 var chai                 = require('chai');
 var sinon                = require('sinon');
 var sinonChai            = require('sinon-chai');
+var async                = require('async');
 var fs                   = require('fs');
 var devNullStream        = require('dev-null-stream');
+var Promise              = require('bluebird');
+var faker                = require('faker');
+
 
 var FileContainer        = mongoose.model('FileContainer');
 var User                 = mongoose.model('User');
 var FakeModel            = mongoose.model('FakeModel');
-var async                = require('async');
+
 
 chai.should();
 chai.use( sinonChai );
@@ -25,15 +32,14 @@ var devNull = new devNullStream( devNullOpts);
 describe('User - FileContainer: Integration test', function(){
     
     // Our soon to be users
-    var user1    = null;
-    var user2    = null;
+    var user1 = null;
+    var user2 = null;
+
+    var user1Template = null;
+    var user2Template = null;
+    
     var fileCntr = null;
 
-    var userTemplate = {
-	email: 'Test@cool.com',
-	password: 'Super Secure'
-    };
-    
     var fileTemplate = {
 	file: {
 	    name: 'test file',
@@ -56,12 +62,26 @@ describe('User - FileContainer: Integration test', function(){
     
     beforeEach( function(done){
 	fileCntr = null;
-	userTemplate.name = { first: 'User 1', last: 'test subject 1' };
-	user1 = User(userTemplate);
 	
-	userTemplate.name = { first: 'User 2', last: 'test subject 2' };	
-	user2 = User(userTemplate);
+	user1Template = helper.genUser();
+	user2Template = helper.genUser();
 	
+	user1 = User.register(
+	    user1Template.name.first,
+	    user1Template.name.last,
+	    user1Template.email,
+	    user1Template.password,
+	    user1Template.username
+	);
+
+	user2 = User.register(
+	    user2Template.name.first,
+	    user2Template.name.last,
+	    user2Template.email,
+	    user2Template.password,
+	    user2Template.username
+	);
+
 	user1.save(function(err){
 	    if( err ) done( err );
 	    user2.save(done);

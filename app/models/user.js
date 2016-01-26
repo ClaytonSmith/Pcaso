@@ -28,6 +28,7 @@ var mongoose       = require('mongoose');
 var bcrypt         = require('bcrypt-nodejs');
 var extend         = require('mongoose-schema-extend');
 var async          = require('async');
+var config         = require('../../config/config');
 
 //var BaseSchema     = mongoose.model('BaseSchema');
 var FileContainers = mongoose.model('FileContainer');
@@ -40,12 +41,13 @@ var BaseUserSchema = new mongoose.Schema({// BaseSchema.extend({
     lastUpdated:    { type: Number,  default: Date.now },            // Last seen
     
     // Personal data
-    email:          { type: String,  required: true },
+    email:          { type: String,  required: true, unique : true, dropDups: true },
     password:       { type: String,  required: true },
     name: { 
         first:          { type: String, required: true },
 	last:           { type: String, required: true }
-    }
+    },
+    username: { type: String,  required: true, unique : true, dropDups: true },
 });
 
 var UnauthenticatedUserSchema  = BaseUserSchema.extend({});
@@ -61,12 +63,10 @@ var UserSchema                 = BaseUserSchema.extend({
     },
     comments:       { type: [], default: [] },                        // List of mongoId for comments left by user
     userComments:   { type: [], default: [] },                        // List of mongoId for comments left by user
-    notifications:  { type: [], default: [] },                         // List of new and all notifications, hide this       
-    settings: {
-	accountVisivility:  { type: String,  'default': 'PRIVATE'},   // Account visibility, who can see this profile
-        commentable:        { type: Boolean, 'default': true },             // default commenting on account
-        acceptFiles:        { type: Boolean, 'default': true }              // Will tell whether commenting is allowed, it is not by default
-    }
+    notifications:  { type: [], default: [] },                         // List of new and all notifications, hide this
+    displaySettings: {
+	link:          { type: String, required: true }
+    }	
 });
 
 UnauthenticatedUserSchema.method({
@@ -97,7 +97,7 @@ UserSchema.method({
 	
 	options.displaySettings = JSON.parse(JSON.stringify( settings.displaySettings || {} )) ;
 	options.fileOptions     = JSON.parse(JSON.stringify( settings.fileOptions     || {} )) ;
-
+	
 	options.displaySettings.visibility = options.displaySettings.visibility || this.fileSettings.defaults.visibility;
 
 	var fileContainer = FileContainers.register(this, file, options);
@@ -121,7 +121,6 @@ UserSchema.method({
         return ( index >= 0 ) ? this.files.splice( index, 1) : [] ; 
     },
     
-    
     // file will be removed from DB
     removeFile: function(fileID, callback){	
         var deleted = this.deleteFile( fileID, callback );        
@@ -140,16 +139,8 @@ UserSchema.method({
 
     // Adds new comment ID to list of comments IFF commenting is enabled
     addComment: function(commentID){
-        if( !this.settings.commentable ){	    
-            //new Error( 'Commenting is not allowed on this object' );
-	    return false;
-	}
-	
-	// add notification
-	
 	return this.comments.push( commentID );
-    },
-    
+    }, 
     
     leaveComment: function( entity, subject, commentBody, callback ){
 	var user = this;
@@ -237,7 +228,7 @@ UserSchema.method({
         // confirmiing the change
         this.email = newEmail;
     },
-    
+
     /******* Security *******/
     generateHash: function(password) {
 	return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
@@ -246,7 +237,64 @@ UserSchema.method({
     validPassword: function(password) {
 	return bcrypt.compareSync(password, this.password);
     }
+
 });
+
+UnauthenticatedUserSchema.static({
+    /******* Security *******/
+    generateHash: function(password) {
+	return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
+    },
+    
+    validPassword: function(password) {
+	return bcrypt.compareSync(password, this.password);
+    },
+
+    register: function( first, last, email, pass, username){
+	var user = new this({
+	    name: {
+		first: first,
+		last: last,
+	    },
+	    email: email,
+	    password: this.generateHash( pass ),
+	    username: username
+	});	
+	
+	return user;
+    }   
+});
+
+UserSchema.static({
+    /******* Security *******/
+    generateHash: function(password) {
+	return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
+    },
+    
+    validPassword: function(password) {
+	return bcrypt.compareSync(password, this.password);
+    },
+
+    register: function( first, last, email, pass, username){
+	var user = new this({
+	    name: {
+		first: first,
+		last: last,
+	    },
+	    email: email,
+	    password: this.generateHash( pass ),
+	    username: username,
+	    displaySettings: {
+		link: config.service.domain + "user/" + username
+	    }
+	});	
+	
+	return user;
+    }
+});
+
+UserSchema.set('versionKey', false);
+UnauthenticatedUserSchema.set('versionKey', false);
 
 // Update dates 
 UserSchema.pre('save', function(next) {

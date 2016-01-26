@@ -1,8 +1,13 @@
+'use strict'
+
+var helper               = require('../../../helpers/helper');
 var mongoose             = require('mongoose');
 var chai                 = require("chai");
 var sinon                = require("sinon");
 var sinonChai            = require("sinon-chai");
 var devNullStream        = require('dev-null-stream');
+var Promise              = require('bluebird');
+var faker                = require('faker');
 
 var FileContainer        = mongoose.model('FileContainer');
 var UnauthenticatedUser  = mongoose.model('UnauthenticatedUser');
@@ -20,12 +25,11 @@ describe('User - Comments: Integration test', function(){
     
     var user1 = null;
     var user2 = null;
-    var targetEntity = null;
 
-    var userTemplate = {
-	email: 'Test@cool.com',
-	password: 'Super Secure'
-    };
+    var user1Template = null;
+    var user2Template = null;
+    
+    var targetEntity = null;
     
     var commentTemplate = {
 	subject: 'test',
@@ -38,11 +42,25 @@ describe('User - Comments: Integration test', function(){
     });
     
     beforeEach( function(done){	
+	user1Template = helper.genUser();
+	user2Template = helper.genUser();
 	
-	userTemplate.name = { first: 'User 1', last: 'test subject' };
-	user1 = User(userTemplate);
-	userTemplate.name = { first: 'User 2', last: 'test subject' };	
-	user2 = User(userTemplate);
+	user1 = User.register(
+	    user1Template.name.first,
+	    user1Template.name.last,
+	    user1Template.email,
+	    user1Template.password,
+	    user1Template.username
+	);
+
+	user2 = User.register(
+	    user2Template.name.first,
+	    user2Template.name.last,
+	    user2Template.email,
+	    user2Template.password,
+	    user2Template.username
+	);
+	
 	
 	user1.save(function(err){
 	    if( err ) done( err );
@@ -100,8 +118,8 @@ describe('User - Comments: Integration test', function(){
 	
 	// Helper catches test errors in thrown the promises and brings them back into view of the test
 	// any errors thrown in the test will make the test fail silently
-	function check(f){ try{ f() } catch( e ){ done(e); throw new Error(e); }};
-        
+	var check = helper.check( done );
+
 	var promise= new Promise( function(resolve, reject){
 	    var comment = user1.leaveComment(user1, commentTemplate.subject, commentTemplate.body, function(err){	
 		if( err ) done( err );
@@ -165,7 +183,7 @@ describe('User - Comments: Integration test', function(){
 	
 	// Helper catches test errors in thrown the promises and brings them back into view of the test
 	// any errors thrown in the test will make the test fail silently
-	function check(f){ try{ f() }catch( e ){throw new Error(done( e ))}; };	
+	var check = helper.check( done );
         
 	// Create comment
 	var promise= new Promise( function(resolve, reject){
@@ -271,8 +289,8 @@ describe('User - Comments: Integration test', function(){
 	
     	// Helper catches test errors in thrown the promises and brings them back into view of the test
     	// any errors thrown in the test will make the test fail silently
-    	function check(f){ try{ f() }catch( e ){ done(e); };};
-	
+	var check = helper.check( done );
+
     	// Create comment
     	var promise= new Promise( function(resolve, reject){
     	    comment1 = user1.leaveComment(user2, commentTemplate.subject, commentTemplate.body, function(err){
@@ -428,6 +446,6 @@ describe('User - Comments: Integration test', function(){
     		expect( updatedUser.userComments.length ).to.equal( 0 );
 		done();    	    
 	    });	      	    
-    	});
+    	}).catch( function(d,e){d(e)} );
     });
 });

@@ -35,11 +35,10 @@ var FileContainerSchema = new mongoose.Schema({
     },
     displaySettings: {
 	visibility:      { type: String,  default: 'PRIVATE', required: true},  // Visibility
-    },
-    bulletLink:       { type: String },
-    settings: {
-        acceptFiles:      { type: Boolean, default: false },
-        commentable:      { type: Boolean, default: true }
+	parentLink:      { type: String,  required: true },
+	customURL:       { type: String,  required: true },
+	bulletLink:      { type: String,  required: true },
+	link:            { type: String,  required: true },
     }
 }).extend({});
 
@@ -48,8 +47,6 @@ FileContainerSchema.method({
 
     // Adds new comment ID to list of comments IFF commenting is enabled
     addComment: function(commentID){
-        if( !this.settings.commentable )
-            return new Error( 'Commenting is disallowed on this' + this.__t);
         return this.comments.push( commentID );
     },
     
@@ -117,9 +114,7 @@ FileContainerSchema.method({
 	    
 	    var read = gfs.createReadStream( options );
 	    
-	    read.on('error', function(err){
-		console.log( 'I HAVE ENCOUNTERED AN ERROR: ',err);
-	    });
+	    read.on('error', function(err){ });
 	    
 	    read.pipe(dest);
 	});
@@ -168,10 +163,22 @@ FileContainerSchema.static({
 	    displaySettings: settings.displaySettings,
 	    fileOptions: settings.fileOptions
 	});
+	fileContainer.displaySettings.parentLink = parent.displaySettings.link,	
+	fileContainer.displaySettings.bulletLink = Math.random().toString(36).substring(5) 
 	
+	fileContainer.displaySettings.customURL = fileContainer.displaySettings.customURL 
+	    || fileContainer.displaySettings.bulletLink
+	
+	fileContainer.displaySettings.link = 
+	    parent.displaySettings.link
+	    + "/"
+	    + fileContainer.displaySettings.customURL
+
 	return fileContainer;
-    }
+    } 
 });	
+
+FileContainerSchema.set('versionKey', false);
 
 // Update dates 
 FileContainerSchema.pre('save', function(next){

@@ -19,6 +19,7 @@
     "eslint": "^1.10.3",
     "express": "~4.0.0",
     "express-session": "~1.0.0",
+    "faker": "^3.0.1",
     "formidable": "^1.0.17",
     "fs": "0.0.2",
     "gridfs-stream": "^1.1.1",

@@ -5,7 +5,7 @@
 module.exports = {
     db: 'mongodb://localhost/pcaso_test',
     service: {
-	domain: 'localhost:3000/',
-	api: 'localhost:3000/api/'
+	domain: 'http://localhost:3000/',
+	api: 'http://localhost:3000/api/'
     }
 }
