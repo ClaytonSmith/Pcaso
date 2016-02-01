@@ -157,7 +157,6 @@ exports.useTemplate = function(templateName, recipients, additionalObjects, call
 	    
 	    mailClient.send( next );
 	});
-	
     }, callback );
 };
 

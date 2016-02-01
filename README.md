@@ -44,7 +44,7 @@ V1 Backend
   - [X] Privileged file viewing
   - [X] Bind files to user accounts 
   - [X] Modify privacy settings
-  - [ ] Pretty "bullet" URLs to files 
+  - [X] Pretty "bullet" URLs to files 
 - [X] Comments
   - [X] Bind comments to entities 
   - [X] Remove comments
@@ -53,9 +53,9 @@ V1 Backend
   - [X] File "view" count
   - [ ] Traffic - views per day...
 - [ ] API for the above 
-- [ ] Garbage collection
+- [X] Garbage collection
   - [X] Comments 
-  - [ ] Files
+  - [x] Files
   - [X] User
 - [ ] Test
   - [X] Unit tests 
@@ -65,7 +65,7 @@ V1 Backend
     - [X] Comments
   - [ ] System 
     - [X] User accounts - In development
-    - [ ] File managment	
+    - [X] File managment	
     - [X] Comments
     - [X] Garbage collection - In development
     - [ ] API
