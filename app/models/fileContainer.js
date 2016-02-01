@@ -8,8 +8,11 @@ var util           = require('util');
 var multipart      = require('multipart');
 var async          = require('async');
 var config         = require('../../config/config');
+var asyncRemove    = require('../helpers/async-remove');
+var mailer         = require('../../config/mailer');
 var BaseSchema     = require('./base-schema');
 var Comments       = require('./comments');
+var Notification   = require('./notification');
 
 var FileContainerSchema = new mongoose.Schema({
     
@@ -17,7 +20,8 @@ var FileContainerSchema = new mongoose.Schema({
     lastUpdated:     { type: Number,  default: Date.now },     // Last seen
     parent: {
         collectionName:  { type: String,  required: true },     // collection
-        id:              { type: String,  required: true }      // id
+        id:              { type: String,  required: true },      // id
+	name:        { type: mongoose.Schema.Types.Mixed, default: undefined }
     },
     file: {
      	name:            { type: String,  required: true },              // Path to file
@@ -76,17 +80,65 @@ FileContainerSchema.method({
     // Should only be given mongo documents that have been extended
     // with the .extend({}) method.
     // { _id: ---, __t: ---} 
-    addSharedEntity: function( sharedEntity ){
+    addSharedEntity: function( sharedEntity, callback ){
 	//TODO: error checking
+	// Reformat this to reduce number of branches
+	var fileContainer = this;
+
+	// If user account is given, notify and save email
+	if( sharedEntity.__t === "User" ){
+	    var notificationTitle = fileContainer.file.name + " has shared with you ";
+	    var notification = Notification.register( sharedEntity, this, notificationTitle );
+
+	    this.sharedWith.push( sharedEntity.email );
+  	    
+	    notification.save( function(err){
+		if( err ) return callback( err );
+		// TODO: move this into notificationx
+		mailer.useTemplate( 'shared-dataset', sharedEntity, fileContainer, callback );
+	    });
 	
-	// Email if entity is user
-	this.sharedWith.push( sharedEntity );
-	// email user
+	} else if( typeof sharedEntity ===  'string' || sharedEntity instanceof String ){
+	    
+	    User.findOne( { email: sharedeeEntity }, function(err, doc){
+		if( err )  callback( err );
+		if( !doc ){
+		    // Not user. Email non-user and save email 
+		    this.sharedWith.push( sharedeeEntity );
+		    mailer.useTemplate( 'shared-dataset-with-unregistered-user', sharedEntity, fileContainer, callback );
+		    
+		} else {
+		    
+		    this.sharedWith.push( sharedEntity.email );
+		    
+		    var notificationTitle = "A new dataset has been shared with you";
+		    var notification = Notification.register( doc, this, notificationTitle );
+		    
+		    notification.save( function(err){
+			if( err ) return callback( err );
+			
+			// TODO: move this into notificationx
+			mailer.useTemplate( 'shared-dataset', sharedEntity, callback );
+		    });	    
+		}
+	    });
+	    
+	} else {
+	    shared = { id: sharedEntity._id, collectionName: sharedEntity.__t };
+	    this.sharedWith.push( shared  );
+	    callback( null );
+	}
     },
 
     deleteSharedEntity: function( sharedEntity ){
-	var index = this.sharedWith.indexOf( sharedEntity );
-	return ( index >= 0 ) ? this.sharedWith.splice( index, 1) : [] ;
+	if( sharedEntity.__t === "User" || typeof sharedEntity ===  'string' || sharedEntity instanceof String ){
+	    var index = this.sharedWith.indexOf( sharedEntity.email );
+	    return ( index >= 0 ) ? this.sharedWith.splice( index, 1) : [] ;
+	} else {
+            var idIndex         = this.sharedWith.map( function(e){ return String( e.id ) } ).indexOf( String( sharedEntity._id ));
+	    var collectionIndex = this.sharedWith.map( function(e){ return e.collectionName } ).indexOf( sharedEntity.__t );
+	    return ( idIndex !== -1 && idIndex === collectionIndex ) ? this.sharedWith.splice( index, 1) : [] ;
+	}
     },
     
     saveDisplaySettings: function( newSettings ){
@@ -98,7 +150,6 @@ FileContainerSchema.method({
 	// If/when more settings are added, this method will become more usefull
 	settings.visibility = newSettings.visibility || this.displaySettings.visibility;
 	
-
 	this.displaySettings = settings;
     
 	return this.displaySettings;
@@ -136,16 +187,20 @@ FileContainerSchema.method({
         // Stringify and compaire because we don't know if `entity._id` will be ObjectID or String	
 	if( String( fileContainer.parent.id ) === entity._id.toString() &&
 	    fileContainer.parent.collectionName === entity.__t ) return true;
-	
-        // File is private and entity is on the shared list
-        var idIndex         = fileContainer.sharedWith.map( function(e){ return String( e._id ) } ).indexOf( String( entity._id ));
-	var collectionIndex = fileContainer.sharedWith.map( function(e){ return e.__t } ).indexOf( entity.__t );
 
-        if( idIndex !== -1 && idIndex === collectionIndex ) return true
+        // File is private and entity is on the shared list
+        var idIndex         = fileContainer.sharedWith.map( function(e){ return String( e.id ) } ).indexOf( String( entity._id ));
+	var collectionIndex = fileContainer.sharedWith.map( function(e){ return e.collectionName } ).indexOf( entity.__t );
+	var emailIndex      = fileContainer.sharedWith.indexOf( entity.email );
+	
+        if( emailIndex !== -1 || idIndex !== -1 && idIndex === collectionIndex ) return true
         
 	return false;
         // TODO: Error checking for not public or private 
-    }    
+    },
+    addNotification: function( id ){
+	throw new Error( 'FileContainer should not be given notifications' );
+    }
 });
 
 FileContainerSchema.static({
@@ -154,8 +209,9 @@ FileContainerSchema.static({
 	var fileContainer = new this({
 	    parent: {
 		id: parent._id,
-		collectionName: parent.__t
-            },
+		collectionName: parent.__t,
+		name: parent.name
+	    },
 	    file: {
 		name: file.name,
 		path: file.path
@@ -173,7 +229,7 @@ FileContainerSchema.static({
 	    parent.displaySettings.link
 	    + "/"
 	    + fileContainer.displaySettings.customURL
-
+	
 	return fileContainer;
     } 
 });	
@@ -192,7 +248,7 @@ FileContainerSchema.pre('save', function(next){
 	grid.mongo = mongoose.mongo;
 	var conn   = mongoose.createConnection(config.db);
 	var documentId = mongoose.Types.ObjectId();        		
-
+	
         conn.once('open', function(){
 	    
 	    var gfs = grid(conn.db);
@@ -256,30 +312,20 @@ FileContainerSchema.pre('remove', function(next) {
     async.parallel(
 	[
 	    function(parellelCB){
-		async.map(fileContainer.comments, function(id, mapCB){    		
-		    fileContainer.removeComment( id, mapCB );
-		}, function(err, results){
-		    // No need for error checking here
-		    parellelCB( err, results );
-		});
+		asyncRemove.asyncRemove(fileContainer.comments, function(id, callback){    		
+		    fileContainer.removeComment( id, callback );
+		}, parellelCB );
 	    },
 	    
 	    function(parellelCB){
 		conn.once('open', function () {
-		    grid(conn.db).remove( fileQuery, function(err){
-			parellelCB(err, null);
-		    });	
+		    grid(conn.db).remove( fileQuery, parellelCB );	
 		});
 	    },
 	    function(parellelCB){
-		deleteFrom( parentCollection, fileContainer.parent.id, function(err, results){
-		    parellelCB( err, results );
-		});
+		deleteFrom( parentCollection, fileContainer.parent.id, parellelCB );
 	    }
-	],
-	function(err, results){
-	    next(err, results);
-	});
+	], next );
 });
 
 

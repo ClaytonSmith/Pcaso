@@ -11,7 +11,6 @@ var devNullStream        = require('dev-null-stream');
 var Promise              = require('bluebird');
 var faker                = require('faker');
 
-
 var FileContainer        = mongoose.model('FileContainer');
 var User                 = mongoose.model('User');
 var FakeModel            = mongoose.model('FakeModel');
@@ -90,10 +89,20 @@ describe('User - FileContainer: Integration test', function(){
     });
     
     afterEach( function(done){
-	user1.remove(function(err){
-	    if( err ) done( err );
-	    user2.remove(done);
-	});
+	async.parallel(
+	    [
+		function(parallelCB){
+		    User.findOne( { _id: user1._id }, parallelCB );
+		},
+		
+		function(parallelCB){
+		    User.findOne( { _id: user2._id }, parallelCB );
+		}
+	    ],
+	    function(err, results){
+		if( err ) return done( err );
+		else async.map( results, function(user, callback){ user !== null ? user.remove( callback ) : callback( null )}, done ); 
+	    });	
     });
 
     
@@ -104,7 +113,7 @@ describe('User - FileContainer: Integration test', function(){
 
     it('Register file with user1', function(done){
 	
-	function check(f){ try{ f() }catch( e ){ throw new Error( done(e) ); };};
+	var check = helper.check( done );
 
 	var promise = new Promise( function(resolve, reject){
 	    fileCntr = user1.registerFile(fileTemplate.file, fileTemplate.settings, function(err){
@@ -126,7 +135,7 @@ describe('User - FileContainer: Integration test', function(){
     
     it('Register and remove file with user1', function(done){
 	
-	function check(f){ try{ f() }catch( e ){ throw new Error( done(e) ); };};
+	var check = helper.check( done );
 	
 	var promise = new Promise( function(resolve, reject){
 	    fileCntr = user1.registerFile(fileTemplate.file, fileTemplate.settings, function(err){
@@ -177,8 +186,8 @@ describe('User - FileContainer: Integration test', function(){
     
     it('File visability: private', function(done){
 	
-	function check(f){ try{ f() }catch( e ){ throw new Error( done(e) ); };};
-
+	var check = helper.check( done );
+	
 	var promise = new Promise( function(resolve, reject){
 	    fileCntr = user1.registerFile(fileTemplate.file, fileTemplate.settings, function(err){
 		if( err ) reject( done, err );
@@ -192,7 +201,6 @@ describe('User - FileContainer: Integration test', function(){
 		expect( fc.viewableTo( user2 ) ).to.be.false;
 		done();
 	    });
-	    
 	}).catch( function(d,e){d(e)} );
     });
 
@@ -209,30 +217,20 @@ describe('User - FileContainer: Integration test', function(){
 	
 	promise.then(function( fc ){
 	    check(function(){
-		expect( fc.viewableTo( user1 ) ).to.be.true;
-		expect( fc.viewableTo( user2 ) ).to.be.false;
+		expect( fileCntr.viewableTo( user1 ) ).to.be.true;
+		expect( fileCntr.viewableTo( user2 ) ).to.be.false;
 	    });
-
-	    fc.addSharedEntity( user2 );
 	    
 	    return new Promise( function(resolve, reject){
-		fc.save(function(err){
+	    	fc.addSharedEntity( user2, function(err){
 		    if( err ) reject( done, err );
 		    else resolve()
 		});
 	    });
 	}).catch( function(d,e){d(e)} ).then(function(){
-	    
-	    return new Promise( function(resolve, reject){
-		FileContainer.findOne( { _id: fileCntr._id }, function(err, doc){
-		    if( err ) reject( done, err );
-		    else resolve( doc )
-		});
-	    });
-	}).catch( function(d,e){d(e)} ).then(function(fc){
 	    check(function(){	    
-		expect( fc.viewableTo( user1 ) ).to.be.true;
-		expect( fc.viewableTo( user2 ) ).to.be.true;
+		expect( fileCntr.viewableTo( user1 ) ).to.be.true;
+		expect( fileCntr.viewableTo( user2 ) ).to.be.true;
 		done();
 	    });
 	}).catch( function(d,e){d(e)} );
@@ -240,8 +238,8 @@ describe('User - FileContainer: Integration test', function(){
 
     it('File visability: Default visibility', function(done){
 	
-	function check(f){ try{ f() }catch( e ){ done(e); };};
-	
+	var check = helper.check( done );
+
 	user1.fileSettings.defaults.visibility = 'PUBLIC'
 	
 	var promise = new Promise( function(resolve, reject){
@@ -263,7 +261,7 @@ describe('User - FileContainer: Integration test', function(){
     
     it('Remove file when parent is removed', function(done){
 	
-	function check(f){ try{ f() }catch( e ){ done(e); };};
+	var check = helper.check( done );
 	
 	var promise = new Promise( function(resolve, reject){
 	    fileCntr = user1.registerFile(fileTemplate.file, fileTemplate.settings, function(err){
@@ -274,16 +272,11 @@ describe('User - FileContainer: Integration test', function(){
 	
 	
 	promise.then(function(fc){
-	    
-	    return new Promise( function(resolve, reject){
-	    	try {
-		    user1.remove( function(err){
-	    		if( err ) reject( done, err );
-	    		else resolve( fileCntr );
-	    	    });
-		} catch(e){
-		    console.log( e);
-		};
+	    return new Promise( function(resolve, reject){	
+		user1.remove( function(err){
+	    	    if( err ) reject( done, err );
+	    	    else resolve( fileCntr );
+	    	});
 	    });		   
 	}).catch( function(d,e){d(e)} ).then(function(fc){
 	    
@@ -310,7 +303,8 @@ describe('User - FileContainer: Integration test', function(){
 	    check(function(){
 		expect( doc ).to.not.exist;
 
-		//to appease the afterEach gods 	
+		// To appease the afterEach gods 	
+		// A sacrifice must be made 
 		user1 = new FakeModel({});
 		user1.save( done );
 	    });

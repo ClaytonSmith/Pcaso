@@ -22,7 +22,10 @@ FakeSchema.method({
     addComment:    function(id){ return id; },
     deleteComment: function(id){ return id; },
     removeComment: function(id){ return id; },
-    deleteFile:    function(id){ return id; }
+    deleteFile:    function(id){ return id; },
+    addNotification: function( id ){
+	
+    }
 });
 
 FakeSchema.static({
@@ -32,6 +35,15 @@ FakeSchema.static({
 	    __t: 'FakeModel',
 	    displaySettings: {
 		link: "http://localhost/3000/cool"
+	    },
+	   
+	    // Methods
+	    addComment:    function(id){ return id; },
+	    deleteComment: function(id){ return id; },
+	    removeComment: function(id){ return id; },
+	    deleteFile:    function(id){ return id; },
+	    addNotification: function( id ){
+		
 	    }
 	}
 

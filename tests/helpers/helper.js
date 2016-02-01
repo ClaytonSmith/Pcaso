@@ -2,6 +2,7 @@
 
 var faker                = require('faker');
 
+
 process.env['NODE_ENV'] = 'test';
 
 require('./chai');
@@ -27,7 +28,7 @@ exports.check = function( done ){
 	    tests()
 	} catch( error ) {
 	    done( error );
-	    throw new Error(e);
+	    throw new Error( error );
 	}
     };
 }

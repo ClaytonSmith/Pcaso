@@ -123,9 +123,9 @@ describe('User - FileContainer - Comments: Integration test', function(){
 		    else resolve( doc );
 		});
 	    });
-	}).catch( function(d,e){d(e)} ).then(function(updatedUser){
-	    
+	}).catch( function(d,e){d(e)} ).then(function(updatedUser){	    
 	    user1 = updatedUser;
+
 	    check(function(){
 		expect( user1.files.length ).to.equal( 1 );
 		expect( user1.files ).to.include( fileCntr._id.toString() );
@@ -156,201 +156,229 @@ describe('User - FileContainer - Comments: Integration test', function(){
 		});
 	    });
 	}).catch( function(d,e){d(e)} ).then(function(fc){
-
+	    
 	    check(function(){	    
 		expect( fc.comments.length ).to.equal( 1 );
 		expect( fc.comments ).to.include( comment._id );
-		done();     
+		
 	    });
+	    
+	    return new Promise( function(resolve, reject){
+		User.findOne( { _id: user1._id }, function(err, doc){
+		    if( err ) reject( done, err );
+		    else resolve( doc );
+		});
+	    });
+	}).catch( function(d,e){d(e)} ).then(function(updatedUser){	    
+	    user1 = updatedUser;
+	    done();     
 	}).catch( function(d,e){ d(e) });
     });
     
     it("User2 comments on User1's file", function(done){
-	var spy = sinon.spy();
+    	var spy = sinon.spy();
 
-	var check = helper.check( done );
+    	var check = helper.check( done );
 
-	var comment  = null;
-	var fileCntr = null;
+    	var comment  = null;
+    	var fileCntr = null;
 	
-	var promise = new Promise( function(resolve, reject){
-	    fileCntr = user1.registerFile(fileTemplate.file, fileTemplate.settings, function(err){
-		if( err ) reject( done, err );
-		else resolve( fileCntr );
-	    });
-	});
+    	var promise = new Promise( function(resolve, reject){
+    	    fileCntr = user1.registerFile(fileTemplate.file, fileTemplate.settings, function(err){
+    		if( err ) reject( done, err );
+    		else resolve( fileCntr );
+    	    });
+    	});
 	
-	promise.then( function(fc){
-	    return new Promise( function(resolve, reject){
-		user1.save(function(err){
-		    if( err ) reject( done, err );
-		    else resolve();
-		});
-	    });
-	}).catch( function(d,e){d(e)} ).then(function(){
+    	promise.then( function(fc){
+    	    return new Promise( function(resolve, reject){
+    		user1.save(function(err){
+    		    if( err ) reject( done, err );
+    		    else resolve();
+    		});
+    	    });
+    	}).catch( function(d,e){d(e)} ).then(function(){
 	    
-	    return new Promise( function(resolve, reject){
-		User.findOne( { _id: user1._id }, function(err, doc){
-		    if( err ) reject( done, err );
-		    else resolve( doc );
-		});
-	    });
-	}).catch( function(d,e){d(e)} ).then(function(updatedUser){
+    	    return new Promise( function(resolve, reject){
+    		User.findOne( { _id: user1._id }, function(err, doc){
+    		    if( err ) reject( done, err );
+    		    else resolve( doc );
+    		});
+    	    });
+    	}).catch( function(d,e){d(e)} ).then(function(updatedUser){
+    	    user1 = updatedUser;
 	    
-	    user1 = updatedUser;
-	    check(function(){
-		expect( user1.files.length ).to.equal( 1 );
-		expect( user1.files ).to.include( fileCntr._id.toString() );
-	    });
+    	    check(function(){
+    		expect( user1.files.length ).to.equal( 1 );
+    		expect( user1.files ).to.include( fileCntr._id.toString() );
+    	    });
 
-	    return new Promise( function(resolve, reject){
-		comment = user2.leaveComment(fileCntr, commentTemplate.subject, commentTemplate.body, function(err){
-		    if( err ) reject( done, err );
-		    else resolve( comment );
-		});
-	    });
-	}).catch( function(d,e){d(e)} ).then(function( comment ){
+    	    return new Promise( function(resolve, reject){
+    		comment = user2.leaveComment(fileCntr, commentTemplate.subject, commentTemplate.body, function(err){
+    		    if( err ) reject( done, err );
+    		    else resolve( comment );
+    		});
+    	    });
+    	}).catch( function(d,e){d(e)} ).then(function( comment ){
 	    
-	    // Check that parent is user1 and target is the file container
-	    check(function(){
-		expect( comment.parent.id ).to.equal( user2._id.toString() );
-		expect( comment.parent.collectionName ).to.include( user2.__t );
+    	    // Check that parent is user1 and target is the file container
+    	    check(function(){
+    		expect( comment.parent.id ).to.equal( user2._id.toString() );
+    		expect( comment.parent.collectionName ).to.include( user2.__t );
 		
-		expect( comment.target.id ).to.equal( fileCntr._id.toString() );
-		expect( comment.target.collectionName ).to.equal( fileCntr.__t );
-	    });
+    		expect( comment.target.id ).to.equal( fileCntr._id.toString() );
+    		expect( comment.target.collectionName ).to.equal( fileCntr.__t );
+    	    });
 	    
-	    return new Promise( function(resolve, reject){
+    	    return new Promise( function(resolve, reject){
 		
-		FileContainer.findOne( { _id: fileCntr._id }, function(err, doc){
-		    if( err ) reject( done, err );
-		    else resolve( doc );
-		});
-	    });
-	}).catch( function(d,e){d(e)} ).then(function(fc){
+    		FileContainer.findOne( { _id: fileCntr._id }, function(err, doc){
+    		    if( err ) reject( done, err );
+    		    else resolve( doc );
+    		});
+    	    });
+    	}).catch( function(d,e){d(e)} ).then(function(fc){
 
-	    check(function(){	    
-		expect( fc.comments.length ).to.equal( 1 );
-		expect( fc.comments ).to.include( comment._id );
-		done();
-	    });
+    	    check(function(){	    
+    		expect( fc.comments.length ).to.equal( 1 );
+    		expect( fc.comments ).to.include( comment._id );
+    		//done();
+    	    });
+	
+    	    return new Promise( function(resolve, reject){
+    		User.findOne( { _id: user1._id }, function(err, doc){
+    		    if( err ) reject( done, err );
+    		    else resolve( doc );
+    		});
+    	    });
+    	}).catch( function(d,e){d(e)} ).then(function(updatedUser){
+    	    user1 = updatedUser;
+	   
+    	    return new Promise( function(resolve, reject){
+    		User.findOne( { _id: user2._id }, function(err, doc){
+    		    if( err ) reject( done, err );
+    		    else resolve( doc );
+    		});
+    	    });
+    	}).catch( function(d,e){d(e)} ).then(function(updatedUser){
+    	    user2 = updatedUser;
+	    done();
 	}).catch( function(d,e){d(e)} );
     });
 
     it("User2's comments on User1's file removed when file is removed", function(done){
-	var spy = sinon.spy();
+    	var spy = sinon.spy();
 
-	var check = helper.check( done );
+    	var check = helper.check( done );
 
-	var comment  = null;
-	var fileCntr = null;
+    	var comment  = null;
+    	var fileCntr = null;
 	
-	var promise = new Promise( function(resolve, reject){
-	    fileCntr = user1.registerFile(fileTemplate.file, fileTemplate.settings, function(err){
-		if( err ) reject( done, err );
-		else resolve( fileCntr );
-	    });
-	});
+    	var promise = new Promise( function(resolve, reject){
+    	    fileCntr = user1.registerFile(fileTemplate.file, fileTemplate.settings, function(err){
+    		if( err ) reject( done, err );
+    		else resolve( fileCntr );
+    	    });
+    	});
 	
-	promise.then( function(fc){
-	    return new Promise( function(resolve, reject){
-		user1.save(function(err){
-		    if( err ) reject( done, err );
-		    else resolve();
-		});
-	    });
-	}).catch( function(d,e){d(e)} ).then(function(){
+    	promise.then( function(fc){
+    	    return new Promise( function(resolve, reject){
+    		user1.save(function(err){
+    		    if( err ) reject( done, err );
+    		    else resolve();
+    		});
+    	    });
+    	}).catch( function(d,e){d(e)} ).then(function(){
 	    
-	    return new Promise( function(resolve, reject){
-		User.findOne( { _id: user1._id }, function(err, doc){
-		    if( err ) reject( done, err );
-		    else resolve( doc );
-		});
-	    });
-	}).catch( function(d,e){d(e)} ).then(function(updatedUser){
-	    
-	    user1 = updatedUser;
-	    check(function(){
-		expect( user1.files.length ).to.equal( 1 );
-		expect( user1.files ).to.include( fileCntr._id.toString() );
-	    });
+    	    return new Promise( function(resolve, reject){
+    		User.findOne( { _id: user1._id }, function(err, doc){
+    		    if( err ) reject( done, err );
+    		    else resolve( doc );
+    		});
+    	    });
+    	}).catch( function(d,e){d(e)} ).then(function(updatedUser){
+    	    user1 = updatedUser;
 
-	    return new Promise( function(resolve, reject){
-		comment = user2.leaveComment(fileCntr, commentTemplate.subject, commentTemplate.body, function(err){
-		    if( err ) reject( done, err );
-		    else resolve( comment );
-		});
-	    });
-	}).catch( function(d,e){d(e)} ).then(function( comment ){
+    	    check(function(){
+    		expect( user1.files.length ).to.equal( 1 );
+    		expect( user1.files ).to.include( fileCntr._id.toString() );
+    	    });
+
+    	    return new Promise( function(resolve, reject){
+    		comment = user2.leaveComment(fileCntr, commentTemplate.subject, commentTemplate.body, function(err){
+    		    if( err ) reject( done, err );
+    		    else resolve( comment );
+    		});
+    	    });
+    	}).catch( function(d,e){d(e)} ).then(function( comment ){
 	    
-	    // Check that parent is user1 and target is the file container
-	    check(function(){
-		expect( comment.parent.id ).to.equal( user2._id.toString() );
-		expect( comment.parent.collectionName ).to.include( user2.__t );
+    	    // Check that parent is user1 and target is the file container
+    	    check(function(){
+    		expect( comment.parent.id ).to.equal( user2._id.toString() );
+    		expect( comment.parent.collectionName ).to.include( user2.__t );
 		
-		expect( comment.target.id ).to.equal( fileCntr._id.toString() );
-		expect( comment.target.collectionName ).to.equal( fileCntr.__t );
-	    });
+    		expect( comment.target.id ).to.equal( fileCntr._id.toString() );
+    		expect( comment.target.collectionName ).to.equal( fileCntr.__t );
+    	    });
 	    
-	    return new Promise( function(resolve, reject){
+    	    return new Promise( function(resolve, reject){		
+    		FileContainer.findOne( { _id: fileCntr._id }, function(err, doc){
+    		    if( err ) reject( done, err );
+    		    else resolve( doc );
+    		});
+    	    });
+    	}).catch( function(d,e){d(e)} ).then(function(fc){
+	    
+    	    check(function(){	    
+    		expect( fc.comments.length ).to.equal( 1 );
+    		expect( fc.comments ).to.include( comment._id );
+    	    });
+	    
+    	    return new Promise( function(resolve, reject){
 		
-		FileContainer.findOne( { _id: fileCntr._id }, function(err, doc){
-		    if( err ) reject( done, err );
-		    else resolve( doc );
-		});
-	    });
-	}).catch( function(d,e){d(e)} ).then(function(fc){
+    		fileCntr.remove( function(err){
+    		    if( err ) reject( done, err );
+    		    else resolve();
+    		});
+    	    });
+    	}).catch( function(d,e){d(e)} ).then(function(){
+    	    return new Promise( function(resolve, reject){
+    		FileContainer.findOne( { _id: fileCntr._id }, function(err, doc){
+    		    if( err ) reject( done, err );
+    		    else resolve( doc );
+    		});
+    	    });
+    	}).catch( function(d,e){d(e)} ).then(function(fc){
+    	    check(function(){	    
+    		expect( fc ).to.not.exist;
+    	    });
 	    
-	    check(function(){	    
-		expect( fc.comments.length ).to.equal( 1 );
-		expect( fc.comments ).to.include( comment._id );
-	    });
-	    
-	    return new Promise( function(resolve, reject){
-		
-		fileCntr.remove( function(err){
-		    if( err ) reject( done, err );
-		    else resolve();
-		});
-	    });
-	}).catch( function(d,e){d(e)} ).then(function(){
-	    return new Promise( function(resolve, reject){
-		FileContainer.findOne( { _id: fileCntr._id }, function(err, doc){
-		    if( err ) reject( done, err );
-		    else resolve( doc );
-		});
-	    });
-	}).catch( function(d,e){d(e)} ).then(function(fc){
-	    check(function(){	    
-		expect( fc ).to.not.exist;
-	    });
-	    
-	    return new Promise( function(resolve, reject){
-		User.findOne( { _id: user1._id }, function(err, doc){
-		    if( err ) reject( done, err );
-		    else resolve( doc );
-		});
-	    });
-	}).catch( function(d,e){d(e)} ).then(function(updatedUser){
+    	    return new Promise( function(resolve, reject){
+    		User.findOne( { _id: user1._id }, function(err, doc){
+    		    if( err ) reject( done, err );
+    		    else resolve( doc );
+    		});
+    	    });
+    	}).catch( function(d,e){d(e)} ).then(function(updatedUser){
+    	    user1 = updatedUser;
 
-	    user1 = updatedUser;
-	    check(function(){
-		expect( user1.files.length ).to.equal( 0 );
-	    });
+    	    check(function(){
+    		expect( user1.files.length ).to.equal( 0 );
+    	    });
 
-	    return new Promise( function(resolve, reject){
-		User.findOne( { _id: user2._id }, function(err, doc){
-		    if( err ) reject( done, err );
-		    else resolve( doc );
-		});
-	    });
-	}).catch( function(d,e){d(e)} ).then(function(updatedUser){
+    	    return new Promise( function(resolve, reject){
+    		User.findOne( { _id: user2._id }, function(err, doc){
+    		    if( err ) reject( done, err );
+    		    else resolve( doc );
+    		});
+    	    });
+    	}).catch( function(d,e){d(e)} ).then(function(updatedUser){
+    	    user2 = updatedUser;
 
-	    user2 = updatedUser;
-	    check(function(){
-		expect( user2.comments.length ).to.equal( 0 );
-		done();
-	    });
-	}).catch( function(d,e){d(e)} );
+    	    check(function(){
+    		expect( user2.comments.length ).to.equal( 0 );
+    		done();
+    	    });
+    	}).catch( function(d,e){d(e)} );
     });
 });

@@ -1,11 +1,12 @@
 'use strict'
 
-var formidable   = require('formidable');
-var mongoose     = require('mongoose');
-var util         = require('util');
-var extend       = require('mongoose-schema-extend')
-var async        = require('async');
-var config       = require('../../config/config');
+var formidable     = require('formidable');
+var mongoose       = require('mongoose');
+var util           = require('util');
+var extend         = require('mongoose-schema-extend')
+var async          = require('async');
+var config         = require('../../config/config');
+var asyncRemove    = require('../helpers/async-remove');
 
 //var BaseSchema   = mongoose.model("BaseSchema");
 
@@ -58,8 +59,11 @@ CommentSchema.method({
 	}
         
         return deleted;
+    },
+    addNotification: function( id ){
+	throw new Error( 'Comments should not be given notifications' );
     }
-
+    
 });
 
 CommentSchema.static({
@@ -123,25 +127,20 @@ CommentSchema.pre('remove', function( next ){
     async.series(
 	[
 	    function(parellelCB){	
-		async.map(comment.children, function(id, mapCB){
-		    comment.removeComment( id, mapCB );
-		}, function(err, results){
-		    parellelCB( err, results );
-		});
+		asyncRemove.asyncRemove(comment.children, function(id, callback){
+		    comment.removeComment( id, callback );
+		}, parellelCB );
 	    },
+
 	    function(parellelCB){	
-		deleteFrom( parentCollection, comment.parent.id, function(err, results){
-		    parellelCB( err, results );
-		});
+		deleteFrom( parentCollection, comment.parent.id, parellelCB );
 	    },
+
 	    function(parellelCB){	
-		deleteFrom( subjectCollection, comment.target.id, function(err, results){
-		     parellelCB( err, results );
-		});
+		deleteFrom( subjectCollection, comment.target.id, parellelCB );
 	    },
-	], function(err, results){
-	    next(err, results);
-	});
+
+	], next );
 });		  
 
 

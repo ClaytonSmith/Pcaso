@@ -15,13 +15,19 @@ var templateClients = {
     'test': { 
 	subject: 'Cool Test',
 	client: 'no-reply'
+    },
+    'shared-dataset': { 
+	subject: 'PCaso: A dataset has been shared with you',
+	client: 'no-reply'
     }
+    
 };
 
-function templateResourceCollector(objA){
+function templateResourceCollector(data, extra){
     return { 
 	config: config,
-	data: objA
+	data: data,
+	extra: extra
     }
 }
 
@@ -109,13 +115,18 @@ function MailClient( client ){
     return  newClient;
 }
 
-exports.useTemplate = function(templateName, recipients){
-    
+exports.useTemplate = function(templateName, recipients, additionalObjects, callback){
+
+    if( callback === undefined ){
+	callback = additionalObjects;
+	additionalObjects = undefined;
+    }
+
     // Get the mailer for the template 
     var mailer = templateClients[ templateName ];
     
     // If the mailer in undefined, there there is no template that uses it
-    if( mailer === undefined ) return new Error( 'Template undefined' );
+    if( mailer === undefined ) return callback( new Error( 'Template undefined' ) );
     
     // Create the template from the mailer
     var template = new EmailTemplate( path.join(templateDir, templateName));
@@ -130,17 +141,13 @@ exports.useTemplate = function(templateName, recipients){
 
     // turn recipients into array
     recipients = Array.isArray( recipients ) ? recipients : [ recipients ] ;
-    
-    console.log('just befor build');
+   
     // Be aware of plural and singular recipient/s
     async.mapLimit( recipients, 10, function( recipient, next){
-	console.log('builder');
+
 	// render single recipient
-	template.render( templateResourceCollector(recipient), function( err, results){
-	    console.log('in render', recipient, err);
-	    console.log('Result', results.html);	    
-	    
-	    if(err) return new Error(err);
+	template.render( templateResourceCollector(recipient, additionalObjects), function( err, results){
+	    if(err) return callback( err );
 	    
 	    mailClient.from( mailer.client );
 	    mailClient.to( recipient );
@@ -148,19 +155,10 @@ exports.useTemplate = function(templateName, recipients){
 	    mailClient.html( results.html );
 	    mailClient.text( results.text );
 	    
-	    //console.log('Constructed email', mailClient);
-	    mailClient.send( function(error, status) {
-		//console.log('Here', error);
-		if(error) return new Error( error );
-		
-		console.log('Server responded with "%s\n%s"', status.response, status.message);
-		next( null, status.message);
-	    });
+	    mailClient.send( next );
 	});
-    }, function(err){
-	if(err) return new Error( err );
-	console.log('Sent %s messages', recipients.length );
-    });
+	
+    }, callback );
 };
 
 exports.newClient = MailClient;

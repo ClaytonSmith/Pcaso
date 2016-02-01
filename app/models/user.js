@@ -29,11 +29,13 @@ var bcrypt         = require('bcrypt-nodejs');
 var extend         = require('mongoose-schema-extend');
 var async          = require('async');
 var config         = require('../../config/config');
+var asyncRemove    = require('../helpers/async-remove');
 
 //var BaseSchema     = mongoose.model('BaseSchema');
 var FileContainers = mongoose.model('FileContainer');
 var Comments       = mongoose.model('Comment');
 var Notification   = mongoose.model('Notification');
+
 
 var BaseUserSchema = new mongoose.Schema({// BaseSchema.extend({    
     // User accound and reg
@@ -114,8 +116,7 @@ UserSchema.method({
 	return fileContainer;
     },
     
-    
-
+  
     // Removes a file from the user's list of files    
     deleteFile: function( fileID ){
         var index = this.files.indexOf( fileID );
@@ -150,13 +151,23 @@ UserSchema.method({
 	comment.save(function(err){
 	    if( err ) callback( err ) ;
 	    user.userComments.push( comment._id );	
-	
-	    var notificationTitle = user.username + " has commented on your " + entity.__t;
-	    var notification = Notification.register(entity.parent || entity, comment, notificationTitle );
 	    
+	    if( entity._id === "user" ){
+	    };
+		
 	    entity.save( function(err2){
 		if( err2 ) callback( err2 ) ;	
-		notification.save( callback );
+		
+		var notificationTitle = user.username + " has commented on your " + entity.__t;
+		var notification = Notification.register( entity, comment, notificationTitle );
+		
+		notification.save( function(err3){
+		    if( entity._id === user._id ){
+			entity.addNotification( notification.id );
+		    }
+		    
+		    callback( err3 );
+		});
 	    });
 	});
 	
@@ -179,62 +190,53 @@ UserSchema.method({
 	var deleted = this.deleteComment( commentID );
 	
 	if( deleted.length > 0 ){
-	    Comments.findOne( {  _id: commentID }, function(err, doc){
-		if( err  ) return callback( err );
-		if( !doc ) return callback( null );
-		
+	    Comments.findOne( { _id: commentID }, function(err, doc){
+		if( err || !doc ) return callback( err, doc );		
 		doc.remove( callback );
-	    });   
-	    
-	} else {
-	    callback( null );
-	}
-
+	    });       
+	} else  callback( null );
+	
 	return deleted;
     },
     
     // Add new notification to list of all notifications
     addNotification: function(notificationID){
         this.notifications.push( notificationID );
-	return null;
     },
     
-    markNotificationAsRead: function(notificationID){
-        // Notifications.findOne({ _id: notificationID }, function( err, doc ){
-        // if( err ) return handleError( err );
-        // if( !doc ) return true;
-        // doc.read = true;
-        // doc.save();
-        // });
+    markNotificationAsRead: function(notificationID, callback){
+        Notifications.findOne({ _id: notificationID }, function( err, doc ){
+            if( err || !doc ) return callback( err, doc );
+            doc.read = true;
+            doc.save( callback );
+        });
     },
     
     // remove notification ID from notification list
     deleteNotification: function(notificationID){
         var index = this.notifications.indexOf( notificationID );
-        return ( index >= 0 ) ? notifications.splice( index, 1): []; 
+        return ( index >= 0 ) ? this.notifications.splice( index, 1): []; 
     },
     
     // deletes the notification 
-    removeNotification: function(notificationID){
-
-        var deleted = this.deleteNotification( notificationID );
-        
-        if( deleted.length ){
-            // Commentes.findOne({ _id: notificationID }function( err, doc ){
-            // if( err ) return handleError( err );
-            // if( !doc ) return true;
-            // doc.remove();
-	}
-        
-        return deleted;
+    removeNotification: function(notificationID, callback){
+	var user = this;
+	var deleted = user.deleteNotification( notificationID );
+	if( deleted.length > 0 ){
+	    Notification.findOne( { _id: notificationID }, function(err, doc){
+		if( err || !doc ) return callback( err, doc );		
+		doc.remove( callback );
+	    });
+	} else callback( null );	
+	
+	return deleted;
     },
     
-    updateEmail: function( newEmail ){
-	
-        // MAYBE: Send authentication email to users old email account
-        // confirmiing the change
-        this.email = newEmail;
-    },
+    // updateEmail: function( newEmail ){
+    // MAYBE: Send authentication email to users old email account
+    // confirming the change
+    // this.email = newEmail;
+    /// },
 
     /******* Security *******/
     generateHash: function(password) {
@@ -317,38 +319,29 @@ UserSchema.pre('remove', function(next) {
     async.parallel(
 	[
 	    function(parellelCB){
-		async.map(user.comments, function(id, mapCB){    		
+		asyncRemove.asyncRemove(user.comments, function(id, mapCB){    		
 		    user.removeComment( id, mapCB );
-		}, function(err, results){
-		    // No need for error checking here
-		    parellelCB( err, results );
-		});
+		}, parellelCB );
 	    },
 	    
 	    function(parellelCB){
-		async.map(user.userComments, function(id, mapCB){
+		asyncRemove.asyncRemove(user.userComments, function(id, mapCB){
     		    user.removeComment( id, mapCB );
-		}, function(err, results){
-		    // No need for error checking here
-		    parellelCB( err, results );
-		});
+		}, parellelCB );
 	    },
 	    
 	    function(parellelCB){
-		async.map(user.files, function(id, mapCB){
+		asyncRemove.asyncRemove(user.files, function(id, mapCB){
     		    user.removeFile( id, mapCB );
-		}, function(err, results){
-		    // No need for error checking here
-		    parellelCB( err, results );
-		});
+		}, parellelCB );
+	    },	
+	    function(parellelCB){
+		asyncRemove.asyncRemove(user.notifications, function(id, streamCB){
+		    user.removeNotification( id, streamCB );
+		}, parellelCB );
 	    }
-	],
-	function(err, results){
-	    next(err, results);
-	});	    
+	], next );	    
 });
-
-
 
 
 // hides sensitive information

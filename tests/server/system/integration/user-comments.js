@@ -244,6 +244,8 @@ describe('User - Comments: Integration test', function(){
 		});
 	    }); 
 	}).then(function(updatedUser){
+	    user2 = updatedUser;
+
 	    // Make sure comment is remove from user
 	    check(function(){
 		expect( updatedUser.comments.length ).to.equal( 0 );
@@ -421,7 +423,8 @@ describe('User - Comments: Integration test', function(){
     		});
     	    }); 
     	}).catch( function(d,e){d(e)} ).then(function(updatedUser){
-	    
+	    user1 = updatedUser;
+
     	    // Make sure comment is remove from user
     	    check(function(){
     		expect( updatedUser.comments.length ).to.equal( 0 );
@@ -439,7 +442,7 @@ describe('User - Comments: Integration test', function(){
     		});
     	    }); 
     	}).catch( function(d,e){d(e)} ).then(function(updatedUser){
-	    
+	    user2 = updatedUser;
     	    // Make sure comment is remove from user
     	    check(function(){
     		expect( updatedUser.comments.length ).to.equal( 0 );
