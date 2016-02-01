@@ -1,3 +1,8 @@
+'use strict'
+
+var helper = require('../../helpers/helper');
+
+var faker                = require('faker');
 var mongoose             = require('mongoose');
 var chai                 = require("chai");
 var sinon                = require("sinon");
@@ -54,7 +59,7 @@ describe('Mailer', function(){
     });
 
     it('Ensure that all required fields are set: TEXT and HTML', function(){
-	var spy = sinon.spy();;
+	var spy = sinon.spy();
 	
 	// Nothing set
 	mailer.send(spy);

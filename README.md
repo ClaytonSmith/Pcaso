@@ -5,7 +5,7 @@
 
 ### Installation
 
-Pcaso is meant to run in a linux environment. Assuming [nodejs](https://nodejs.org/en/download/package-manager/) has been installed, 
+Pcaso is meant to run in a linux environment. Assuming [nodejs V5.3.0^](https://nodejs.org/en/download/package-manager/) has been installed, 
 
 Run the following:
 > git clone http://github.com/claytonsmith/pcaso
@@ -43,29 +43,29 @@ V1 Backend
   - [X] File download
   - [X] Privileged file viewing
   - [X] Bind files to user accounts 
-  - [ ] Modify privacy settings
-  - [ ] Pretty "bullet" URLs to files 
-- [ ] Comments
+  - [X] Modify privacy settings
+  - [X] Pretty "bullet" URLs to files 
+- [X] Comments
   - [X] Bind comments to entities 
-  - [ ] Remove comments - IN DEVELOPMENT
-  - [ ] Edit comments?? - Maybe
+  - [X] Remove comments
+  - [X] Edit comments
 - [ ] Statistics
-  - [ ] File "view" count
-  - [ ] Traffic
-- [ ] Garbage collection
-  - [ ] Comments
-  - [ ] Files
-  - [ ] User
+  - [X] File "view" count
+  - [ ] Traffic - views per day...
+- [ ] API for the above 
+- [X] Garbage collection
+  - [X] Comments 
+  - [x] Files
+  - [X] User
 - [ ] Test
   - [X] Unit tests 
     - [X] User accounts
     - [X] Email services
     - [X] File managment	
     - [X] Comments
-  - System 
-    - [ ] User accounts
-    - [ ] Email services
-    - [ ] File managment	
-    - [ ] Comments
-    - [ ] Garbage collection
+  - [ ] System 
+    - [X] User accounts - In development
+    - [X] File managment	
+    - [X] Comments
+    - [X] Garbage collection - In development
     - [ ] API

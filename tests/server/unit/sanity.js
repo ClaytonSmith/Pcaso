@@ -1,3 +1,8 @@
+'use strict'
+
+var helper = require('../../helpers/helper');
+
+var faker                = require('faker');
 var chai                 = require("chai");
 var sinon                = require("sinon");
 var sinonChai            = require("sinon-chai");
@@ -57,6 +62,11 @@ describe('Santiy check.', function(){
 	expect( model ).to.exist;
     });
 
+    it('Ensure model `FakeModel` has been loaded', function(){
+	var model = mongoose.model('FakeModel');
+	expect( model ).to.exist;
+    });
+    
     it('Ensure mailer has been loaded', function(){
 	var mailer = require('../../../config/mailer');
 	expect( mailer ).to.exist;
