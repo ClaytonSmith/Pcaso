@@ -7,7 +7,8 @@ var Comments       = require('./comments');
 
 var BaseSchema = mongoose.Schema({ 
     dateAdded:      { type: Number,  default: Date.now },            // Join date
-    lastUpdated:    { type: Number,  default: Date.now }             // Last seen
+    lastUpdated:    { type: Number,  default: Date.now },             // Last seen
+    children:       { type: [],     default: [] }            // Comments on comment
 });
 
 BaseSchema.method({

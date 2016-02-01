@@ -96,7 +96,6 @@ module.exports = function(passport) {
 				// Make account
 				var newUser         = new UnauthenticatedUsers();
 				
-				console.log('REQ BODY**************************\n', req.body)
 				newUser.email       = email.toLowerCase();
 				newUser.password    = newUser.generateHash(password);
 				newUser.name.first  = req.body.firstName;
@@ -105,11 +104,10 @@ module.exports = function(passport) {
 				newUser.save(function(err) {
 				    if (err) return done(err);    
 				    console.log('In save');
-				    mailer.useTemplate( 'test', newUser) 
-				    
-				    return done(null, newUser); 
+				    mailer.useTemplate( 'test', newUser, function(mailError){
+					done(mailError, newUser); 
+				    }); 
 				});
-				
 				
 				console.log('/authenticate-account/' + newUser._id );
 				//return done(null, false, req.flash('signupMessage', 'That email is already in use.')); 

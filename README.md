@@ -5,7 +5,7 @@
 
 ### Installation
 
-Pcaso is meant to run in a linux environment. Assuming [nodejs](https://nodejs.org/en/download/package-manager/) has been installed, 
+Pcaso is meant to run in a linux environment. Assuming [nodejs V5.3.0^](https://nodejs.org/en/download/package-manager/) has been installed, 
 
 Run the following:
 > git clone http://github.com/claytonsmith/pcaso
@@ -34,33 +34,38 @@ V1 Backend
   - [X] Email authentication
     - [X] Unique registration link
     - [X] Email( verb ) registration link
-    
 - [X] Email service
   - [X] Able to end emails through Pcaso domain
   - [X] Email templating using EJS
-    - [ ] Add more templates
- 
+    - [ ] Add more templates 
 - [ ] File management
   - [X] File upload
   - [X] File download
   - [X] Privileged file viewing
   - [X] Bind files to user accounts 
-  - [ ] Modify privacy settings
-  - [ ] Pretty "bullet" URLs to files 
-
-- [ ] Comments
+  - [X] Modify privacy settings
+  - [X] Pretty "bullet" URLs to files 
+- [X] Comments
   - [X] Bind comments to entities 
-  - [ ] Remove comments - IN DEVELOPMENT
-  - [ ] Edit comments?? - Maybe
-
+  - [X] Remove comments
+  - [X] Edit comments
 - [ ] Statistics
-  - [ ] File "view" count
-  - [ ] Traffic
-
-
-
-
-
-
-
- 
+  - [X] File "view" count
+  - [ ] Traffic - views per day...
+- [ ] API for the above 
+- [X] Garbage collection
+  - [X] Comments 
+  - [x] Files
+  - [X] User
+- [ ] Test
+  - [X] Unit tests 
+    - [X] User accounts
+    - [X] Email services
+    - [X] File managment	
+    - [X] Comments
+  - [ ] System 
+    - [X] User accounts - In development
+    - [X] File managment	
+    - [X] Comments
+    - [X] Garbage collection - In development
+    - [ ] API
