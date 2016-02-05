@@ -90,8 +90,7 @@ describe('User', function(){
     });
 
     it('Password encription', function(){
-	expect( user.password ).not
-	    .equal( userTemplate.password );
+	expect( user.password ).not.equal( userTemplate.password );
     });
     
     it('User information saved correctly', function(){

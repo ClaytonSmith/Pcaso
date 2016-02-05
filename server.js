@@ -31,6 +31,8 @@ fs.readdirSync(models)
 
 require('./config/passport')(passport);                  // pass passport for configuration
 
+app.set('title', 'Pcaso');
+
 // Express init
 app.use(morgan('dev'));                                  // Logger
 app.use(cookieParser());                                 // read cookies (needed for auth) 
@@ -62,7 +64,7 @@ connect()
 // listen on port and start app
 function listen () {
     if (app.get('env') === 'test') return;
-    app.listen(port);
+    app.listen(port)
     console.log('Express app started on port ' + port);
 }
 

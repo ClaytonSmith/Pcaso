@@ -5,119 +5,79 @@ var mongoose = require('mongoose');
 var files      = require('./controllers/fileContainers');
 var users      = require('./controllers/users'); // not yet 
 
+
 module.exports = function(app, passport) {
 
     // normal routes ===============================================================
     
     // show the home page (will also have our login links)
-    app.get('/', function(req, res) {
-        res.render('index.ejs');
+    app.get( '/', function(req, res) {
+        res.render('index.ejs', { user: req.user });
+    });   
+    
+    app.get('/profile', users.getProfile);
+    
+    app.get('/sign-in', function(req, res){
+	res.render('sign-in.ejs', { message: req.flash('signInMessage'), user: req.user });	
     });
     
-    // PROFILE SECTION ========================
-    app.get('/profile', isLoggedIn, function(req, res) {
-        res.render('profile.ejs', {
-            user : req.user
-        });
-    });
+    app.post('/sign-in', passport.authenticate('local-login', {
+        successRedirect : '/profile', // redirect to the secure profile section
+        failureRedirect : '/sign-in', // redirect back to the signup page if there is an error
+        failureFlash : true // allow flash messages
+    }));
     
-    app.get('/profile2', isLoggedIn, function(req, res) {
-        res.render('profile2.ejs', {
-            user : req.user
-        });
+    app.get('/sign-up', function(req, res){
+	res.render('sign-up.ejs', { message: req.flash('signUpMessage'), user: req.user });	
     });
 
-    // LOGOUT ==============================
-    app.get('/logout', function(req, res) {
+    app.post('/sign-up', passport.authenticate('local-signup', {
+        successRedirect : '/sign-in', // redirect to the secure profile section
+        failureRedirect : '/sign-up',     // redirect back to the signup page if there is an error
+        failureFlash : true               // allow flash messages
+    }));
+
+
+    					     
+    app.get('/authenticate-account/:authenticationCode', users.authenticateAccount);
+    
+    app.get('/sign-out', function(req, res) {
         req.logout();
         res.redirect('/');
     });
     
-    // Filename or bullet works here
-    //app.get('/user/:userName/:fileName', files.displayFile);
-    
-    //app.get('/user/:username', user.displayAccountPage);
-    
-    
-    app.get('/delete-account', users.deleteAccount);
-    
-    app.post('/upload-file', files.upload);
-    
-    app.get('/download/:fileId', files.download);
-    
-    app.get('/delete-file/:fileId',  users.deleteFile);   
-    
-    app.get('/authenticate-account/:authenticationCode', users.authenticateAccount)									     
-    
-    app.get('/authentication-login', function(req, res){
-	req.logout();
-	res.render('login.ejs', { user: req.user, message: req.flash('loginMessage', 'Please check your email for an authentication link.') });
+    app.get('/upload', function(req, res){
+	res.render('upload.ejs', { message: req.flash('uploadMessage'), user: req.user });	
     });
     
-    app.post('/api/add-shared-user', files.addSharedUser); 
-    /*== API =================================================================================*/   
-    //app.delete('/api/delete-files',  users. -- );   
-    //app.delete('/api/delete-account', users. -- );
+    app.post( '/upload-dataset', users.createDataset);
 
+    app.get(    '/user/:username',        users.getUserProfile );
+    //app.post(   '/user/:username/update', users.updateProfile );
+    //app.delete( '/user/:username/delete', users.deleteAccount);
 
-    // API
-    //api.get('/api/get-user-info' user.getAccount);  
+    //app.get(    '/user/:username/datasets/',                         files.displayUserDatasets );
+    app.get(    '/user/:username/datasets/:fileLink',                files.displayDataset );
+    //app.post(   '/user/:username/datasets/:fileLink/update',         files.updateDataset );
+    //app.get(    '/user/:username/datasets/:fileLink/download',       files.downloadDataset);    
+    //app.delete( '/user/:username/datasets/:fileLink/delete',         users.deleteDataset );
+    app.post(   '/user/:username/datasets/:fileLink/request-access', files.requestAccess );    
     
-    //app.get('/api/get-all-containers', files.getAllFileContainers);
-    
-    //app.get('/api/get-file', files.getFile);
-    
-    //app.post('/api/upload-file', files.upload);   
-    
-    
-    //==============================================================================
-    //= AUTHENTICATE (FIRST LOGIN) ==================================================
-    //===============================================================================
+    //app.get( '/gallery', files.displayGallery );    
 
-    // locally --------------------------------
-    // LOGIN ===============================
-    // show the login form
-    app.get('/login', function(req, res) {
-        res.render('login.ejs', { message: req.flash('loginMessage') });
+    app.get( '/about', function(req, res){
+	res.render('about', { user: req.user });
     });
     
-    // process the login form
-    app.post('/login', passport.authenticate('local-login', {
-        successRedirect : '/profile', // redirect to the secure profile section
-        failureRedirect : '/login', // redirect back to the signup page if there is an error
-        failureFlash : true // allow flash messages
-    }));
-
-    // SIGNUP =================================
-    // show the signup form
-    app.get('/signup', function(req, res) {
-        res.render('signup.ejs', { message: req.flash('signupMessage') });
-    });
     
-    // process the signup form
-    app.post('/signup', passport.authenticate('local-signup', {
-        successRedirect : '/authentication-login', // redirect to the secure profile section
-        failureRedirect : '/signup', // redirect back to the signup page if there is an error
-        failureFlash : true // allow flash messages
-    }));
-
-    // =============================================================================
-    // AUTHORIZE (ALREADY LOGGED IN / CONNECTING OTHER SOCIAL ACCOUNT) =============
-    // =============================================================================
-
-    // locally --------------------------------
-    app.get('/connect/local', function(req, res) {
-        res.render('connect-local.ejs', { message: req.flash('loginMessage') });
-    });
-    app.post('/connect/local', passport.authenticate('local-signup', {
-        successRedirect : '/profile', // redirect to the secure profile section
-        failureRedirect : '/connect/local', // redirect back to the signup page if there is an error
-        failureFlash : true // allow flash messages
-    }));
-
-    // facebook -------------------------------
-
-//    app.get('/:bullet', files.isBullet, files.displayFile);
+    app.get( '*',  function(req, res){
+	res.render('/404.ejs', { user: req.user });
+    })
+    
+    
+    
+    
+    //    app.get('/:bullet', files.isBullet, files.displayFile);
 };
 
 // route middleware to ensure user is logged in
@@ -125,6 +85,6 @@ function isLoggedIn(req, res, next) {
     if (req.isAuthenticated())
         return next();
     
-    
     res.redirect('/');
 }
+

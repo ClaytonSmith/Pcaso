@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+  <%- include head.ejs %>  
+  <body>
+    <%- include header.ejs %>      
+    <main>
+      
+      <div class="content">
+	
+	<h1>Hey now</h1>
+	
+	<div id="loading" style="padding-left:2vmin; display:none;">
+	  <p>Painting data...</p>
+	  <p></p>
+	  <p><small>Waiting for >10 seconds? <a target="_blank" href="http://www.pcaso.io/help">Click for help.</a></small></p>
+	</div>
+
+	<!-- Upload file -->
+	<div id="pcaso-upload" style="padding-left:2vmin;">
+	  <div id="step1">
+	    <h4>To explore your data, and get an easily shareable URL, load a .csv file.</h4>
+	    <input type="file" id="upload-file" style="margin-left:2vmin">
+	    <br/>
+	  </div>
+	  <div id="step2" style="visibility:hidden;">
+	    <h4>Pick input fields, including
+	      <ul>
+		<li>one ID (needs unique, non-blank value in each row)</li>
+		<li>two to eight numeric axes</li>
+		<li>one or more metadata fields, to color/highlight points (e.g., with categorical values)</li>
+	      </ul>
+	    </h4>
+	    <table id="table"></table>
+	    <h4>Add a caption describing your dataset (optional)</h4>
+	    <textarea rows="8" id="caption-box" cols="80" name="caption" form="usrform"></textarea>
+	    <br/>
+	    <input type="button" id="launch" onclick="launch()" value="Paint this data" style="margin-left:2vmin;">
+	  </div>
+	</div>
+
+	<!-- Pcaso --> 
+	<div id="pcaso" style="visibility:hidden;" >
+	</div>
+	<div id="pcaso-panel">
+	  
+	  <div id="pcaso-hover">( 0, 0 )</div> 
+	  <div id="search_panel">
+	    <form name="searchform" onSubmit="return handleSearch()" >
+	      <input type="text" id="search_input" placeholder="Search" value="">
+	      <input value="Search" id="search_button" type="submit">
+                    </br>
+                    <input type="checkbox" id="search_exact_checkbox" checked><span>exact match only</span>
+	    </form>
+	    <div id="search_results"></div>
+	  </div>
+
+	  <br style="clear: both;">
+	  <div id="pcaso-selection" ></div>
+	  <div id="pcaso-legend" ></div> 
+
+	</div>
+	<br style="clear: both;">
+	<div style="display:none;" id="show-caption" ></div>
+	
+
+      </div>
+    </main>
+    <%- include footer.ejs %>  
+  </body>  
+</html>
+
+
+
+

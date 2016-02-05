@@ -1,18 +1,20 @@
 'user strict'
 
-var formidable     = require('formidable');
-var mongoose       = require('mongoose');
-var grid           = require('gridfs-stream');
-var fs             = require('fs');
-var util           = require('util');
-var multipart      = require('multipart');
-var async          = require('async');
-var config         = require('../../config/config');
-var asyncRemove    = require('../helpers/async-remove');
-var mailer         = require('../../config/mailer');
-var BaseSchema     = require('./base-schema');
-var Comments       = require('./comments');
-var Notification   = require('./notification');
+var formidable        = require('formidable');
+var mongoose          = require('mongoose');
+var grid              = require('gridfs-stream');
+var fs                = require('fs');
+var util              = require('util');
+var multipart         = require('multipart');
+var async             = require('async');
+var mongoosePaginate  = require('mongoose-paginate');
+
+var config            = require('../../config/config');
+var asyncRemove       = require('../helpers/async-remove');
+var mailer            = require('../../config/mailer');
+var BaseSchema        = require('./base-schema');
+var Comments          = require('./comments');
+var Notification      = require('./notification');
 
 var FileContainerSchema = new mongoose.Schema({
     
@@ -20,8 +22,9 @@ var FileContainerSchema = new mongoose.Schema({
     lastUpdated:     { type: Number,  default: Date.now },     // Last seen
     parent: {
         collectionName:  { type: String,  required: true },     // collection
-        id:              { type: String,  required: true },      // id
-	name:        { type: mongoose.Schema.Types.Mixed, default: undefined }
+        id:              { type: String,  required: true },     // id
+	name:            { type: mongoose.Schema.Types.Mixed, default: undefined }, // name
+	username:        { type: String,  default: '' },        // username
     },
     file: {
      	name:            { type: String,  required: true },              // Path to file
@@ -43,9 +46,11 @@ var FileContainerSchema = new mongoose.Schema({
 	customURL:       { type: String,  required: true },
 	bulletLink:      { type: String,  required: true },
 	link:            { type: String,  required: true },
+	localLink:       { type: String,  required: true }
     }
 }).extend({});
 
+FileContainerSchema.plugin(mongoosePaginate);
 
 FileContainerSchema.method({
 
@@ -210,12 +215,14 @@ FileContainerSchema.static({
 	    parent: {
 		id: parent._id,
 		collectionName: parent.__t,
-		name: parent.name
+		name: parent.name,
+		username: parent.username
 	    },
 	    file: {
 		name: file.name,
 		path: file.path
 	    },
+	    metaData: settings.metaData,
 	    displaySettings: settings.displaySettings,
 	    fileOptions: settings.fileOptions
 	});
@@ -227,8 +234,20 @@ FileContainerSchema.static({
 	
 	fileContainer.displaySettings.link = 
 	    parent.displaySettings.link
-	    + "/"
+	    + "/datasets/"
 	    + fileContainer.displaySettings.customURL
+	
+	
+	fileContainer.displaySettings.localLink = 
+	    parent.displaySettings.localLink
+	    + "/datasets/"
+	    + fileContainer.displaySettings.customURL
+	
+	fileContainer.displaySettings.deleteLink = 
+	    parent.displaySettings.localLink
+	    + "/datasets/"
+	    + fileContainer.displaySettings.customURL
+	    + '/delete'
 	
 	return fileContainer;
     } 

@@ -24,17 +24,17 @@
 
 
 
-var mongoose       = require('mongoose');
-var bcrypt         = require('bcrypt-nodejs');
-var extend         = require('mongoose-schema-extend');
-var async          = require('async');
-var config         = require('../../config/config');
-var asyncRemove    = require('../helpers/async-remove');
+var mongoose          = require('mongoose');
+var bcrypt            = require('bcrypt-nodejs');
+var extend            = require('mongoose-schema-extend');
+var async             = require('async');
+var config            = require('../../config/config');
+var asyncRemove       = require('../helpers/async-remove');
+var mongoosePaginate  = require('mongoose-paginate');
 
-//var BaseSchema     = mongoose.model('BaseSchema');
-var FileContainers = mongoose.model('FileContainer');
-var Comments       = mongoose.model('Comment');
-var Notification   = mongoose.model('Notification');
+var FileContainers    = mongoose.model('FileContainer');
+var Comments          = mongoose.model('Comment');
+var Notification      = mongoose.model('Notification');
 
 
 var BaseUserSchema = new mongoose.Schema({// BaseSchema.extend({    
@@ -55,22 +55,7 @@ var BaseUserSchema = new mongoose.Schema({// BaseSchema.extend({
 
 var UnauthenticatedUserSchema  = BaseUserSchema.extend({});
 
-// Regular users can have files
-var UserSchema                 = BaseUserSchema.extend({
-    files:          { type: [], default: [] },                        // List of mongoId for containers
-    fileSettings: {
-	defaults: {
-	    visibility:  { type: String,  'default': 'PRIVATE'},      // default file visibility, set for every future upload
-	    commentable:        { type: Boolean, 'default': true }    // default commenting on account
-	},
-    },
-    comments:       { type: [], default: [] },                        // List of mongoId for comments left by user
-    userComments:   { type: [], default: [] },                        // List of mongoId for comments left by user
-    notifications:  { type: [], default: [] },                         // List of new and all notifications, hide this
-    displaySettings: {
-	link:          { type: String, required: true }
-    }	
-});
+UnauthenticatedUserSchema.plugin(mongoosePaginate);
 
 UnauthenticatedUserSchema.method({
 
@@ -85,10 +70,34 @@ UnauthenticatedUserSchema.method({
 });
 
 
+// Regular users can have files
+var UserSchema                 = BaseUserSchema.extend({
+    files:          { type: [], default: [] },                        // List of mongoId for containers
+    fileSettings: {
+	defaults: {
+	    visibility:  { type: String,  'default': 'PRIVATE'},      // default file visibility, set for every future upload
+	    commentable:        { type: Boolean, 'default': true }    // default commenting on account
+	},
+    },
+    comments:       { type: [], default: [] },                        // List of mongoId for comments left by user
+    userComments:   { type: [], default: [] },                        // List of mongoId for comments left by user
+    notifications:  { type: [], default: [] },                         // List of new and all notifications, hide this
+    avatar:         { type: String, default: '' },
+    displaySettings: {
+	link:          { type: String, required: true },
+	localLink:     { type: String, required: true },
+	deleteLink:    { type: String, required: true }
+
+    }	
+});
+
+UserSchema.plugin(mongoosePaginate);
+
 // Unregistered users dont get these cool features. They get nothing 
 UserSchema.method({
 
     attachFile: function(fileID){
+	console.log( 'attaching file ' );
 	return this.files.push( fileID );
     },
 
@@ -106,10 +115,10 @@ UserSchema.method({
 	var fileContainer = FileContainers.register(this, file, options);
 
 	fileContainer.save(function(err){
+	    console.log( err );
 	    if( err ) callback( err ) ;
 	    
-	    user.attachFile( fileContainer._id );	
-	    
+	    user.attachFile( fileContainer._id );
 	    callback( null );	    
 	});
 	
@@ -259,7 +268,7 @@ UnauthenticatedUserSchema.static({
 	return bcrypt.compareSync(password, this.password);
     },
 
-    register: function( first, last, email, pass, username){
+    register: function(first, last, email, pass, username){
 	var user = new this({
 	    name: {
 		first: first,
@@ -294,10 +303,33 @@ UserSchema.static({
 	    password: this.generateHash( pass ),
 	    username: username,
 	    displaySettings: {
-		link: config.service.domain + "user/" + username
+		link: config.service.domain + "user/" + username,
+		deleteLink: config.service.domain + "user/" + username + '/delete',
+		localLink:  "/user/" + username
 	    }
 	});	
 	
+	return user;
+    },
+
+    convert: function(unauthenticatedUser){
+
+	var user = new this({
+	    name: {
+		first: unauthenticatedUser.name.first,
+		last:  unauthenticatedUser.name.last,
+	    },
+	    email: unauthenticatedUser.email,
+	    password: unauthenticatedUser.password, // Pass is already encrypted 
+	    username: unauthenticatedUser.username,
+	    displaySettings: {
+		link:       config.service.domain + "user/" + unauthenticatedUser.username,
+		deleteLink: config.service.domain + "user/" + unauthenticatedUser.username + '/delete',
+		localLink:  "/user/" + unauthenticatedUser.username
+	    }
+	});	
+	
+	console.log( user );
 	return user;
     }
 });

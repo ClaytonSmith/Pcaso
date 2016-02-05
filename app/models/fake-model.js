@@ -13,7 +13,8 @@ var FakeSchema = new mongoose.Schema({
     dateAdded:      { type: Number,  default: Date.now },            // Join date
     lastUpdated:    { type: Number,  default: Date.now },            // Last seen
     displaySettings: {
-	link: { type: String, default: "http://localhost/3000/cool" }
+	link: { type: String, default: config.service.domain + "404" }, //point to 404 page
+	localLink: { type: String, default: "/404l" }
     }
 }).extend({});
 

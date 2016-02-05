@@ -1,12 +1,14 @@
 'use strict'
 
-var formidable     = require('formidable');
-var mongoose       = require('mongoose');
-var util           = require('util');
-var extend         = require('mongoose-schema-extend')
-var async          = require('async');
-var config         = require('../../config/config');
-var asyncRemove    = require('../helpers/async-remove');
+var formidable        = require('formidable');
+var mongoose          = require('mongoose');
+var util              = require('util');
+var extend            = require('mongoose-schema-extend')
+var async             = require('async');
+var mongoosePaginate  = require('mongoose-paginate');
+
+var config            = require('../../config/config');
+var asyncRemove       = require('../helpers/async-remove');
 
 //var BaseSchema   = mongoose.model("BaseSchema");
 
@@ -22,16 +24,22 @@ var CommentSchema = new mongoose.Schema({
         collectionName: { type: String,  required: true },    // collection
         id:             { type: String,  required: true }     // id
     },
+    topic: {                                                  // topic of the comment tree
+        collectionName: { type: String,  required: true },    // Used to search for all things 
+        id:             { type: String,  required: true }     // id
+    },
     subject:    { type: String,  required: true },
     children:   { type: [],     default: [] },                // Comments on comment
     from:       { type: String, required: true },
     body:       { type: String, required: true },
     displaySettings: {
 	parentLink:     { type: String, required: true },
-	link:           { type: String, required: true }
+	link:           { type: String, required: true },
+	localLink:      { type: String, required: true }
     }
 }).extend({});
 
+CommentSchema.plugin(mongoosePaginate); 
 
 CommentSchema.method({
     
@@ -67,6 +75,26 @@ CommentSchema.method({
 });
 
 CommentSchema.static({
+    collectByParent: function(parent,  callback){
+	var query = { 
+	    "parent.id": parent._id || parent.id,
+	    "parent.collectionName": parent.__t || parent.collectionName 
+	}
+	
+	this.find( query, callback );
+    },
+
+    collectByTopic: function(topic,  callback){
+	
+	var query = { 
+	    "topic.id": topic._id || topic.id,
+	    "topic.collectionName": topic.__t || topic.collectionName 
+	}
+	
+	this.find( query, callback );
+    },
+
+
     register: function(parent, target, from, subject, body){
 
 	var newComment = new this({
@@ -78,12 +106,17 @@ CommentSchema.static({
 		id: target._id,
 		collectionName: target.__t
 	    },
-	    from: from,
+	    topic: { // If the target it a comment, it will have a topic, if not then topic is target
+		id: (target.topic || {} ).id || target._id,
+		collectionName: (target.topic || {} ).collectionName || target.__t
+	    },
+	    from: from, // name of user who left the comment
 	    subject: subject,
 	    body: body,
 	    displaySettings: {
 		parentLink: parent.displaySettings.link,
 		link: target.displaySettings.link, // Will add comment direct link
+		localLink: target.displaySettings.localLink, // Will add comment direct link
 	    }
 	});
 	

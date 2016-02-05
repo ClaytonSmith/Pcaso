@@ -16,6 +16,6 @@ results
 npm-debug.log
 node_modules
 
-data/temp/
+data/temp/*
 
 config/secrets.js

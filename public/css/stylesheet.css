@@ -1,0 +1,166 @@
+.pull-right {
+    position: absolute;
+    right: 2em;
+}
+
+.nav {
+    padding: .5em 2em .5em 2em;
+    background-color: #2980B9;
+}
+
+.nav .child{
+    padding: 5px 0em 0px 0px;
+}
+
+
+body {
+    background: #ECF0F1;
+}
+
+
+.pure-menu-active>.pure-menu-link, .pure-menu-link:hover, .pure-menu-link:focus {
+    color: #FFF;
+    background-color: inherit;
+}
+
+
+.pure-menu-item, .pure-menu-link{
+    color: #ECF0F1;
+    font-size: large;
+}
+
+
+.splash-container {
+    z-index: 1;
+    overflow: hidden;
+    /* The following styles are required for the "scroll-over" effect */
+    width: 100%;
+    height: 88%;
+    left: 0;
+    position: fixed !important;
+}
+
+
+.splash {
+    /* absolute center .splash within .splash-container */
+    width: 80%;
+    height: 50%;
+    margin: auto;
+    position: absolute;
+    top: 100px; left: 0; bottom: 0; right: 0;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+/* This is the main heading that appears on the blue section */
+.splash-head {
+    font-size: 75px;
+    font-weight: bold;
+    color: #2980B9;
+    padding: .5em 1em;
+    font-weight: 100;
+    line-height: 1em;
+}
+
+.splash-head h1{
+    margin: 0 0 0 0;
+}
+
+
+/* This is the subheading that appears on the blue section */
+.splash-subhead {
+    color: #2980B9;
+    letter-spacing: 0.05em;
+    font-size: 18px;
+    opacity: 0.8;
+}
+
+.lets-go{
+    margin-top: 1em;
+    border-radius: 8px;
+    border: 2px #2980B9;
+    padding: .7em 2.7em;
+    font-size: 125%;
+    background-color: #E74C3C !important;
+}
+
+.content {
+    width: 75%;
+    max-width: 1500px;
+    min-width: 350px;
+    margin: auto;
+    margin-top: 5em;
+}
+
+.form-container {
+    margin: 0 auto;
+    text-align: center;
+}
+
+.form-container h1{
+    font-size: 3em;
+    color: #1F75D6;
+}
+
+.terms-and-conditions-cb{
+    margin: 1em auto 2em auto !important;
+}
+
+
+.account-container .title{
+}
+
+
+.account-container hr{
+    border: 0;
+    height: 1px;
+    background-color: #1F75D6;
+    background-image: linear-gradient(to right, #B7C2FF, #1F75D6, #B7C2FF );
+}
+
+.upload-container .title{
+}
+
+
+.upload-container hr{
+    border: 0;
+    height: 1px;
+    background-color: #1F75D6;
+    background-image: linear-gradient(to right, #B7C2FF, #1F75D6, #B7C2FF );
+}
+
+.dropzone-previews {
+    border: 2px dashed #0087F7;
+    border-radius: 5px;
+    background: white;
+    width: 100%;
+
+}
+
+#file-select {
+    margin: 2em 0 2em 0;
+    padding: 1em 1em 1em 1em; 
+    background-color: white;
+}
+
+#data-display-table{
+    text-align: center;
+    display: inline-box;
+    max-height: 150em;
+    display: -moz-inline-box;
+    overflow: auto !important;
+}
+
+#data-display-table thead{
+    background-color: #2980B9;
+    color: #ECF0F1;
+    text-align: center;
+}
+
+#data-display-table tbody{
+       background-color: #FFF;
+}
+
+
+
+

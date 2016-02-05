@@ -1,17 +1,19 @@
 'use strict'
 
-var formidable     = require('formidable');
-var mongoose       = require('mongoose');
-var util           = require('util');
-var extend         = require('mongoose-schema-extend')
-var async          = require('async');
-var config         = require('../../config/config');
-var asyncRemove    = require('../helpers/async-remove');
+var formidable        = require('formidable');
+var mongoose          = require('mongoose');
+var util              = require('util');
+var extend            = require('mongoose-schema-extend')
+var async             = require('async');
+var mongoosePaginate  = require('mongoose-paginate');
+
+var config            = require('../../config/config');
+var asyncRemove       = require('../helpers/async-remove');
 //var BaseSchema   = mongoose.model("BaseSchema");
 
 var NotificationSchema = new mongoose.Schema({
-    dateAdded:      { type: Number,  default: Date.now },     // Join date
-    lastUpdated:    { type: Number,  default: Date.now },     // Last seen
+    dateAdded:   { type: Number,  default: Date.now },     // Join date
+    lastUpdated: { type: Number,  default: Date.now },     // Last seen
     parent: {                                                 // Entity being notified
         collectionName: { type: String,  required: true },    // collection
         id:             { type: String,  required: true }     // id
@@ -20,11 +22,12 @@ var NotificationSchema = new mongoose.Schema({
 	collectionName: { type: String,  required: true },    // collection
 	id:             { type: String,  required: true }     // id
     },
-    title:     { type: String,  required: true },
+    title:       { type: String,  required: true },
     link:        { type: String,  required: true },           // Link to the event
     read:        { type: Boolean, default: false }
 }).extend({});
 
+NotificationSchema.plugin(mongoosePaginate);
 
 //NotificationSchema
 
