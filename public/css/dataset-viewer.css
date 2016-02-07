@@ -1,8 +1,8 @@
 
-/* Table */
-table            { margin-left:1vmin; background:#eaebec; color:#333; text-align:center; font-size:1.1vmin; border:#bbb 1px solid; }
-table th         { padding:0.8vmin; background: #ededed;}
-table td         { padding:0.8vmin; background:#fafafa; }
+/* /\* Table *\/ */
+/* table            { margin-left:1vmin; background:#eaebec; color:#333; text-align:center; font-size:1.1vmin; border:#bbb 1px solid; } */
+/* table th         { padding:0.8vmin; background: #ededed;} */
+/* table td         { padding:0.8vmin; background:#fafafa; } */
 
 /* SVG */
 svg              { font:1.2vmin 'Lato', sans-serif; padding: 1vmin; }
@@ -16,13 +16,13 @@ circle           { cursor:pointer; /*fill-opacity: 0.6;*/ }
 .axis, .box      { shape-rendering:crispEdges; }
 .axis line       { stroke:#aaa; }
 .axis path       { display:none; }
-#x_label          {font-size:1.7vmin;}
-#y_label          {font-size:1.7vmin;}
+#x_label         {font-size:1.7vmin;}
+#y_label         {font-size:1.7vmin;}
 
 /* Legend */
 #pcaso-panel     {  display:none; float:left; padding: 0 2vmin 2vmin 2vmin; font-size:2vmin; }
 #pcaso-hover     {font-family: 'Lato'; font-size: 1.4vmin; color: gray; border: 1px solid #ccc; background: #eee; display:inline-block; float:left; padding: 1vmin 2vmin 0 2vmin; margin: 0 2vmin 0 0; } /* Coordinates of point when hovering */
-.meta-text   { color:#000; font-size: 1.7vmin; } /* Meta-data shown on right panel when hovering on point*/
+.meta-text       { color:#000; font-size: 1.7vmin; } /* Meta-data shown on right panel when hovering on point*/
 
 /* Search*/
 #search_panel    {font-family: 'Lato'; font-size: 2vmin; color: gray; border: 1px solid #ccc; background: #eee; padding: 2vmin 2vmin 2vmin 2vmin;display:inline-block;float:left;}
