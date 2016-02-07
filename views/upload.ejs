@@ -14,14 +14,13 @@
 	<div class="upload-container">
 	  <h1 class="title">Submit data</h1>
 	  <hr>
-
+	  
           
 	  <form action="/upload-dataset" method="post" enctype="multipart/form-data" 
-		class="pure-form pure-form-aligned" id="file-select" >
+		class="pure-form pure-form-stacked" id="dataset-upload-form" >
 	    
 	    <div class="pure-control-group">
-	      
-	      <input type="file" id="file-select" name="file" />
+	      <input type="file" accept=".csv" id="file-select" name="file" />
 	    </div>
 	    
 	    <div id="csv-display-container"></div>
@@ -51,11 +50,8 @@
 	    <% } %>
 	    
 	    
-	    <button type="submit">Submit data and files!</button>
-	    
-	    
+	    <button type="submit" id="submit-button">Submit data and files!</button>
 	  </form>
-	  
 	</div>
       </div>
     </main>

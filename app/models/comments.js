@@ -28,14 +28,14 @@ var CommentSchema = new mongoose.Schema({
         collectionName: { type: String,  required: true },    // Used to search for all things 
         id:             { type: String,  required: true }     // id
     },
-    subject:    { type: String,  required: true },
+    subject:    { type: String, required: true },
     children:   { type: [],     default: [] },                // Comments on comment
     from:       { type: String, required: true },
     body:       { type: String, required: true },
-    displaySettings: {
-	parentLink:     { type: String, required: true },
+    links: {
+	parent:         { type: String, required: true },
 	link:           { type: String, required: true },
-	localLink:      { type: String, required: true }
+	local:          { type: String, required: true }
     }
 }).extend({});
 
@@ -97,7 +97,9 @@ CommentSchema.static({
 
     register: function(parent, target, from, subject, body){
 
+	var id = mongoose.Types.ObjectId();
 	var newComment = new this({
+	    __id: id,
 	    parent: {
 		id: parent._id,
 		collectionName: parent.__t
@@ -113,13 +115,13 @@ CommentSchema.static({
 	    from: from, // name of user who left the comment
 	    subject: subject,
 	    body: body,
-	    displaySettings: {
-		parentLink: parent.displaySettings.link,
-		link: target.displaySettings.link, // Will add comment direct link
-		localLink: target.displaySettings.localLink, // Will add comment direct link
+	    links: {
+		parent: parent.links.link,
+		link:  parent.links.link  + '/' + id.toString(),
+		local: parent.links.local + '/' + id.toString()
 	    }
 	});
-	
+
 	target.addComment( newComment._id );
 	
 	return newComment;

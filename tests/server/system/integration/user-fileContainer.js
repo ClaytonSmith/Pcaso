@@ -39,20 +39,7 @@ describe('User - FileContainer: Integration test', function(){
     
     var fileCntr = null;
 
-    var fileTemplate = {
-	file: {
-	    name: 'test file',
-	    path: './data/test/test-file.txt'
-	},
-	settings:{
-	    fileOptions: {
-		keepFile: true
-	    },
-	    displaySettings:{
-		// null
-	    }
-	}
-    };
+    var fileTemplate = helper.fileTemplate;;
     
     before( function(done){
 	done();

@@ -36,17 +36,23 @@ var FileContainerSchema = new mongoose.Schema({
     },
     sharedWith:      { type: [],      default: [] },
     comments:        { type: [],      default: [] },
-    metaData:        { type: Object,  default: {} },
+    //metaData:        { type: Object,  default: {} },
     statistics: {
 	viewCount:       { type: Number, default: 0 }      // File metadata
     },
     displaySettings: {
 	visibility:      { type: String,  default: 'PRIVATE', required: true},  // Visibility
-	parentLink:      { type: String,  required: true },
-	customURL:       { type: String,  required: true },
-	bulletLink:      { type: String,  required: true },
+	title:           { type: String,  required: true },                     // Display title
+	caption:         { type: String,  default: ''    },                     // description
+	display:         { type: Object,  required: true, default: {}},         // Tells the painter how to interpret the data
+	legacy:          { type: Object,  required: true, default: {}},         // Tells OLD painter how to interpret the data
+    },
+    links: {
+	parent:          { type: String,  required: true },
+	custom:          { type: String,  required: true },
+	bullet:          { type: String,  required: true },
 	link:            { type: String,  required: true },
-	localLink:       { type: String,  required: true }
+	local:           { type: String,  required: true }
     }
 }).extend({});
 
@@ -209,6 +215,29 @@ FileContainerSchema.method({
 });
 
 FileContainerSchema.static({
+
+    // Converts form inputs into something recognizable to the legacy painter
+    convertDisplaySettingsToLegacy: function( displaySettings ){
+	var lagacySettings = {
+	    "fields-pca":     [],
+	    "fields-meta":    [],
+	    "fields-meta-id": [],
+	    "caption": displaySettings.caption
+	}
+	
+	displaySettings.display.columnTypes.forEach(function(column, index){
+	    var bucket = null;
+	    
+	    if( column === 'id' )         bucket = "fields-meta-id";
+	    else if( column === 'meta' )  bucket = "fields-meta";
+	    else                          bucket = "fields-pca";
+	    
+	    lagacySettings[ bucket ].push( index +1 );
+	});
+	
+	return lagacySettings;
+    },
+    
     register: function(parent, file, settings){
 	
 	var fileContainer = new this({
@@ -222,32 +251,21 @@ FileContainerSchema.static({
 		name: file.name,
 		path: file.path
 	    },
-	    metaData: settings.metaData,
+	    sharedWith: settings.sharedWith ? seettings.sharedWith : [], 
+	    fileOptions: settings.fileOptions,	    
 	    displaySettings: settings.displaySettings,
-	    fileOptions: settings.fileOptions
+	    links: {
+		parent: parent.links.link,
+		bullet: Math.random().toString(36).substring(5) 
+	    }
 	});
-	fileContainer.displaySettings.parentLink = parent.displaySettings.link,	
-	fileContainer.displaySettings.bulletLink = Math.random().toString(36).substring(5) 
 	
-	fileContainer.displaySettings.customURL = fileContainer.displaySettings.customURL 
-	    || fileContainer.displaySettings.bulletLink
-	
-	fileContainer.displaySettings.link = 
-	    parent.displaySettings.link
-	    + "/datasets/"
-	    + fileContainer.displaySettings.customURL
-	
-	
-	fileContainer.displaySettings.localLink = 
-	    parent.displaySettings.localLink
-	    + "/datasets/"
-	    + fileContainer.displaySettings.customURL
-	
-	fileContainer.displaySettings.deleteLink = 
-	    parent.displaySettings.localLink
-	    + "/datasets/"
-	    + fileContainer.displaySettings.customURL
-	    + '/delete'
+	fileContainer.displaySettings.legacy = this.convertDisplaySettingsToLegacy( fileContainer.displaySettings );
+
+	fileContainer.displaySettings.title = fileContainer.displaySettings.title || file.name;	    
+	fileContainer.links.custom = (settings.links || {}).customURL || fileContainer.links.bullet;
+	fileContainer.links.link  = parent.links.link  + "/datasets/" + fileContainer.links.custom;
+	fileContainer.links.local = parent.links.local + "/datasets/" + fileContainer.links.custom;
 	
 	return fileContainer;
     } 

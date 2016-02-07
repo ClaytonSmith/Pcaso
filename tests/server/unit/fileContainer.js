@@ -39,20 +39,7 @@ describe('FileContainer', function(){
     var fileCntr = null;
     var parent = null;
     
-    var fileTemplate = {
-	file: {
-	    name: faker.commerce.productName(),
-	    path: './data/test/test-file.txt'
-	},
-	settings:{
-	    fileOptions: {
-		keepFile: true
-	    },
-	    displaySettings:{
-		// null
-	    }
-	}
-    };
+    var fileTemplate = helper.fileTemplate;;
     
     before( function(done){
 	var temp = helper.genUser();
@@ -143,8 +130,8 @@ describe('FileContainer', function(){
     	expect( fileCntr.parent.collectionName ).to.equal( parent.__t );
     	expect( fileCntr.file.name ).to.equal( fileTemplate.file.name );
     	expect( fileCntr.file.path ).to.equal( fileTemplate.file.path );
-    	expect( fileCntr.displaySettings.customURL ).to.equal( fileCntr.displaySettings.bulletLink );
-    	expect( fileCntr.displaySettings.parentLink ).to.equal( parent.displaySettings.link );
+    	expect( fileCntr.links.custom ).to.equal( fileCntr.links.bullet );
+    	expect( fileCntr.links.parent ).to.equal( parent.links.link );
     });
     
 

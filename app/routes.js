@@ -58,6 +58,9 @@ module.exports = function(app, passport) {
 
     //app.get(    '/user/:username/datasets/',                         files.displayUserDatasets );
     app.get(    '/user/:username/datasets/:fileLink',                files.displayDataset );
+    app.get(    '/user/:username/datasets/:fileLink/csv',            files.datasetGetCSV );
+    app.get(    '/user/:username/datasets/:fileLink/config',         files.datasetGetLegacyConfig );
+
     //app.post(   '/user/:username/datasets/:fileLink/update',         files.updateDataset );
     //app.get(    '/user/:username/datasets/:fileLink/download',       files.downloadDataset);    
     //app.delete( '/user/:username/datasets/:fileLink/delete',         users.deleteDataset );
@@ -69,13 +72,9 @@ module.exports = function(app, passport) {
 	res.render('about', { user: req.user });
     });
     
-    
-    app.get( '*',  function(req, res){
-	res.render('/404.ejs', { user: req.user });
-    })
-    
-    
-    
+    //    app.get( '*',  function(req, res){
+    //	res.render('/404.ejs', { user: req.user });
+    //   });
     
     //    app.get('/:bullet', files.isBullet, files.displayFile);
 };

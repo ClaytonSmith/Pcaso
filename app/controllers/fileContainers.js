@@ -48,7 +48,7 @@ exports.requestAccess = function(req, res){
     var fileContainer  = null;
     var fcQuery          = {
 	'parent.username': req.params.username,
-	'displaySettings.customURL': req.params.fileLink 
+	'links.custom': req.params.fileLink 
     }
     
     var promise = new Promise( function(resolve, reject){
@@ -86,24 +86,75 @@ exports.requestAccess = function(req, res){
 //http://10.1.0.117:3000/user/username.cool/datasets/6qh4c0418aor
 exports.displayDataset = function(req, res){
     
-    var query = {
-	'parent.username': req.params.username,
-	'displaySettings.customURL': req.params.fileLink 
-    }
+    console.log( req.params );
+
+    var query = req.params.bulletURL ?
+	{
+	    'links.bullet': req.params.bulletURL
+	} : {
+	    'parent.username': req.params.username,
+	    'links.custom': req.params.fileLink 
+	};
     
+    console.log( query, "URL\n", req.originalUrl, "\n", "/user/:username/datasets/:fileLink" );
+    FileContainers.findOne( query, function(err, doc){
+    	console.log( err, doc, query);
+	
+    	if( doc.viewableTo( req.user ) ){ 
+    	    res.render( 'dataset.ejs');
+    	} else {
+    	    res.render( 'request-access.ejs', {
+    		user: req.user,
+    		file: {
+    		    name: doc.file.name,
+    		    requestLink: doc.displaySettings.link + '/request-access'
+    		}
+    	    });
+    	}
+    });
+//    res.redirect('/profile');
+}
+
+
+//http://10.1.0.117:3000/user/username.cool/datasets/6qh4c0418aor
+exports.datasetGetCSV = function(req, res){
+    
+    var query = req.params.bulletURL ?
+	{
+	    'links.bullet': req.params.bulletURL
+	} : {
+	    'parent.username': req.params.username,
+	    'links.custom': req.params.fileLink 
+	};
+
     FileContainers.findOne( query, function(err, doc){
 	console.log( err, doc, query);
 	
 	if( doc.viewableTo( req.user ) ){ 
-	    res.render( 'dataset.ejs', {user: req.user });
+	    doc.getFile( res );
 	} else {
-	    res.render( 'request-access.ejs', {
-		user: req.user,
-		file: {
-		    name: doc.file.name,
-		    requestLink: doc.displaySettings.link + '/request-access'
-		}
-	    });
+	    res.send(404);
+	}
+    });
+}
+
+exports.datasetGetLegacyConfig = function(req, res){
+    
+    var query = req.params.bulletURL ?
+	{
+	    'links.bullet': req.params.bulletURL
+	} : {
+	    'parent.username': req.params.username,
+	    'links.custom': req.params.fileLink 
+	};
+    
+    FileContainers.findOne( query, function(err, doc){
+	if( err ) throw new Error( err );
+	
+	if( doc.viewableTo( req.user ) ){ 
+	    res.send( doc.displaySettings.legacy );
+	} else {
+	    res.send(404);
 	}
     });
 }

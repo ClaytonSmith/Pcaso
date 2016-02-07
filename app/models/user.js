@@ -83,11 +83,9 @@ var UserSchema                 = BaseUserSchema.extend({
     userComments:   { type: [], default: [] },                        // List of mongoId for comments left by user
     notifications:  { type: [], default: [] },                         // List of new and all notifications, hide this
     avatar:         { type: String, default: '' },
-    displaySettings: {
+    links: {
 	link:          { type: String, required: true },
-	localLink:     { type: String, required: true },
-	deleteLink:    { type: String, required: true }
-
+	local:         { type: String, required: true }
     }	
 });
 
@@ -97,7 +95,6 @@ UserSchema.plugin(mongoosePaginate);
 UserSchema.method({
 
     attachFile: function(fileID){
-	console.log( 'attaching file ' );
 	return this.files.push( fileID );
     },
 
@@ -107,15 +104,16 @@ UserSchema.method({
 	var user = this;
 	var options = JSON.parse(JSON.stringify( settings ));
 	
+	// deep copy 
 	options.displaySettings = JSON.parse(JSON.stringify( settings.displaySettings || {} )) ;
 	options.fileOptions     = JSON.parse(JSON.stringify( settings.fileOptions     || {} )) ;
 	
-	options.displaySettings.visibility = options.displaySettings.visibility || this.fileSettings.defaults.visibility;
-
+	options.displaySettings.visibility = options.displaySettings.visibility 
+	    || this.fileSettings.defaults.visibility;
+	
 	var fileContainer = FileContainers.register(this, file, options);
 
 	fileContainer.save(function(err){
-	    console.log( err );
 	    if( err ) callback( err ) ;
 	    
 	    user.attachFile( fileContainer._id );
@@ -302,10 +300,9 @@ UserSchema.static({
 	    email: email,
 	    password: this.generateHash( pass ),
 	    username: username,
-	    displaySettings: {
+	    links: {
 		link: config.service.domain + "user/" + username,
-		deleteLink: config.service.domain + "user/" + username + '/delete',
-		localLink:  "/user/" + username
+		local:  "/user/" + username
 	    }
 	});	
 	
@@ -322,10 +319,9 @@ UserSchema.static({
 	    email: unauthenticatedUser.email,
 	    password: unauthenticatedUser.password, // Pass is already encrypted 
 	    username: unauthenticatedUser.username,
-	    displaySettings: {
+	    links: {
 		link:       config.service.domain + "user/" + unauthenticatedUser.username,
-		deleteLink: config.service.domain + "user/" + unauthenticatedUser.username + '/delete',
-		localLink:  "/user/" + unauthenticatedUser.username
+		local:  "/user/" + unauthenticatedUser.username
 	    }
 	});	
 	

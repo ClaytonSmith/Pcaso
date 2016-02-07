@@ -1,0 +1,59 @@
+
+/* Table */
+table            { margin-left:1vmin; background:#eaebec; color:#333; text-align:center; font-size:1.1vmin; border:#bbb 1px solid; }
+table th         { padding:0.8vmin; background: #ededed;}
+table td         { padding:0.8vmin; background:#fafafa; }
+
+/* SVG */
+svg              { font:1.2vmin 'Lato', sans-serif; padding: 1vmin; }
+circle           { cursor:pointer; /*fill-opacity: 0.6;*/ }
+
+/* Boxes */
+.box             { fill:#fafafa; stroke: #ccc; cursor:pointer; }
+.box-preview     { fill:#fafafa; stroke: #aaa; stroke-width:3px; }
+
+/* Axis-related */
+.axis, .box      { shape-rendering:crispEdges; }
+.axis line       { stroke:#aaa; }
+.axis path       { display:none; }
+#x_label          {font-size:1.7vmin;}
+#y_label          {font-size:1.7vmin;}
+
+/* Legend */
+#pcaso-panel     {  display:none; float:left; padding: 0 2vmin 2vmin 2vmin; font-size:2vmin; }
+#pcaso-hover     {font-family: 'Lato'; font-size: 1.4vmin; color: gray; border: 1px solid #ccc; background: #eee; display:inline-block; float:left; padding: 1vmin 2vmin 0 2vmin; margin: 0 2vmin 0 0; } /* Coordinates of point when hovering */
+.meta-text   { color:#000; font-size: 1.7vmin; } /* Meta-data shown on right panel when hovering on point*/
+
+/* Search*/
+#search_panel    {font-family: 'Lato'; font-size: 2vmin; color: gray; border: 1px solid #ccc; background: #eee; padding: 2vmin 2vmin 2vmin 2vmin;display:inline-block;float:left;}
+#search_input    {width: 15vmin; border: 1px dotted #ccc; background: white; padding: 1vmin 1vmin 1vmin 1vmin; font-size: 1.8vmin; margin: 0 0 2vmin 0; color: black;}
+#search_button   {width: 8vmin; border: 1px #ccc;  font-family: 'Lato'; padding: 1vmin 1vmin 1vmin 1vmin; font-size: 1.8vmin; margin: 0 0 2vmin 0; color: black;}
+/*      #search_exact_checkbox {width:1vmin; height:1vmin;}
+ */
+#search_results  {font-family: 'Lato'; color: black; padding: 2vmin 2vmin 2vmin 2vmin;}
+
+
+#pcaso-selection { padding-right:4vmin; font-size:2vmin; display:inline-block; float:left; padding: 2vmin 2vmin 2vmin 2vmin; } /* Showing meta-data column names */
+#pcaso-legend    { font-weight:bold; font-size:2vmin; line-height:3vmin; overflow-y:auto; display:inline-block; float:left; padding: 2vmin 2vmin 2vmin 2vmin; } /* meta-data content */
+
+
+/* Caption */
+#show-caption    {height: 10vmin; overflow-y:auto; display:none; border: 1px solid #ccc; background: white; font-family: 'Lato'; padding: 2vmin 2vmin; font-size: 2vmin; margin: 2vmin 2vmin 2vmin 2vmin; color: black;}
+
+/* Plotting area */
+#pcaso           {border: 2px solid #ccc; float:left; }
+
+/* Back button (Pick input fields) */
+#backBtn         {margin-bottom:1vmin;}
+
+/* Responsiveness */
+.svg-responsive  { display:inline-block; float:left; /*position:absolute; top:10px; left:0;*/ }
+/*.svg-container { position:relative; display:inline-block; width:100%; padding-bottom:100%; vertical-align:top; overflow:hidden; }*/
+
+/* Brush area */
+.extent {
+    fill: #000;
+    fill-opacity: .125;
+    stroke: #fff;
+}
+

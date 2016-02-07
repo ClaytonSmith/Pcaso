@@ -239,8 +239,8 @@ exports.authenticateAccount = function(req, res){
 }
 
 exports.createDataset = function(req, res){
-var form = new formidable.IncomingForm();
-
+    var form = new formidable.IncomingForm();
+    console.log(req.body, 'This is a cool test');
     form.uploadDir = __dirname + "../../../data/temp";
     form.keepExtensions = true;
     
@@ -254,29 +254,23 @@ var form = new formidable.IncomingForm();
 
   	    if( err ) return handleError( err ) ;
     	    if( !user ) return res.send( 504 );
-    
-	    var settings = {
-		displaySettings: {
-		    visibility: fields.visibility
-		},
-		metaData: fields // Just put everything in here for now
-	    };
 	    
-    	    var fileContainer = user.registerFile( files.file, settings, function(fileRegErr){
+	    var form = JSON.parse( fields.revertUponArival );
+
+    	    var fileContainer = user.registerFile( files.file, form, function(fileRegErr){
 		if( fileRegErr ) {
-		    console.log( fileRegErr );		    
+		    console.log( fileRegErr );
 		    throw new Error( error );
 		}
-		
-
+	
 		user.save(function(userSaveErr){
 		    if( userSaveErr ) {
 			console.log( userSaveErr );		    
 			throw new Error( error );
 		    }
+		    
+		    res.redirect( fileContainer.links.local );
     		});
-		
-		res.redirect( fileContainer.displaySettings.localLink );
 	    });    	    
         });   
     });

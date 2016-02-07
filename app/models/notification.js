@@ -23,7 +23,10 @@ var NotificationSchema = new mongoose.Schema({
 	id:             { type: String,  required: true }     // id
     },
     title:       { type: String,  required: true },
-    link:        { type: String,  required: true },           // Link to the event
+    links:{
+	link:        { type: String,  required: true },           // Link to the event
+	local:        { type: String,  required: true },           // Link to the event
+    },
     read:        { type: Boolean, default: false }
 }).extend({});
 
@@ -46,7 +49,10 @@ NotificationSchema.static({
 		collectionName: event.__t
 	    },	
 	    title: title,
-	    link: event.displaySettings.link
+	    links: {
+		link: event.links.link,
+		local: event.links.local
+	    }
 	});
 	
 	return note;

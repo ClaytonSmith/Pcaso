@@ -44,9 +44,9 @@ module.exports = function(passport) {
 			
 			if( err ) return done(err);
 			
-			if( !user ) return done(null, false, req.flash('loginMessage', 'Bad username or password.'));
+			if( !user ) return done(null, false, req.flash('signInMessage', 'Bad username or password.'));
 			
-			if( !user.validPassword(password)) return done(null, false, req.flash('loginMessage', 'Bad username or password.'));
+			if( !user.validPassword(password)) return done(null, false, req.flash('signInMessage', 'Bad username or password.'));
 			
 			return done(null, user);
 		    });

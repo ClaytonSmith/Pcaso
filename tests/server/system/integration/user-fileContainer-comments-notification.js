@@ -32,20 +32,7 @@ describe('User - FileContainer - Comments - Notification: Integration test', fun
     
     var targetEntity = null;
 
-    var fileTemplate = {
-	file: {
-	    name: 'test file',
-	    path: './data/test/test-file.txt'
-	},
-	settings:{
-	    fileOptions: {
-		keepFile: true
-	    },
-	    displaySettings:{
-		// null
-	    }
-	}
-    };
+    var fileTemplate = helper.fileTemplate;
         
     var commentTemplate = {
 	subject: 'test',
