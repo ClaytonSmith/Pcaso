@@ -75,9 +75,10 @@ module.exports = function(app, passport) {
  
     // Ajax does some awful stuff that forces the 'get' to be a 'post'
     // I miss angular's `http` so much :(
-    app.post(   '/api/comments/get', comments.getComments);
-    app.post(   '/api/comments', comments.postComment);
-    app.delete( '/api/comments', comments.deleteComment );
+    app.post(   '/api/comments/get',        comments.getComments);
+    app.post(   '/api/comments/create',     comments.postComment);
+    app.post(   '/api/comments/edit',       comments.editComment);
+    app.delete( '/api/comments/:commentID', comments.deleteComment );
  
 
    //    app.get( '*',  function(req, res){

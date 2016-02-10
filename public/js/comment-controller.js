@@ -13,12 +13,13 @@ function init() {
 	currentUserIsAdmin: false,
 	enableAttachments: false,
 	enableUpvoting: false,
-	enableEdditing: false,
-	readOnly: !user._id, // is the user logged in, if not `_id` will be null and thus fale
+	enableDeletingCommentWithReplies: true,
+	readOnly: !user._id, 
 	fieldMappings: {
 	    fullname: 'username',
 	    content: 'body',
-	    parent: 'target'
+	    parent: 'target',
+	    createdByCurrentUser: 'createdByCurrentUser'
 	},
 	
 	getComments: function(success, error) {
@@ -27,7 +28,7 @@ function init() {
 		topic: {
 		    id: focusEntity._id,
 		    collectionName: focusEntity.__t
-		}	
+		}
 	    };
 	    
 	    console.log( data );
@@ -37,43 +38,57 @@ function init() {
 		dataType:'json',	
 		cache: false,
 		data: data,
-		success: success,
 		error: error
+	    }).success(function(data){
+		
+		if( !user._id ) success( data );
+		else success( data.map( function(comment){
+		    comment.createdByCurrentUser = ( user.username === comment.username);
+		    return comment;
+		}));
 	    });
 	},
 	postComment: function(data, success, error) {
-	    console.log( data );
 	    
 	    data.topic = {
 		id: focusEntity._id,
-		collectionName: focusEntity.__t
+		collectionName: focusEntity.__t,
 	    };
 	    
-console.log( data );
 	    $.ajax({
-		type: 'post',
-		url: '/api/comments',
+		type: 'POST',
+		url: '/api/comments/create',
 		data: data,
 		cache: false,
-		success: success,
 		fail: error,
 		dataType: 'json'
+	    }).success(function(data){
+		data.createdByCurrentUser = true;
+		success( data );
 	    });
 	},
 	putComment: function(data, success, error) {
-	    setTimeout(function() {
-		console.log( 'hello' );
-		success(data);
-	    }, 500);
+	    
+	    $.ajax({
+		type: 'POST',
+		url: '/api/comments/edit',
+		data: data,
+		cache: false,
+		fail: error,
+	    }).success(function(data){
+		data.createdByCurrentUser = true;
+		console.log( data );
+		success( data );
+	    });
+	    
+	    
 	},
 	deleteComment: function(data, success, error) {
 	    $.ajax({
 		type: 'DELETE',
-		url: '/api/comments',
-		data: data,
+		url: '/api/comments/' + data.id,
 		success: success,
-		fail: error,
-		dataType: 'json'
+		fail: error
 	    });
 	}
     });

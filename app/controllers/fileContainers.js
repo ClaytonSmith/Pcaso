@@ -101,7 +101,7 @@ exports.displayDataset = function(req, res){
     	console.log( err, doc, query);
 	
     	if( doc.viewableTo( req.user ) ){ 
-    	    res.render( 'dataset.ejs', { user: req.user });
+    	    res.render( 'dataset.ejs', { user: req.user, dataset: doc });
     	} else {
     	    res.render( 'request-access.ejs', {
     		user: req.user,

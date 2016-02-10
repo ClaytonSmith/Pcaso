@@ -105,6 +105,7 @@ CommentSchema.static({
 		+ ', '
 		+ new Date( date ).getFullYear();
 	}   
+	
 	return comments.map( function(comment){
 	    return {
 		id: comment._id, // If root comment, exclude topic or jquery comments gets mad

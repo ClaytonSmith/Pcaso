@@ -14,9 +14,9 @@ var Comments              = mongoose.model('Comment');
 
 exports.getComments  = function(req, res){
     console.log( req.body, req.params );
-           Comments.collectByTopic( req.body.topic, function(err, docs){
+    Comments.collectByTopic( req.body.topic, function(err, docs){
     	res.send( Comments.jqueryCommentsTransform( docs ));
-     }); 
+    }); 
 
 //    res.send( [ req.body ] );
 }
@@ -25,9 +25,9 @@ exports.postComment = function(req, res){
     if( !req.isAuthenticated() )
 	res.send( 403 );
 
-    console.log( req.body );
     var query = null;
 
+    console.log( req.body );
     if( req.body.target !== '' ){
 	query = {
 	    '_id':  req.body.target,
@@ -57,8 +57,9 @@ exports.postComment = function(req, res){
 	}
 	
 
-	req.user.leaveComment( doc, comment.subject, comment.body, function(commentError){ 
+	var comment = req.user.leaveComment( doc, subject, req.body.body, function(commentError){ 
 	    
+	    res.send( Comments.jqueryCommentsTransform( [ comment ] )[0] );
 	    req.user.save(function(err){
 		// handle error somehow
 	    });
@@ -66,4 +67,45 @@ exports.postComment = function(req, res){
     });
 }
 
-exports.deleteComment  = function(req, res){}
+exports.deleteComment  = function(req, res){
+    if( !req.isAuthenticated() )
+	res.send( 403 );
+    
+    var query = {
+	'_id': req.params.commentID,
+	'parent.id': req.user._id,
+	'parent.collectionName': req.user.__t
+    };
+    
+    Comments.findOne( query, function(err, doc){
+	if( err || !doc ) return res.send( 403 );
+	
+	doc.remove( function(removeError){
+	    if( removeError ) res.send( 500 );
+	    else res.send( 200 );
+	})
+    });
+}
+
+
+
+exports.editComment  = function(req, res){
+    if( !req.isAuthenticated() )
+	res.send( 403 );
+    
+    var query = {
+	'_id': req.body.id,
+	'parent.id': req.user._id,
+	'parent.collectionName': req.user.__t
+    };
+    
+    Comments.findOne( query, function(err, doc){
+	if( err || !doc ) return res.send( 403 );
+	doc.body = req.body.body;
+	
+	doc.save( function(saveError){
+	    if( saveError ) res.send( 500 );
+	    else res.send( 200 );
+	});
+    });
+}
