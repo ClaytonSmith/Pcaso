@@ -5,32 +5,29 @@
     <%- include header.ejs %>      
     <main>
       
-      <div class="content">
+      <div class="app-content">
 	<div class="account-container">
 	  
 	  
 	  <% if (isOwner) { %>
-	  <h1 class="title">Welcome <%= account.name.first %></h1>
 	  <% } else { %>
-	  <h1 class="title"><%= account.username %>'s profile</h1>
 	  <% } %>
-
+	  
 	  <hr>
-
+	  
 	  <% if (isOwner) { %>
 	  <h2 id="my-files">My files</h2>
 	  <% } else { %>
-	  <h1 class="title"><%= account.username %>'s files</h1>
 	  <% } %>
 	  
 	  <p>file preview</P>
-	  <strong>Files</strong>: <textarea> <%= account.files %></textarea><br>	  
+	  <strong>Files</strong>: <textarea> <%= profile.files %> </textarea><br>	  
 	  
           <p>
-            <strong>id</strong>: <%= account._id %><br>
-            <strong>email</strong>: <%= account.email %><br>
-            <strong>password</strong>: <%= account.password %><br>
-	    <strong>Mongoose ID</strong>: <%= account._id %>
+            <strong class="green-id">id</strong>: <%= profile._id %><br>
+            <strong>email</strong>: <%= profile.email %><br>
+            <strong>password</strong>: <%= profile.password %><br>
+	    <strong>Mongoose ID</strong>: <%= profile._id %>
           </p>
           
 	  <div class="pure-g">
@@ -38,10 +35,9 @@
 	    <div class="pure-u-1-3"><p>Comments</p></div>
 	    <div class="pure-u-1-3"><p>Stats</p></div>
 	  </div>	  
-
-	</div> 
-      </div>
-      
+	  
+	  <div id="comments-container" class="jquery-comments"></div> 
+	</div>
     </main>
     <%- include footer.ejs %>  
   </body>  

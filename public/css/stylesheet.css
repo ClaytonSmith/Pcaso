@@ -84,7 +84,7 @@ body {
     background-color: #E74C3C !important;
 }
 
-.content {
+.app-content {
     width: 75%;
     max-width: 1500px;
     min-width: 350px;
@@ -161,6 +161,8 @@ body {
        background-color: #FFF;
 }
 
+.green-id{
 
-
+    color: blue;
+}
 

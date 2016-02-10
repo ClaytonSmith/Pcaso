@@ -1,13 +1,15 @@
 'user strict'
 
-var formidable   = require('formidable');
-var mongoose     = require('mongoose');
-var grid         = require('gridfs-stream');
-var fs           = require('fs');
-var util         = require('util');
-var multipart    = require('multipart');
-var config       = require('../../config/config');
-var async        = require('async');
+var formidable            = require('formidable');
+var mongoose              = require('mongoose');
+var grid                  = require('gridfs-stream');
+var fs                    = require('fs');
+var util                  = require('util');
+var multipart             = require('multipart');
+var config                = require('../../config/config');
+var async                 = require('async');
+var AsyncCollect          = require('../helpers/async-collect').asyncCollect;
+
 
 // Load other models
 var Users                 = mongoose.model('User');
@@ -31,62 +33,63 @@ exports.getUserProfile = function(req, res){
     // Renders user account page
     // If user is signed on, then additional items will be rendered. Note `isOwner`
         
-    Users.findOne( req.param.username, function(err, doc){
+    var query = {
+	username: req.params.username
+    };
+    
+    Users.findOne( query, function(err, doc){
 	if( err )  return res.render('500.ejs', { user: req.user });
 	if( !doc ) return res.render('404.ejs', { user: req.user });
 	
-	var isOwner = req.isAuthenticated() && req.user.username === req.params.username
-	var fcQuery   = {
-	    'parent.id': doc._id,
- 	    'parent.collectionName': doc.__t,
-	    $or: [ {'displaySettings': "PUBLIC"} ]
+
+	console.log( AsyncCollect ); 
+	var isOwner = req.isAuthenticated() && req.user.username === req.params.username;
+	var asyncCollect = new AsyncCollect( doc );
+	var noteQuery = null;	
+    	var fcQuery   = {
+    	    'parent.id': doc._id,
+    	    'parent.collectionName': doc.__t,
+    	    $or: [ {'displaySettings.visibility': "PUBLIC"} ]
+    	}
+	
+	
+	// If owner, also look for private files 
+	if( isOwner ) { 
+	    fcQuery.$or.push( {'displaySettings.visibility': "PRIVATE"} );
+	
+	// Any new notes?
+	    
+	    var noteQuery = {
+		'parent.id': doc._id,
+ 		'parent.collectionName': doc.__t,
+		read: true
+	    };
 	}
 	
-	if( isOwner ) fcQuery.$or.push( {'displaySettings': "PRIVATE"} );
-		
-	var noteQuery = {
-	    'parent.id': doc._id,
- 	    'parent.collectionName': doc.__t,
-	    read: true
-	};
+	asyncCollect.add( function(parellelCB){ FileContainers.find( fcQuery,  parellelCB ); }, 'files' );
+	//asyncCollect.add( function(parellelCB){ Comments.collectByParent( doc, parellelCB ); }, 'comments' );
 	
+	if( isOwner )
+	    asyncCollect.add( function(parellelCB){ Notifications.find( noteQuery, parellelCB ); }, 'notifications' );
+			  
 	
-	function helper(docCollection){
-	    var ids = {};
-	    docCollection.forEach(function(d, i){  ids[ d._id ] = i; });
-
-	    return function(id){
-		return ids[ id ] !== undefined ? docCollection[ ids[ id ] ] : undefined ;  
-	    }
-	}
+	//async.parallel( asyncCollect.getQueries(),
+	//function(err, results){
+	//		    asyncCollect.merge( results );
+			    
+			    //console.log( 
+	res.render('profile.ejs', {
+	    profile: doc,				
+	    user : req.user,
+	    isOwner: isOwner, 
+	    name: {name: 'name'}
+	});
 	
-	async.parallel(
-	    [
-		function(parellelCB){ FileContainers.find( fcQuery,  parellelCB ); },
-		function(parellelCB){ Comments.collectByParent( doc, parellelCB ); },
-		function(parellelCB){ Notifications.find( noteQuery, parellelCB ); }
-	    ],
-	    function(err, results){
-		var docFinder = null;
-
-		docFinder = helper( results[0] );
-		doc.files = doc.files.map( docFinder ).filter( Boolean );
-
-		docFinder = helper( results[1] );
-		doc.files = doc.userComments.map( docFinder ).filter( Boolean );
-		
-		docFinder = helper( results[2] );
-		doc.files = doc.notifications.map( docFinder ).filter( Boolean );
-
-		console.log(doc);
-		res.render('profile.ejs', {
-		    user : req.user,
-		    account: doc,
-		    isOwner: isOwner 
-		});
-	    });	       
+	//		});	       
     });   
 }
+
+
 
 exports.getProfile = function(req, res){
     // Renders user account page
@@ -94,68 +97,110 @@ exports.getProfile = function(req, res){
     
     if( !req.isAuthenticated() )
 	return res.redirect('/sign-in');
- 
-    Users.findOne( { username: req.user.username }, function(err, doc){
+
+    return res.redirect( '/user/' + req.user.username );
+    
+    // Users.findOne( { username: req.user.username }, function(err, doc){
+    // 	if( err )  return res.render('500.ejs', { user: req.user });
+    // 	if( !doc ) return res.render('404.ejs', { user: req.user });
+	
+    // 	var isOwner = true;
+    // 	var fcQuery   = {
+    // 	    'parent.id': doc._id,
+    // 	    'parent.collectionName': doc.__t,
+    // 	    $or: [ {'displaySettings.visibility': "PUBLIC"} ]
+    // 	}
+	
+    // 	if( isOwner ) fcQuery.$or.push( {'displaySettings.visibility': "PRIVATE"} );
+	
+    // 	var noteQuery = {
+    // 	    'parent.id': doc._id,
+    // 	    'parent.collectionName': doc.__t,
+    // 	    read: true
+    // 	};
+	
+	
+    // 	function helper(docCollection){
+    // 	    var ids = {};
+    // 	    docCollection.forEach(function(d, i){  ids[ d._id ] = i; });
+    // 	    return function(id){
+    // 		return ids[ id ] !== undefined ? docCollection[ ids[ id ] ] : undefined ;  
+    // 	    }
+    // 	}
+	
+    // 	async.parallel(
+    // 	    [
+    // 		function(parellelCB){ FileContainers.find( fcQuery,  parellelCB ); },
+    // 		function(parellelCB){ Comments.collectByParent( doc, parellelCB ); },
+    // 		function(parellelCB){ Notifications.find( noteQuery, parellelCB ); }
+    // 	    ],
+    // 	    function(err, results){
+    // 		var docFinder = null;
+
+    // 		docFinder = helper( results[0] );
+    // 		doc.files = doc.files.map( docFinder ).filter( Boolean );
+
+    // 		docFinder = helper( results[1] );
+    // 		doc.userComments = doc.userComments.map( docFinder ).filter( Boolean );
+		
+    // 		docFinder = helper( results[2] );
+    // 		doc.notifications = doc.notifications.map( docFinder ).filter( Boolean );
+
+    // 		console.log(doc);
+    // 		res.render('profile.ejs', {
+    // 		    user : req.user = doc,
+    // 		    account: doc,
+    // 		    isOwner: isOwner 
+    // 		});
+    // 	    });	       
+    // });   
+}
+
+exports.getUserProfileComments = function(req, res){
+    
+    Users.findOne( { username: req.params.username }, function(err, doc){
+	if( err || !doc ) return res.send(404);
+
+	
+	Comments.collectByParent( doc, function(cmmtErr, comments){
+	    if( cmmtErr || !comments ) return res.send(404);
+	    console.log( cmmtErr, comments );
+	    res.send( Comments.jqueryCommentsTransform( comments ) );	    
+	});	
+    });
+}
+
+exports.postUserProfileComment = function(req, res){
+    if( !req.isAuthenticated() )
+	res.send( 403 );
+    
+    var query = {
+	username: req.params.username
+    };
+    
+    Users.findOne( query, function(err, doc){
 	if( err )  return res.render('500.ejs', { user: req.user });
 	if( !doc ) return res.render('404.ejs', { user: req.user });
 	
-	var isOwner = true;
-	var fcQuery   = {
-	    'parent.id': doc._id,
- 	    'parent.collectionName': doc.__t,
-	    $or: [ {'displaySettings.visibility': "PUBLIC"} ]
+	var comment = {
+	    body: req.body.body,
+	    subject: doc.username+"'s account",
 	}
 	
-	if( isOwner ) fcQuery.$or.push( {'displaySettings.visibility': "PRIVATE"} );
-	
-	var noteQuery = {
-	    'parent.id': doc._id,
- 	    'parent.collectionName': doc.__t,
-	    read: true
-	};
-	
-	
-	function helper(docCollection){
-	    var ids = {};
-	    docCollection.forEach(function(d, i){  ids[ d._id ] = i; });
-	    return function(id){
-		return ids[ id ] !== undefined ? docCollection[ ids[ id ] ] : undefined ;  
-	    }
-	}
-	
-	async.parallel(
-	    [
-		function(parellelCB){ FileContainers.find( fcQuery,  parellelCB ); },
-		function(parellelCB){ Comments.collectByParent( doc, parellelCB ); },
-		function(parellelCB){ Notifications.find( noteQuery, parellelCB ); }
-	    ],
-	    function(err, results){
-		var docFinder = null;
-
-		docFinder = helper( results[0] );
-		doc.files = doc.files.map( docFinder ).filter( Boolean );
-
-		docFinder = helper( results[1] );
-		doc.userComments = doc.userComments.map( docFinder ).filter( Boolean );
-		
-		docFinder = helper( results[2] );
-		doc.notifications = doc.notifications.map( docFinder ).filter( Boolean );
-
-		console.log(doc);
-		res.render('profile.ejs', {
-		    user : req.user = doc,
-		    account: doc,
-		    isOwner: isOwner 
-		});
-	    });	       
-    });   
+	req.user.leaveComment(doc, comment.subject, comment.body, function(commentError){ 
+	    console.log('no errors please', err);
+	    
+	    res.send( 200 );
+	    
+	});
+    });
 }
 
 exports.deleteAccount = function(req, res){
     console.log('Account being deleted');
     
     req.user.remove(function(err){ /*Log or handle*/});
-
+    
     req.logout();
     res.redirect('/');
 }

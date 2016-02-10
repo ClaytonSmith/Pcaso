@@ -30,13 +30,12 @@ var FileContainerSchema = new mongoose.Schema({
      	name:            { type: String,  required: true },              // Path to file
 	path:            { type: String,  required: true },              // Path to file
      	id:              { type: Object, default: mongoose.Types.ObjectId().toString() } 
-    },     
+    },
     fileOptions: {
 	keepFile:        { type: Boolean, default: false }, 
     },
     sharedWith:      { type: [],      default: [] },
     comments:        { type: [],      default: [] },
-    //metaData:        { type: Object,  default: {} },
     statistics: {
 	viewCount:       { type: Number, default: 0 }      // File metadata
     },
@@ -52,7 +51,7 @@ var FileContainerSchema = new mongoose.Schema({
 	custom:          { type: String,  required: true },
 	bullet:          { type: String,  required: true },
 	link:            { type: String,  required: true },
-	local:           { type: String,  required: true }
+	local:           { type: String,  required: true },
     }
 }).extend({});
 

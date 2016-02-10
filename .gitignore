@@ -17,5 +17,6 @@ npm-debug.log
 node_modules
 
 data/temp/*
+public/users-public-data/*
 
 config/secrets.js

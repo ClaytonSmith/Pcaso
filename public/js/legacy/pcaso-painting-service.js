@@ -175,8 +175,7 @@ function init() {
 	    if(config){
 		//config = JSON.parse(config)
 
-		// --
-		
+		// --		
 		p2 = "fields-pca"; p = config[p2]; _c['fields-pca'] = [];
 		for(i=0; i<p.length; i++) _c['fields-pca'][i] = parseInt(p[i])
 
@@ -272,7 +271,7 @@ function init() {
 	    .attr("preserveAspectRatio", "xMinYMin meet")
 	    .classed("svg-responsive", true)
 	
-	var newCircles = _pcaso.selectAll("circle");
+
 
 	resizeWindow();
 
@@ -366,7 +365,7 @@ function init() {
 	    .on("click",function(d) {full_screen_toggle();});
 
 
-
+	var newCirlce = null;
 
 	// Color points, legend, and selection box
 	colorPoints(_p_colorBy)
@@ -942,6 +941,7 @@ function init() {
     function brushstart() {
 	console.log("brushstart")
 	d3.select(this).call(brush.clear());
+	newCircles = _pcaso.selectAll("circle");
 	preview_x_scale.domain(domainByPC[current_p_in_preview.x]);
 	preview_y_scale.domain(domainByPC[current_p_in_preview.y]);
     }
@@ -959,8 +959,7 @@ function init() {
 
 	    var num_highlighted = 0;
 	    
-	    
-	    _pcaso.selectAll("circle").attr("class", function(d) {
+	    newCircles.attr("class", function(d) {
 		if (e[0][0] > d[p.x] || d[p.x] > e[1][0] || e[0][1] > d[p.y] || d[p.y] > e[1][1]) {
 		    return "unselected";
 		} else {

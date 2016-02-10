@@ -30,7 +30,11 @@ var extend            = require('mongoose-schema-extend');
 var async             = require('async');
 var config            = require('../../config/config');
 var asyncRemove       = require('../helpers/async-remove');
+var copyFiles         = require('../helpers/copy-files');
 var mongoosePaginate  = require('mongoose-paginate');
+var util              = require('util');
+var mkdirp            = require('mkdirp');
+var rimraf            = require('rimraf');
 
 var FileContainers    = mongoose.model('FileContainer');
 var Comments          = mongoose.model('Comment');
@@ -81,9 +85,10 @@ var UserSchema                 = BaseUserSchema.extend({
     },
     comments:       { type: [], default: [] },                        // List of mongoId for comments left by user
     userComments:   { type: [], default: [] },                        // List of mongoId for comments left by user
-    notifications:  { type: [], default: [] },                         // List of new and all notifications, hide this
-    avatar:         { type: String, default: '' },
+    notifications:  { type: [], default: [] },                        // List of new and all notifications, hide this
+    publicDataPath: { type: String, default: '' },
     links: {
+	avatar:        { type: String, default: '' },
 	link:          { type: String, required: true },
 	local:         { type: String, required: true }
     }	
@@ -153,13 +158,13 @@ UserSchema.method({
     
     leaveComment: function( entity, subject, commentBody, callback ){
 	var user = this;
-	var comment = Comments.register( user, entity, this.name.first, subject, commentBody);
+	var comment = Comments.register( user, entity, this.username, subject, commentBody);
 	
 	comment.save(function(err){
 	    if( err ) callback( err ) ;
 	    user.userComments.push( comment._id );	
 	    
-	    if( entity._id === "user" ){
+	    if( entity.__t === "User" ){
 	    };
 		
 	    entity.save( function(err2){
@@ -267,6 +272,7 @@ UnauthenticatedUserSchema.static({
     },
 
     register: function(first, last, email, pass, username){
+	console.log( copyFiles );
 	var user = new this({
 	    name: {
 		first: first,
@@ -300,8 +306,10 @@ UserSchema.static({
 	    email: email,
 	    password: this.generateHash( pass ),
 	    username: username,
+	    publicDataPath: config.root +'/public/users-public-data/'+ username,
 	    links: {
-		link: config.service.domain + "user/" + username,
+		avatar: config.service.domain +'/users-public-data/'+ username +'/imgs/avatar.png',	   
+		link:   config.service.domain + "user/" + username,
 		local:  "/user/" + username
 	    }
 	});	
@@ -319,8 +327,10 @@ UserSchema.static({
 	    email: unauthenticatedUser.email,
 	    password: unauthenticatedUser.password, // Pass is already encrypted 
 	    username: unauthenticatedUser.username,
+	    publicDataPath: config.root +'/public/users-public-data/'+ unauthenticatedUser.username,
 	    links: {
-		link:       config.service.domain + "user/" + unauthenticatedUser.username,
+		avatar: config.service.domain +'/users-public-data/'+ unauthenticatedUser.username +'/imgs/avatar.png',
+		link:   config.service.domain + "user/" + unauthenticatedUser.username,
 		local:  "/user/" + unauthenticatedUser.username
 	    }
 	});	
@@ -337,7 +347,33 @@ UnauthenticatedUserSchema.set('versionKey', false);
 UserSchema.pre('save', function(next) {
     var user = this;
     user.lastUpdated = Date.now();    
-    next();
+
+
+    
+    // On first save
+    if( user.isNew ){
+
+
+	var publicDir = config.root + '/public/users-public-data/'+ user.username +'/';
+	//create public directory for things like avatars
+		
+	async.series(
+	[
+	    function(parellelCB){
+		// covers both images and avatar directory
+		mkdirp( publicDir + "imgs/", parellelCB );
+	    },
+	    
+	    function(parellelCB){
+		mkdirp( publicDir + "files/", parellelCB );
+	    },
+	    function(parellelCB){
+		copyFiles( config.defaultAvatarPath, user.publicDataPath +'/imgs/avatar.png', parellelCB );
+	    }
+	    
+	], next );	    
+		
+    } else next();
 });
 
 // Before a user deletes their account, remove all of their files and directory
@@ -367,7 +403,11 @@ UserSchema.pre('remove', function(next) {
 		asyncRemove.asyncRemove(user.notifications, function(id, streamCB){
 		    user.removeNotification( id, streamCB );
 		}, parellelCB );
+	    },
+	    function(parellelCB){
+		rimraf( user.publicDataPath, parellelCB );
 	    }
+	    
 	], next );	    
 });
 

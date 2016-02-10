@@ -258,3 +258,8 @@
     background: rgb(255, 163, 0);
     color: white;
 }
+
+
+.pure-menu-heading {
+    text-transform: none;
+}

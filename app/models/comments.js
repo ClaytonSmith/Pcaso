@@ -34,6 +34,7 @@ var CommentSchema = new mongoose.Schema({
     body:       { type: String, required: true },
     links: {
 	parent:         { type: String, required: true },
+	avatar:         { type: String, required: true },
 	link:           { type: String, required: true },
 	local:          { type: String, required: true }
     }
@@ -79,8 +80,9 @@ CommentSchema.static({
 	var query = { 
 	    "parent.id": parent._id || parent.id,
 	    "parent.collectionName": parent.__t || parent.collectionName 
-	}
+	}           
 	
+	console.log( query );
 	this.find( query, callback );
     },
 
@@ -93,8 +95,29 @@ CommentSchema.static({
 	
 	this.find( query, callback );
     },
-
-
+    
+    jqueryCommentsTransform: function( comments ){
+	
+	function formatDate( date ){
+	    return (new Date( date ).getMonth()+1)
+		+ ' '
+		+ new Date( date ).getDate()
+		+ ', '
+		+ new Date( date ).getFullYear();
+	}   
+	return comments.map( function(comment){
+	    return {
+		id: comment._id, // If root comment, exclude topic or jquery comments gets mad
+		target: comment.target.id === comment.topic.id ? null : comment.target.id, 
+		created: formatDate( comment.dateAdded ), 
+		body: comment.body,
+		username: comment.from,
+		profile_picture_url: comment.links.avatar,
+		profile_url: comment.links.parent
+	    }; 
+	});
+    },
+	
     register: function(parent, target, from, subject, body){
 
 	var id = mongoose.Types.ObjectId();
@@ -117,6 +140,7 @@ CommentSchema.static({
 	    body: body,
 	    links: {
 		parent: parent.links.link,
+		avatar: parent.links.avatar,
 		link:  parent.links.link  + '/' + id.toString(),
 		local: parent.links.local + '/' + id.toString()
 	    }

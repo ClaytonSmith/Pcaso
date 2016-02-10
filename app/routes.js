@@ -3,8 +3,8 @@
 var mongoose = require('mongoose');
 
 var files      = require('./controllers/fileContainers');
-var users      = require('./controllers/users'); // not yet 
-
+var users      = require('./controllers/users');
+var comments   = require('./controllers/comments'); 
 
 module.exports = function(app, passport) {
 
@@ -14,7 +14,8 @@ module.exports = function(app, passport) {
     app.get( '/', function(req, res) {
         res.render('index.ejs', { user: req.user });
     });   
-    
+        
+
     app.get('/profile', users.getProfile);
     
     app.get('/sign-in', function(req, res){
@@ -51,8 +52,8 @@ module.exports = function(app, passport) {
     });
     
     app.post( '/upload-dataset', users.createDataset);
-
-    app.get(    '/user/:username',        users.getUserProfile );
+    
+    app.get(    '/user/:username',          users.getUserProfile );
     //app.post(   '/user/:username/update', users.updateProfile );
     //app.delete( '/user/:username/delete', users.deleteAccount);
 
@@ -71,8 +72,15 @@ module.exports = function(app, passport) {
     app.get( '/about', function(req, res){
 	res.render('about', { user: req.user });
     });
-    
-    //    app.get( '*',  function(req, res){
+ 
+    // Ajax does some awful stuff that forces the 'get' to be a 'post'
+    // I miss angular's `http` so much :(
+    app.post(   '/api/comments/get', comments.getComments);
+    app.post(   '/api/comments', comments.postComment);
+    app.delete( '/api/comments', comments.deleteComment );
+ 
+
+   //    app.get( '*',  function(req, res){
     //	res.render('/404.ejs', { user: req.user });
     //   });
     
