@@ -4,7 +4,7 @@ function init() {
     // ===========================================================================
     // == Config
     // ===========================================================================
-
+    // preview_holder
     // Static settings
     var _c = {
 	'nLinesPrev'    : 3,
@@ -265,6 +265,7 @@ function init() {
 	_pcaso = d3.select("#pcaso")
 	// .classed("svg-container", true)
 	    .append("svg")
+	    .attr("id", "svg-id")
 	    .attr("width",  _c['width' ])
 	    .attr("height", _c['height'])
 	    .attr("viewBox", "-5 0 " + getWindowSize() + " " + getWindowSize())
@@ -360,7 +361,7 @@ function init() {
 	    .attr("y",responsive_padding/2)
 	    .attr("width",button_size)
 	    .attr("height",button_size)
-	    .attr("xlink:href","/img/grow-big.png")
+	    .attr("xlink:href","/imgs/grow-big.png")
 	// .text("full screen")
 	    .on("click",function(d) {full_screen_toggle();});
 
@@ -616,7 +617,7 @@ function init() {
 
 		// Set zoom icon to collapse            
 		_pcaso.select("#full_screen_toggle")
-		    .attr("xlink:href","images/shrink-big.png")
+		    .attr("xlink:href","/imgs/shrink-big.png")
 		
 
 		currently_full_screen=true;

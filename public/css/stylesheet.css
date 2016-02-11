@@ -161,8 +161,16 @@ body {
        background-color: #FFF;
 }
 
-.green-id{
-
-    color: blue;
+.profile-main-display{
+    max-height: 25em;
+    overflow-y: scroll;
+    margin-bottom: 3em;
 }
 
+
+.dataspace-tile{
+    text-align: center;
+    background-color: white;
+    border-radius: 6px;
+    margin: 1em;
+}

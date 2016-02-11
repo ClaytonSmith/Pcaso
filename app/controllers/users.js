@@ -73,87 +73,29 @@ exports.getUserProfile = function(req, res){
 	    asyncCollect.add( function(parellelCB){ Notifications.find( noteQuery, parellelCB ); }, 'notifications' );
 			  
 	
-	//async.parallel( asyncCollect.getQueries(),
-	//function(err, results){
-	//		    asyncCollect.merge( results );
-			    
-			    //console.log( 
-	res.render('profile.ejs', {
-	    profile: doc,				
-	    user : req.user,
-	    isOwner: isOwner, 
-	    name: {name: 'name'}
-	});
-	
-	//		});	       
+	async.parallel( asyncCollect.getQueries(), function(err, results){
+	    asyncCollect.merge( results );
+	    
+	    //console.log( 
+	    res.render('profile.ejs', {
+		profile: doc,				
+		user : req.user,
+		isOwner: isOwner, 
+		name: {name: 'name'}
+	    });
+	    
+	});	       
     });   
 }
 
 
 
 exports.getProfile = function(req, res){
-    // Renders user account page
-    // If user is signed in and is account owner, then additional items will be rendered. Note `isOwner`
-    
     if( !req.isAuthenticated() )
 	return res.redirect('/sign-in');
 
     return res.redirect( '/user/' + req.user.username );
     
-    // Users.findOne( { username: req.user.username }, function(err, doc){
-    // 	if( err )  return res.render('500.ejs', { user: req.user });
-    // 	if( !doc ) return res.render('404.ejs', { user: req.user });
-	
-    // 	var isOwner = true;
-    // 	var fcQuery   = {
-    // 	    'parent.id': doc._id,
-    // 	    'parent.collectionName': doc.__t,
-    // 	    $or: [ {'displaySettings.visibility': "PUBLIC"} ]
-    // 	}
-	
-    // 	if( isOwner ) fcQuery.$or.push( {'displaySettings.visibility': "PRIVATE"} );
-	
-    // 	var noteQuery = {
-    // 	    'parent.id': doc._id,
-    // 	    'parent.collectionName': doc.__t,
-    // 	    read: true
-    // 	};
-	
-	
-    // 	function helper(docCollection){
-    // 	    var ids = {};
-    // 	    docCollection.forEach(function(d, i){  ids[ d._id ] = i; });
-    // 	    return function(id){
-    // 		return ids[ id ] !== undefined ? docCollection[ ids[ id ] ] : undefined ;  
-    // 	    }
-    // 	}
-	
-    // 	async.parallel(
-    // 	    [
-    // 		function(parellelCB){ FileContainers.find( fcQuery,  parellelCB ); },
-    // 		function(parellelCB){ Comments.collectByParent( doc, parellelCB ); },
-    // 		function(parellelCB){ Notifications.find( noteQuery, parellelCB ); }
-    // 	    ],
-    // 	    function(err, results){
-    // 		var docFinder = null;
-
-    // 		docFinder = helper( results[0] );
-    // 		doc.files = doc.files.map( docFinder ).filter( Boolean );
-
-    // 		docFinder = helper( results[1] );
-    // 		doc.userComments = doc.userComments.map( docFinder ).filter( Boolean );
-		
-    // 		docFinder = helper( results[2] );
-    // 		doc.notifications = doc.notifications.map( docFinder ).filter( Boolean );
-
-    // 		console.log(doc);
-    // 		res.render('profile.ejs', {
-    // 		    user : req.user = doc,
-    // 		    account: doc,
-    // 		    isOwner: isOwner 
-    // 		});
-    // 	    });	       
-    // });   
 }
 
 exports.getUserProfileComments = function(req, res){

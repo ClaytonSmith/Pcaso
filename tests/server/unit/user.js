@@ -33,7 +33,10 @@ describe('Unauthenticated user', function(){
 	    userTemplate.username
 	);
 	
-	user.save( done );
+	user.save( function(err){
+	    console.log( err );
+	    done( err );
+	} );
     });
     
     afterEach(function(done){

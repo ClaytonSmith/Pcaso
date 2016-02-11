@@ -86,7 +86,8 @@ var UserSchema                 = BaseUserSchema.extend({
     comments:       { type: [], default: [] },                        // List of mongoId for comments left by user
     userComments:   { type: [], default: [] },                        // List of mongoId for comments left by user
     notifications:  { type: [], default: [] },                        // List of new and all notifications, hide this
-    publicDataPath: { type: String, default: '' },
+    localDataPath:  { type: String, default: '' },
+    publicDataPath: { type: String, default: '' },    
     links: {
 	avatar:        { type: String, default: '' },
 	link:          { type: String, required: true },
@@ -106,6 +107,7 @@ UserSchema.method({
     // Saves file's ID in list of files
     registerFile: function(file, settings, callback){
 	
+	console.log( 'Settings', settings );
 	var user = this;
 	var options = JSON.parse(JSON.stringify( settings ));
 	
@@ -306,9 +308,10 @@ UserSchema.static({
 	    email: email,
 	    password: this.generateHash( pass ),
 	    username: username,
-	    publicDataPath: config.root +'/public/users-public-data/'+ username,
+	    localDataPath:  config.root +'/public/users-public-data/'+ username,
+	    publicDataPath: config.service.domain +'users-public-data/'+ username,
 	    links: {
-		avatar: config.service.domain +'/users-public-data/'+ username +'/imgs/avatar.png',	   
+		avatar: config.service.domain +'users-public-data/'+ username +'/imgs/avatar.png',	   
 		link:   config.service.domain + "user/" + username,
 		local:  "/user/" + username
 	    }
@@ -327,9 +330,10 @@ UserSchema.static({
 	    email: unauthenticatedUser.email,
 	    password: unauthenticatedUser.password, // Pass is already encrypted 
 	    username: unauthenticatedUser.username,
-	    publicDataPath: config.root +'/public/users-public-data/'+ unauthenticatedUser.username,
+	    localDataPath:  config.root +'/public/users-public-data/'+ unauthenticatedUser.username,
+	    publicDataPath: config.service.domain +'users-public-data/'+ unauthenticatedUser.username,
 	    links: {
-		avatar: config.service.domain +'/users-public-data/'+ unauthenticatedUser.username +'/imgs/avatar.png',
+		avatar: config.service.domain +'users-public-data/'+ unauthenticatedUser.username +'/imgs/avatar.png',
 		link:   config.service.domain + "user/" + unauthenticatedUser.username,
 		local:  "/user/" + unauthenticatedUser.username
 	    }
@@ -363,12 +367,8 @@ UserSchema.pre('save', function(next) {
 		// covers both images and avatar directory
 		mkdirp( publicDir + "imgs/", parellelCB );
 	    },
-	    
 	    function(parellelCB){
-		mkdirp( publicDir + "files/", parellelCB );
-	    },
-	    function(parellelCB){
-		copyFiles( config.defaultAvatarPath, user.publicDataPath +'/imgs/avatar.png', parellelCB );
+		copyFiles( config.defaultAvatarPath, user.localDataPath +'/imgs/avatar.png', parellelCB );
 	    }
 	    
 	], next );	    
@@ -405,7 +405,7 @@ UserSchema.pre('remove', function(next) {
 		}, parellelCB );
 	    },
 	    function(parellelCB){
-		rimraf( user.publicDataPath, parellelCB );
+		rimraf( user.localDataPath, parellelCB );
 	    }
 	    
 	], next );	    

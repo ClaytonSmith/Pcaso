@@ -15,10 +15,8 @@ var Comments              = mongoose.model('Comment');
 exports.getComments  = function(req, res){
     console.log( req.body, req.params );
     Comments.collectByTopic( req.body.topic, function(err, docs){
-    	res.send( Comments.jqueryCommentsTransform( docs ));
+	res.send( Comments.jqueryCommentsTransform( docs ));
     }); 
-
-//    res.send( [ req.body ] );
 }
 
 exports.postComment = function(req, res){

@@ -30,8 +30,7 @@ function init() {
 		    collectionName: focusEntity.__t
 		}
 	    };
-	    
-	    console.log( data );
+
 	    $.ajax({
 		url: '/api/comments/get',
 		type: 'POST',
@@ -40,9 +39,11 @@ function init() {
 		data: data,
 		error: error
 	    }).success(function(data){
+		console.log( data );
 		
 		if( !user._id ) success( data );
 		else success( data.map( function(comment){
+
 		    comment.createdByCurrentUser = ( user.username === comment.username);
 		    return comment;
 		}));

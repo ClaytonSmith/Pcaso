@@ -132,6 +132,9 @@ exports.datasetGetCSV = function(req, res){
 	
 	if( doc.viewableTo( req.user ) ){ 
 	    doc.getFile( res );
+	    doc.save(function(saveErr){
+		// Handle error 
+	    });
 	} else {
 	    res.send(404);
 	}

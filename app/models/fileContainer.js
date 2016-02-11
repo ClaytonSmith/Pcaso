@@ -8,11 +8,13 @@ var util              = require('util');
 var multipart         = require('multipart');
 var async             = require('async');
 var mongoosePaginate  = require('mongoose-paginate');
+var mkdirp            = require('mkdirp');
+var rimraf            = require('rimraf');
 
 var config            = require('../../config/config');
 var asyncRemove       = require('../helpers/async-remove');
+var generateThumbnail = require('../helpers/generate-datascape-thumbnail');
 var mailer            = require('../../config/mailer');
-var BaseSchema        = require('./base-schema');
 var Comments          = require('./comments');
 var Notification      = require('./notification');
 
@@ -46,14 +48,18 @@ var FileContainerSchema = new mongoose.Schema({
 	display:         { type: Object,  required: true, default: {}},         // Tells the painter how to interpret the data
 	legacy:          { type: Object,  required: true, default: {}},         // Tells OLD painter how to interpret the data
     },
+    localDataPath:  { type: String, required: true },
+    publicDataPath: { type: String, required: true },
     links: {
 	parent:          { type: String,  required: true },
+	thumbnail:       { type: String,  required: true },
 	custom:          { type: String,  required: true },
 	bullet:          { type: String,  required: true },
 	link:            { type: String,  required: true },
 	local:           { type: String,  required: true },
     }
 }).extend({});
+
 
 FileContainerSchema.plugin(mongoosePaginate);
 
@@ -239,7 +245,10 @@ FileContainerSchema.static({
     
     register: function(parent, file, settings){
 	
+	console.log( 'Register', settings );
+	var documentId = mongoose.Types.ObjectId();        		
 	var fileContainer = new this({
+	    _id: documentId,
 	    parent: {
 		id: parent._id,
 		collectionName: parent.__t,
@@ -253,7 +262,10 @@ FileContainerSchema.static({
 	    sharedWith: settings.sharedWith ? seettings.sharedWith : [], 
 	    fileOptions: settings.fileOptions,	    
 	    displaySettings: settings.displaySettings,
+	    localDataPath:  parent.localDataPath,
+	    publicDataPath: parent.publicDataPath,
 	    links: {
+		thumbnail: parent.publicDataPath + "/files/thumbnails/" + documentId +".png",
 		parent: parent.links.link,
 		bullet: Math.random().toString(36).substring(5) 
 	    }
@@ -308,10 +320,20 @@ FileContainerSchema.pre('save', function(next){
 	    //writestream.on('error', throw new Error);
 	    writestream.on('finish', function(){
 		if( !fileContainer.fileOptions.keepFile ) fs.unlinkSync(fileContainer.file.path);	    
-		next();
+		
+		
+		// create thumbnail path and thumbnail
+		mkdirp( fileContainer.localDataPath + "/files/thumbnails/", function(mkdirErr){
+		    if( mkdirErr ) return next( mkdirErr );
+		    
+		    generateThumbnail( fileContainer.localDataPath + "/files/thumbnails/" + fileContainer._id +".png", next );
+
+		});
 	    });
 	    
-	    read.pipe(writestream);
+	    
+	    read.pipe(writestream);	    
+	    
 	});
     } else { 	
 	next();

@@ -18,7 +18,8 @@ function init() {
 	    html: 'Title'
 	}
 	var inputSettings = {
-	    id: 'title',
+	    id:   'title',
+	    name: 'title',
 	    type: 'text',
 	    value: title
 	}
@@ -26,11 +27,6 @@ function init() {
 	var container = $('<div\>',   containerSettings);
 	var label     = $('<label/>', labelSettings);
 	var input     = $('<input/>', inputSettings);
-
-	// on change, set new value
-	input.change(function(value){
-	    title = this.value;
-	});
 
 	container.append( label );
 	container.append( input );
@@ -147,10 +143,11 @@ function init() {
     });
     
     $("#submit-button").click(function(){
-    	var form = $("#dataset-upload-form");
-    	var formData = new FormData();	
+    	var form      = $("#dataset-upload-form");
+    	var formData  = new FormData();	
 	var actionURL = form.attr('action');
-	var method = form.attr('method').toUpperCase();
+	var method    = form.attr('method').toUpperCase();
+        var title     = form.find('input[name="title"]').val();
 
 	var data = {
 	    displaySettings: {
