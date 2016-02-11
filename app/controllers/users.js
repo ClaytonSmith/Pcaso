@@ -256,7 +256,7 @@ exports.createDataset = function(req, res){
 			throw new Error( error );
 		    }
 		    
-		    res.redirect( fileContainer.links.local );
+		    res.send( fileContainer.links.link );
     		});
 	    });    	    
         });   

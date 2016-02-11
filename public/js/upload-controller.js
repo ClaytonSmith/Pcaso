@@ -173,10 +173,12 @@ function init() {
             cache: false,
             contentType: false,
             processData: false,
+	}).success( function(data, textStatus){
+            window.location.replace( data );
 	});
-  	
-	return false;
     });
+
+    return false;
 }
 
 document.addEventListener("DOMContentLoaded", init);

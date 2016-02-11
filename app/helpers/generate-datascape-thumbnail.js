@@ -14,9 +14,11 @@ module.exports = function(path, callback){
     // Create blank new image in memory
     gd.createTrueColor(imageSize, imageSize, function(err, img){
 	if( err ) return callback( err );
-
+	
 	var lines = Array( getRandomInt(7, 3) );
-
+	
+	img.negate();
+	
 	// o and e are undefined
 	for( var i = 0; i < lines.length; i++ ){
 	    lines[i] = Array( getRandomInt(15, 3) );
@@ -44,11 +46,12 @@ module.exports = function(path, callback){
 				      getRandomInt(255,0),
 				      getRandomInt(255,0));
 	    
-	    img.setThickness( getRandomInt(5, 1) );
-	    img.openPolygon( line, color );
+	    img.setThickness( getRandomInt(10, 5) );
+	    line.forEach( function(point){
+		img.filledEllipse( point.x, point.y, 4, 4, color );
+	    });
 	});
-	
-	img.negate();
+
 	// Write image buffer to disk
 	img.savePng(path, 0, callback );
     });
