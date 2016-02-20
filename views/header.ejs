@@ -1,0 +1,42 @@
+<header>
+  <div class="pure-menu pure-menu-horizontal nav">
+    <a href="/" class="pure-menu-heading pure-menu-link">Pcaso</a>
+    
+    <ul class="pure-menu-list">
+      <li class="pure-menu-item"><a href="/gallery" class="pure-menu-link">Gallery</a></li>
+      <li class="pure-menu-item"><a href="/about" class="pure-menu-link">About</a></li>
+    </ul>
+    
+    <ul class="pure-menu-list pull-right">
+      <!-- EJS IF -->
+      
+    
+      <% if (locals.user) { %>
+	  
+      <li class="pure-menu-item"><a href="/notifications" class="pure-menu-link">
+	  Notifications
+	  
+	  <% if (user.notifications.length) { %>
+	  <span class="pure-badge-success"><%= user.notifications.length %></span>
+	  <% } %>
+      </a></li>
+
+      
+      <li class="pure-menu-item pure-menu-has-children pure-menu-allow-hover">
+        <a href="/profile" id="menuLink1" class="pure-menu-link"><%= user.username %></a>
+        <ul class="pure-menu-children nav child">
+          <li class="pure-menu-item"><a href="<%- user.links.local %>/settings" class="pure-menu-link">Settings</a></li>
+          <li class="pure-menu-item"><a href="/sign-out" class="pure-menu-link">Sign Out</a></li>
+        </ul>
+      </li>
+      
+      
+      <% } else { %>
+      
+      <li class="pure-menu-item"><a href="/sign-in" class="pure-menu-link">Sign In</a></li>
+      <li class="pure-menu-item"><a href="/sign-up" class="pure-menu-link">Sign Up</a></li>
+      
+      <% } %>
+    </ul>
+  </div>
+</header>

@@ -6,6 +6,8 @@ var mongoose              = require('mongoose');
 var Users                 = mongoose.model('User');
 var UnauthenticatedUsers  = mongoose.model('UnauthenticatedUser');
 
+
+var config                = require('./config');
 // load the auth variables
 var configAuth            = require('./auth'); // use this one for testing
 
@@ -23,9 +25,7 @@ module.exports = function(passport) {
 
     // used to deserialize the user
     passport.deserializeUser(function(id, done) {
-        Users.findById(id, function(err, user) {
-            done(err, user);
-        });
+        Users.findById(id, done );
     });
     
     //===========================================================================
@@ -38,15 +38,15 @@ module.exports = function(passport) {
             passReqToCallback : true
 	},
 	function(req, email, password, done) {
-	    if (email)	    
+	    if( email )	    
 		process.nextTick(function() {
 		    Users.findOne({ 'email' : email.toLowerCase() }, function(err, user) {
 			
-			if (err) return done(err);
+			if( err ) return done(err);
 			
-			if (!user) return done(null, false, req.flash('loginMessage', 'Bad email or password.'));
+			if( !user ) return done(null, false, req.flash('signInMessage', 'Bad username or password.'));
 			
-			if (!user.validPassword(password)) return done(null, false, req.flash('loginMessage', 'Bad email or password.'));
+			if( !user.validPassword(password)) return done(null, false, req.flash('signInMessage', 'Bad username or password.'));
 			
 			return done(null, user);
 		    });
@@ -60,28 +60,28 @@ module.exports = function(passport) {
             passReqToCallback : true
 	},
 	function(req, email, password, done){
+	    console.log('Local signup');
 	    if (email)
+		
 		process.nextTick(function() {
 		    if (!req.user) {	
+			var query = {
+			    $or: [
+				{ email : email.toLowerCase() },
+				{ username: new RegExp( ["^", req.body.username, "$"].join(""), "i" ) } // Store the original but search for similar 
+			    ]                   
+			};
 			
 			Async.parallel(
 			    [
 				// Search users for email
 				function(callback){
-				    var query = Users.findOne({ 'email' : email.toLowerCase() })
-				    query.exec(function(err, user) {
-					if(err) callback( err );
-					callback( null, user);
-				    });
+				    Users.findOne( query, callback );
 				},
 				
 				// Search UnauthenticatedUsers for email 
 				function(callback){
-				    var query = UnauthenticatedUsers.findOne({ 'email' : email.toLowerCase() })
-				    query.exec(function(err, user) {
-					if(err) callback( err );
-					callback( null, user);
-				    });
+				    UnauthenticatedUsers.findOne( query, callback );
 				},
 			    ],
 			    
@@ -89,28 +89,39 @@ module.exports = function(passport) {
 			    function(err, results){
 				if( err ) return done(err); 
 				
+				var emails   = results.filter( function(result){ return ( result !== null && result.email    === req.body.email ) });
+				var username = results.filter( function(result){ return ( result !== null && result.username === req.body.username ) });
+				
 				// Make sure no users exist in users or unauthenticated users with this email
-				if( !results.reduce(function(predicate, result){ return predicate && result === null; }, true) )
-				    return done(null, false, req.flash('signupMessage', 'That email is already in use.')); 
-				
+				if( emails.length || username.length ){
+				    var errorString = 'The ' 
+					+ ( ( emails.length ) ? 'email' : '' )
+					+ ( ( emails.length && username.length ) ? ' and ' : '' )
+					+ ( ( username.length ) ? 'username' : '' )
+					+ ' provided have already in use.';
+				    
+				    console.log(errorString);
+				    return done(null, false, req.flash('signUpMessage', errorString )); 
+				}
+
 				// Make account
-				var newUser         = new UnauthenticatedUsers();
+				var newUser = UnauthenticatedUsers.register(
+				    req.body.firstName,
+				    req.body.lastName,
+				    email.toLowerCase(),
+				    password,
+				    req.body.username
+				);
 				
-				newUser.email       = email.toLowerCase();
-				newUser.password    = newUser.generateHash(password);
-				newUser.name.first  = req.body.firstName;
-				newUser.name.last   = req.body.lastName;
-				
+				console.log('Made', newUser);
 				newUser.save(function(err) {
-				    if (err) return done(err);    
-				    console.log('In save');
-				    mailer.useTemplate( 'test', newUser, function(mailError){
-					done(mailError, newUser); 
+				    if (err) return done(err);   
+				    mailer.useTemplate( 'authenticate-new-user', newUser, function(mailError){
+					//done(mailError, newUser, req.flash('signInMessage', config.service.domain + 'authenticate-account/' + newUser._id )); 
+					done(mailError, newUser, req.flash('signInMessage', 'An authentication link will be sent to your email account shortly.')); 
 				    }); 
 				});
-				
-				console.log('/authenticate-account/' + newUser._id );
-				//return done(null, false, req.flash('signupMessage', 'That email is already in use.')); 
+	
 			    });
 			
 			// if the user is logged in but has no local account...
@@ -131,8 +142,7 @@ module.exports = function(passport) {
 			    user.name      = req.user.name;
 			    
 			    user.save(function (err) {
-				if (err) return done(err);
-				return done(null,user);
+				done(err, user);
 			    });			    
 			});
 		    } else {

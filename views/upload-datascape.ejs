@@ -1,0 +1,83 @@
+<!doctype html>
+<html>
+  <%- include head.ejs %>  
+  <body>
+    <%- include header.ejs %>      
+    <main>
+      <script src="/js/upload-settings-controller.js"></script>
+      
+      <div class="app-content">
+	
+	<% if (message.length > 0) { %>
+	<div class="pure-alert pure-alert-error"><%= message %></div>
+	<% } %>
+	
+	<div class="upload-container">
+	  <h1 class="title">Upload CVS</h1>
+	  <hr>
+	  
+	  <form action="/upload-datascape" method="POST" enctype="multipart/form-data"
+		class="pure-form pure-form-stacked basic-form" id="dataset-upload-form" 
+		name="dataset-upload-form">  <!-- novalidate="novalidate"> -->
+	    
+	    <div class="pure-control-group" id="file-select-container1">
+	      <label for="file">File sdas</label>
+	      <input type="file" accept=".csv" id="file-select" name="file">
+	    </div>
+	    
+	    <div id="form-file-settings-container">
+	      
+	      <div class="pure-control-group dataset-title">
+		<label for="file-title">Title</label>
+		<input id="file-title" name="title" type="text" value="">
+	      </div>
+	      
+	      <div id="table-display-container"></div>
+	      
+	      <div class="pure-control-group dataset-title">
+		<label for="caption">Caption</label>
+		<div id="caption"></div>
+	      </div>
+	      
+	      <div class="pure-g user-sharing-container">
+		<div class="pure-u-1-2">
+		  <label class="pure-radio" for="privacy-public">
+		    <input type="radio" name="privacySettings"
+			   value="PUBLIC" id="privacy-public">Share publicly
+		  </label>
+		  
+		  <label class="pure-radio" for="privacy-private">
+		    <input type="radio" name="privacySettings"
+			   value="PRIVATE" id="privacy-private">Share privately
+		  </label>
+		</div>
+		
+		<div class="pure-u-1-2">
+		  <div class="pure-control-group" id="user-select">
+		    <label for="shared-users">Shared users</label>
+		    <ul class="top-m-1" id="shared-user-collection"></ul>
+		    
+		    <button class="pure-button top-m-1" id="add-user">
+		      <i class="fa fa-plus">Add shared user</i></button>
+		  </div>
+		</div>
+	      </div>
+	    </div>
+	    <div class="pure-g">	      	      
+	      <button type="submit" id="save-datascape-button"
+		      class="pure-button pure-button-success submit-button pure-g-u-1-5">
+		Create datascape
+	      </button>
+	    </div>
+	  </form>
+          
+	</div>
+      </div>
+    </main>
+    <%- include footer.ejs %>  
+  </body>  
+</html>
+
+
+
+

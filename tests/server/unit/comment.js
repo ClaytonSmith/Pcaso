@@ -74,7 +74,7 @@ describe('Comments', function(){
 	expect( comment.from ).to.equal( commentTemplate.from );
 	expect( comment.body ).to.equal( commentTemplate.body );
 	
-	expect( comment.displaySettings.parentLink).to.equal( parent.displaySettings.link ); 
+	expect( comment.links.parent ).to.equal( parent.links.link ); 
     });
     
     it('Add comment', function(){

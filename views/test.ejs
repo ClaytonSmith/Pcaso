@@ -1,0 +1,126 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title id="title">Pcaso</title>
+    <link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/img/favicon.ico" type="image/x-icon">
+    
+    <meta name="description" value="Data driven painting service that allows users to view higher dimentional datasets." />
+    <meta name="keywords" value="genetic genetics data metadata datadriven pcaso picasso clayton" />
+    <meta name="application-name" content="Pcaso">
+    
+    <!-- Dataset viewer -->
+    <link rel="stylesheet" href="/css/dataset-viewer.css">	
+    
+    <!-- Custom style sheets -->
+    <link rel="stylesheet" href="/css/pure-extras.css">
+    <link rel="stylesheet" href="/css/stylesheet.css">
+    
+    <!-- Jquery-comments -->
+    <link rel="stylesheet" type="text/css" href="/components/jquery-comments/css/jquery-comments.css">
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    
+    
+    <!-- JAVASCRIPT -->
+      <!-- JAVASCRIPT -->
+
+  <script type="text/javascript">
+
+
+    var userData = {
+    <% if (locals.user ) { %>
+    _id:         "<%- user._id %>", 
+    __t:         "<%- user.__t %>", 
+    name:         <%- user.name %>,
+    username:    "<%- user.username %>",
+    avitar:      "<%- user.avitar %>",
+    links:        <%- user.links %>
+    
+    <% } else { %> 
+    _id: null, 
+    __t: null,
+    name: { first: null, last: null },
+    username: null,
+    avitar: null,
+    links: { link: null, local: null }
+    <% }  %>
+    };
+    
+    var focusEntity = {
+    
+    <% if (locals.profile) { %>
+    
+    _id:         "<%- profile._id %>", 
+    __t:         "<%- profile.__t %>", 
+    name:         <%- profile.name %>,
+    username:    "<%- profile.username %>",
+    avitar:      "<%- profile.avitar %>",
+    links:        <%- profile.links %>
+ 
+    <% } else if (locals.dataset) { %>
+    
+    _id:             "<%- dataset._id %>", 
+    __t:             "<%- dataset.__t %>", 
+    parent:           <%- dataset.parent %>,
+    file:             <%- dataset.file %>,
+    statistics:       <%- dataset.statistics %>,
+    displaySettings:  <%- dataset.displaySettings %>,
+    links:            <%- dataset.links %>
+    
+    <% } else { %> 
+    
+    /* No entity in focus */
+    
+    <% }  %>    
+    };
+
+    window.globaData = {};
+    window.globaData.user        = userData;
+    window.globaData.focusEntity = focusEntity;
+    console.log( window.globaData );
+  </script>
+  
+  <!-- Jquery -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+  
+  <!-- D3 -->
+  <script src="/components/d3/d3.min.js"></script>  
+
+    
+  <!-- Jquery-comments -->
+  <script src="/components/jquery-comments/js/jquery-comments.min.js"></script>  
+  <script src="/js/comment-controller.js"></script>  
+  
+  <!-- Papa Parse -->
+  <script src="/js/PapaParse/papaparse.js"></script>
+
+  <!-- Form2js -->
+  <script src="/js/form2js/src/form2js.js"></script>
+  <script src="/js/form2js/src/js2form.js"></script>
+  
+  <!-- Upload controllers-->
+  <script src="/js/helpers.js"></script>
+  <script src="/js/upload-controller.js"></script>
+  
+  
+
+    
+</head>
+
+  <body>
+
+    <main>
+      
+      <div class="content">
+	
+	<h1> Hello </h1>
+	
+      </div>
+    </main>
+
+  </body>  
+</html>
+
+
+

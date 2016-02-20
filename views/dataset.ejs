@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+  <%- include head.ejs %>  
+  <body>
+    <%- include header.ejs %>      
+    <main>
+      
+      <script src="/components/d3/d3.min.js"></script>
+      <script src="/js/legacy/pcaso-painting-service.js"></script>
+           
+      <div id="loading" style="padding-left:2vmin; display:none;">
+	<p>Painting data...</p>
+	<p></p>
+	<p><small>Waiting for >10 seconds? <a target="_blank" href="http://www.pcaso.io/help">Click for help.</a></small></p>
+      </div>
+      
+      <!-- Pcaso --> 
+      <div id="pcaso">
+      </div>
+      
+      <div id="pcaso-panel">
+	
+	<div id="pcaso-hover">( 0, 0 )</div> 
+	<div id="search_panel">
+	  <form name="searchform" onSubmit="return handleSearch()" >
+	    <input type="text" id="search_input" placeholder="Search" value="">
+	    <input value="Search" id="search_button" type="submit">
+	    <br>
+	    <input type="checkbox" id="search_exact_checkbox" checked><span>exact match only</span>
+	  </form>
+	  <div id="search_results"></div>
+	</div>
+	
+	<br style="clear: both;">
+	<div id="pcaso-selection" ></div>
+	<div id="pcaso-legend" ></div> 
+	
+      </div>
+      
+      <br style="clear: both;">
+      <div style="display:none;" id="show-caption" >
+      
+      </div>
+      
+      <div class="app-content">
+	<div id="comments-container" class="jquery-comments"></div> 
+      </div>
+    </main>
+    <%- include footer.ejs %>  
+  </body>  
+</html>

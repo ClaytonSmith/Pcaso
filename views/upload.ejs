@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+  <%- include head.ejs %>  
+  <body>
+    <%- include header.ejs %>      
+    <main>
+      
+      <div class="app-content">
+	
+	<% if (message.length > 0) { %>
+	<div class="pure-alert pure-alert-error"><%= message %></div>
+	<% } %>
+	
+	<div class="upload-container">
+	  <h1 class="title">Submit data</h1>
+	  <hr>
+	  
+          
+	  <form action="/upload-dataset" method="post" enctype="multipart/form-data" 
+		class="pure-form pure-form-stacked" id="dataset-upload-form" >
+	    
+	    <div class="pure-control-group">
+	      <input type="file" accept=".csv" id="file-select" name="file" />
+	    </div>
+	    
+	    <div id="csv-display-container"></div>
+	    
+	  
+	    <% if (user) { %>
+	    
+	    <label for="ownership" class="pure-radio">
+              <input id="publicized" type="radio" name="ownership" value="true" checked>
+              Submit dataset as <%= user.username %>.
+	    </label>
+	    
+	    <label for="ownership" class="pure-radio">
+              <input id="anonymously" type="radio" name="ownership" value="false">
+              Submit dataset anonymously.
+	    </label>
+	    
+	    <% } else { %>			       
+	    
+	    <label for="ownership" class="pure-radio">
+              <input id="ownership" type="radio" name="ownership" value="false" checked>
+              Submit dataset anonymously.
+	    </label>
+	    
+	    <p>You should <a href="/sign-up">sing-up</a> to keep track of your data</p>
+	    
+	    <% } %>
+	    
+	    
+	    <button type="submit" id="submit-button">Submit data and files!</button>
+	  </form>
+	</div>
+      </div>
+    </main>
+    <%- include footer.ejs %>  
+  </body>  
+</html>
+
+
+
+

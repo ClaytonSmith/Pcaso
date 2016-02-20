@@ -1,0 +1,29 @@
+{
+  "name": "Pcaso",
+  "description": "A cool data driven painting project",
+  "main": "server.js",
+  "authors": [
+    "ClaytonSmith <clayton@claytonsmith.io>"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "node",
+    "csv",
+    "paint",
+    "d3",
+    "genetics",
+    "research"
+  ],
+  "homepage": "https://github.com/ClaytonSmith/Pcaso",
+  "moduleType": [],
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "public/components"
+  ],
+  "dependencies": {
+    "d3": "^3.5.14"
+  }
+}

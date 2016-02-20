@@ -33,7 +33,10 @@ describe('Unauthenticated user', function(){
 	    userTemplate.username
 	);
 	
-	user.save( done );
+	user.save( function(err){
+	    console.log( err );
+	    done( err );
+	} );
     });
     
     afterEach(function(done){
@@ -90,8 +93,7 @@ describe('User', function(){
     });
 
     it('Password encription', function(){
-	expect( user.password ).not
-	    .equal( userTemplate.password );
+	expect( user.password ).not.equal( userTemplate.password );
     });
     
     it('User information saved correctly', function(){

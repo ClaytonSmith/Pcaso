@@ -22,7 +22,7 @@ var notifier = {
 var defaults = {
     root: path.join(__dirname, '..'),
     secrets: secrets,
-        
+    defaultAvatarPath: path.join(__dirname, '..') +"/public/imgs/user-icon.png"
     //notifier: notifier
 };
 

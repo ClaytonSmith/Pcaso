@@ -2,8 +2,10 @@
 ESLINT := node_modules/.bin/eslint
 MOCHA := node_modules/.bin/mocha
 
-SRC = $(shell find app/ -name "*.js" -type f | sort)
-SUPPORT = $(wildcard support/*.js)
+SRC      = $(shell find app/ -name "*.js" -type f | sort)
+SUPPORT  = $(wildcard support/*.js)
+FLAGS    = --growl --harmony_proxies
+
 
 lint:
 	@$(ESLINT) $(SRC)
@@ -16,14 +18,14 @@ system-test: | integration-test
 
 unit-test: 
 	@${MOCHA} \
-	  --growl \
+	  ${FLAGS} \
 	  tests/server/unit/controller.js
 
 
 
 integration-test: 
 	@${MOCHA} \
-	  --growl \
+	  ${FLAGS} \
 	  tests/server/system/integration/controller.js
 
 .PHONY: test

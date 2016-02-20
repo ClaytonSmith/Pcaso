@@ -24,17 +24,22 @@
 
 
 
-var mongoose       = require('mongoose');
-var bcrypt         = require('bcrypt-nodejs');
-var extend         = require('mongoose-schema-extend');
-var async          = require('async');
-var config         = require('../../config/config');
-var asyncRemove    = require('../helpers/async-remove');
+var mongoose          = require('mongoose');
+var bcrypt            = require('bcrypt-nodejs');
+var extend            = require('mongoose-schema-extend');
+var async             = require('async');
+var config            = require('../../config/config');
+var mailer            = require('../../config/mailer');
+var asyncRemove       = require('../helpers/async-remove');
+var copyFiles         = require('../helpers/copy-files');
+var mongoosePaginate  = require('mongoose-paginate');
+var util              = require('util');
+var mkdirp            = require('mkdirp');
+var rimraf            = require('rimraf');
 
-//var BaseSchema     = mongoose.model('BaseSchema');
-var FileContainers = mongoose.model('FileContainer');
-var Comments       = mongoose.model('Comment');
-var Notification   = mongoose.model('Notification');
+var FileContainers    = mongoose.model('FileContainer');
+var Comments          = mongoose.model('Comment');
+var Notification      = mongoose.model('Notification');
 
 
 var BaseUserSchema = new mongoose.Schema({// BaseSchema.extend({    
@@ -55,22 +60,7 @@ var BaseUserSchema = new mongoose.Schema({// BaseSchema.extend({
 
 var UnauthenticatedUserSchema  = BaseUserSchema.extend({});
 
-// Regular users can have files
-var UserSchema                 = BaseUserSchema.extend({
-    files:          { type: [], default: [] },                        // List of mongoId for containers
-    fileSettings: {
-	defaults: {
-	    visibility:  { type: String,  'default': 'PRIVATE'},      // default file visibility, set for every future upload
-	    commentable:        { type: Boolean, 'default': true }    // default commenting on account
-	},
-    },
-    comments:       { type: [], default: [] },                        // List of mongoId for comments left by user
-    userComments:   { type: [], default: [] },                        // List of mongoId for comments left by user
-    notifications:  { type: [], default: [] },                         // List of new and all notifications, hide this
-    displaySettings: {
-	link:          { type: String, required: true }
-    }	
-});
+UnauthenticatedUserSchema.plugin(mongoosePaginate);
 
 UnauthenticatedUserSchema.method({
 
@@ -85,6 +75,32 @@ UnauthenticatedUserSchema.method({
 });
 
 
+// Regular users can have files
+var UserSchema                 = BaseUserSchema.extend({
+    files:          { type: [], default: [] },                        // List of mongoId for containers
+    fileSettings: {
+	defaults: {
+	    visibility:  { type: String,  'default': 'PUBLIC'},      // default file visibility, set for every future upload
+	    commentable:        { type: Boolean, 'default': true }    // default commenting on account
+	},
+    },
+    comments:       { type: [], default: [] },                        // List of mongoId for comments left by user
+    userComments:   { type: [], default: [] },                        // List of mongoId for comments left by user
+    notifications:  { type: [], default: [] },                        // List of new and all notifications, hide this
+    localDataPath:  { type: String, default: '' },
+    publicDataPath: { type: String, default: '' },    
+    profileSettings: {
+	displayEmail: { type: Boolean, default: true }
+    },
+    links: {
+	avatar:        { type: String, default: '' },
+	link:          { type: String, required: true },
+	local:         { type: String, required: true }
+    }	
+});
+
+UserSchema.plugin(mongoosePaginate);
+
 // Unregistered users dont get these cool features. They get nothing 
 UserSchema.method({
 
@@ -94,22 +110,23 @@ UserSchema.method({
 
     // Saves file's ID in list of files
     registerFile: function(file, settings, callback){
-	
+
 	var user = this;
 	var options = JSON.parse(JSON.stringify( settings ));
 	
+	// deep copy 
 	options.displaySettings = JSON.parse(JSON.stringify( settings.displaySettings || {} )) ;
 	options.fileOptions     = JSON.parse(JSON.stringify( settings.fileOptions     || {} )) ;
 	
-	options.displaySettings.visibility = options.displaySettings.visibility || this.fileSettings.defaults.visibility;
+	options.displaySettings.visibility = options.displaySettings.visibility 
+	    || this.fileSettings.defaults.visibility;
 
 	var fileContainer = FileContainers.register(this, file, options);
 
 	fileContainer.save(function(err){
 	    if( err ) callback( err ) ;
 	    
-	    user.attachFile( fileContainer._id );	
-	    
+	    user.attachFile( fileContainer._id );
 	    callback( null );	    
 	});
 	
@@ -146,28 +163,39 @@ UserSchema.method({
     
     leaveComment: function( entity, subject, commentBody, callback ){
 	var user = this;
-	var comment = Comments.register( user, entity, this.name.first, subject, commentBody);
+	var comment = Comments.register( user, entity, this.username, subject, commentBody);
+	
+
 	
 	comment.save(function(err){
 	    if( err ) callback( err ) ;
 	    user.userComments.push( comment._id );	
 	    
-	    if( entity._id === "user" ){
+	    if( entity.__t === "User" ){
 	    };
 		
 	    entity.save( function(err2){
 		if( err2 ) callback( err2 ) ;	
 		
-		var notificationTitle = user.username + " has commented on your " + entity.__t;
+		console.log("\n\n\n", entity, "\n\n\n");
+		var notificationTitle = user.name.first +" "+ user.name.first +"has commented on your " + Comments.commentMap( entity.__t );
 		var notification = Notification.register( entity, comment, notificationTitle );
 		
 		notification.save( function(err3){
 		    if( entity._id === user._id ){
 			entity.addNotification( notification.id );
+			
+		    } else {
+			mailer.useTemplate('new-comment', entity, {comment: comment, notification: notification}, function(mailErr,a,b,c,d){
+			    if( mailErr ) throw new Error( mailErr );
+			});
 		    }
 		    
 		    callback( err3 );
 		});
+		
+		
+		// MAILER
 	    });
 	});
 	
@@ -259,7 +287,7 @@ UnauthenticatedUserSchema.static({
 	return bcrypt.compareSync(password, this.password);
     },
 
-    register: function( first, last, email, pass, username){
+    register: function(first, last, email, pass, username){
 	var user = new this({
 	    name: {
 		first: first,
@@ -293,8 +321,34 @@ UserSchema.static({
 	    email: email,
 	    password: this.generateHash( pass ),
 	    username: username,
-	    displaySettings: {
-		link: config.service.domain + "user/" + username
+	    localDataPath:  config.root +'/public/users-public-data/'+ username,
+	    publicDataPath: config.service.domain +'users-public-data/'+ username,
+	    links: {
+		avatar: config.service.domain +'users-public-data/'+ username +'/imgs/avatar',	   
+		link:   config.service.domain + "user/" + username,
+		local:  "/user/" + username
+	    }
+	});	
+	
+	return user;
+    },
+
+    convert: function(unauthenticatedUser){
+
+	var user = new this({
+	    name: {
+		first: unauthenticatedUser.name.first,
+		last:  unauthenticatedUser.name.last,
+	    },
+	    email: unauthenticatedUser.email,
+	    password: unauthenticatedUser.password, // Pass is already encrypted 
+	    username: unauthenticatedUser.username,
+	    localDataPath:  config.root +'/public/users-public-data/'+ unauthenticatedUser.username,
+	    publicDataPath: config.service.domain +'users-public-data/'+ unauthenticatedUser.username,
+	    links: {
+		avatar: config.service.domain +'users-public-data/'+ unauthenticatedUser.username +'/imgs/avatar',
+		link:   config.service.domain + "user/" + unauthenticatedUser.username,
+		local:  "/user/" + unauthenticatedUser.username
 	    }
 	});	
 	
@@ -309,7 +363,29 @@ UnauthenticatedUserSchema.set('versionKey', false);
 UserSchema.pre('save', function(next) {
     var user = this;
     user.lastUpdated = Date.now();    
-    next();
+
+
+    
+    // On first save
+    if( user.isNew ){
+
+
+	var publicDir = config.root + '/public/users-public-data/'+ user.username +'/';
+	//create public directory for things like avatars
+		
+	async.series(
+	[
+	    function(parellelCB){
+		// covers both images and avatar directory
+		mkdirp( publicDir + "imgs/", parellelCB );
+	    },
+	    function(parellelCB){
+		copyFiles( config.defaultAvatarPath, user.localDataPath +'/imgs/avatar', parellelCB );
+	    }
+	    
+	], next );	    
+		
+    } else next();
 });
 
 // Before a user deletes their account, remove all of their files and directory
@@ -339,7 +415,11 @@ UserSchema.pre('remove', function(next) {
 		asyncRemove.asyncRemove(user.notifications, function(id, streamCB){
 		    user.removeNotification( id, streamCB );
 		}, parellelCB );
+	    },
+	    function(parellelCB){
+		rimraf( user.localDataPath, parellelCB );
 	    }
+	    
 	], next );	    
 });
 

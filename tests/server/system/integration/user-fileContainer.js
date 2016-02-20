@@ -39,20 +39,7 @@ describe('User - FileContainer: Integration test', function(){
     
     var fileCntr = null;
 
-    var fileTemplate = {
-	file: {
-	    name: 'test file',
-	    path: './data/test/test-file.txt'
-	},
-	settings:{
-	    fileOptions: {
-		keepFile: true
-	    },
-	    displaySettings:{
-		// null
-	    }
-	}
-    };
+    var fileTemplate = helper.fileTemplate;;
     
     before( function(done){
 	done();
@@ -117,7 +104,10 @@ describe('User - FileContainer: Integration test', function(){
 
 	var promise = new Promise( function(resolve, reject){
 	    fileCntr = user1.registerFile(fileTemplate.file, fileTemplate.settings, function(err){
-		if( err ) reject( done, err );
+		if( err ) {
+		    console.log(err); 
+		    reject( done, err );
+		}
 		else resolve( fileCntr );
 	    });
 	});
@@ -129,7 +119,7 @@ describe('User - FileContainer: Integration test', function(){
 		expect( fc.parent.collectionName ).to.equal( user1.__t );
 		done();
 	    });
-	}).catch( function(d,e){d(e)} );
+	}).catch( function(d,e){ done(e)} );
     
     });
     
@@ -146,10 +136,13 @@ describe('User - FileContainer: Integration test', function(){
 	
 	promise.then(function( fc ){
 	    check(function(){
-		expect( user1.files ).to.include( fc._id );
+
+		expect( user1.files ).to.not.include( fc._id );
 		expect( fc.parent.id ).to.equal( user1._id.toString() );
 		expect( fc.parent.collectionName ).to.equal( user1.__t );
 	    });
+	    
+	    
 	    
 	    return new Promise( function(resolve, reject){
 		user1.removeFile( fc._id, function(err){
@@ -157,7 +150,7 @@ describe('User - FileContainer: Integration test', function(){
 		    else resolve( /* Nothing */);
 		});
 	    });
-	}).catch( function(d,e){d(e)} ).then(function(){
+	}).catch( function(d,e){done(e)} ).then(function(){
 	    
 	    return new Promise( function(resolve, reject){
 		User.findOne( { _id: user1._id }, function(err, doc){
@@ -165,8 +158,9 @@ describe('User - FileContainer: Integration test', function(){
 		    else resolve( doc )
 		});
 	    });	    
-	}).catch( function(d,e){d(e)} ).then(function(updatedUser){
+	}).catch( function(d,e){done(e)} ).then(function(updatedUser){
 	    check(function(){
+		console.log( 'HELLLLLLLLLOOOOOOOOO',fileCntr );
 		expect( user1.files ).to.not.include( fileCntr._id );
 	    });
 	    
@@ -176,7 +170,7 @@ describe('User - FileContainer: Integration test', function(){
 		    else resolve( doc )
 		});
 	    });
-	}).catch( function(d,e){d(e)} ).then(function(query){
+	}).catch( function(d,e){done(e)} ).then(function(query){
 	    check(function(){
 		expect( query ).to.not.exist;
 		done();
@@ -201,7 +195,7 @@ describe('User - FileContainer: Integration test', function(){
 		expect( fc.viewableTo( user2 ) ).to.be.false;
 		done();
 	    });
-	}).catch( function(d,e){d(e)} );
+	}).catch( function(d,e){done(e)} );
     });
 
     it('File visability: Shared', function(done){
@@ -227,13 +221,13 @@ describe('User - FileContainer: Integration test', function(){
 		    else resolve()
 		});
 	    });
-	}).catch( function(d,e){d(e)} ).then(function(){
+	}).catch( function(d,e){done(e)} ).then(function(){
 	    check(function(){	    
 		expect( fileCntr.viewableTo( user1 ) ).to.be.true;
 		expect( fileCntr.viewableTo( user2 ) ).to.be.true;
 		done();
 	    });
-	}).catch( function(d,e){d(e)} );
+	}).catch( function(d,e){done(e)} );
     });
 
     it('File visability: Default visibility', function(done){
@@ -256,7 +250,7 @@ describe('User - FileContainer: Integration test', function(){
 		done();
 	    });
 	    
-	}).catch( function(d,e){d(e)} );
+	}).catch( function(d,e){done(e)} );
     });
     
     it('Remove file when parent is removed', function(done){
@@ -278,7 +272,7 @@ describe('User - FileContainer: Integration test', function(){
 	    	    else resolve( fileCntr );
 	    	});
 	    });		   
-	}).catch( function(d,e){d(e)} ).then(function(fc){
+	}).catch( function(d,e){done(e)} ).then(function(fc){
 	    
 	    return new Promise( function(resolve, reject){
 		User.findOne( { _id: user1._id }, function(err, doc){
@@ -286,7 +280,7 @@ describe('User - FileContainer: Integration test', function(){
 		    else resolve( doc )
 		});
 	    });	    
-	}).catch( function(d,e){d(e)} ).then(function(updatedUser){
+	}).catch( function(d,e){done(e)} ).then(function(updatedUser){
 
 	    check(function(){
 		expect( updatedUser ).to.not.exist;
@@ -298,7 +292,7 @@ describe('User - FileContainer: Integration test', function(){
 		    else resolve( doc )
 		});
 	    });
-	}).catch( function(d,e){d(e)} ).then(function(doc){
+	}).catch( function(d,e){done(e)} ).then(function(doc){
 	    
 	    check(function(){
 		expect( doc ).to.not.exist;
@@ -308,6 +302,6 @@ describe('User - FileContainer: Integration test', function(){
 		user1 = new FakeModel({});
 		user1.save( done );
 	    });
-	}).catch( function(d,e){d(e)} );
+	}).catch( function(d,e){done(e)} );
     });
 });

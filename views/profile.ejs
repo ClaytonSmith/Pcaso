@@ -1,81 +1,66 @@
 <!doctype html>
 <html>
-  <head>
-    <title>Node Authentication</title>
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
-    <style>
-      body         { padding-top:80px; word-wrap:break-word; }
-    </style>
-  </head>
+  <%- include head.ejs %>  
   <body>
-    <div class="container">
-
-      <div class="page-header text-center">
-        <h1><span class="fa fa-anchor"></span> Profile Page</h1>
-        <a href="/logout" class="btn btn-default btn-sm">Logout</a>
-      </div>
-
-      <div class="row">
-
-        <!-- LOCAL INFORMATION -->
-        <div class="col-sm-6">
-          <div class="well">
-            <h3><span class="fa fa-user"></span> Local</h3>
-
-            <% if (user.email) { %>
-            <p>
-              <strong>id</strong>: <%= user._id %><br>
-              <strong>email</strong>: <%= user.email %><br>
-              <strong>password</strong>: <%= user.password %><br>
-	      <strong>Mongoose ID</strong>: <%= user._id %>
-            </p>
-            
-	    <h1> Test loggin</h1>
-
-
-	    <a href="/profile2" class="btn btn-default">Profile2</a>
-	    <a href="/delete-account" class="btn btn-default">Delete Account</a>	    
-
-            <a href="/unlink/local" class="btn btn-default">Unlink</a>
-            <% } else { %>
-            <a href="/connect/local" class="btn btn-default">Connect Local</a>
-            <% } %>
-
-          </div>
-        </div>
-
-        <!-- FACEBOOK INFORMATION -->
-        <div class="col-sm-6">
-          <div class="well">
-            <h3 class="text-primary"><span class="fa fa-facebook"></span> Facebook</h3>
+    <%- include header.ejs %>      
+    <main>
+      
+      <div class="app-content">
+	<div class="account-container">
 	  
-          </div>
-        </div>
-      </div>
-      <div class="row">
+	  
+	  <% if (isOwner) { %>
+	  <h1>Hello <%= profile.name.first %></h1>
+	  <% } else { %>
+	  <h1><%= profile.username %></h1>
+	  <% } %>
 
-        <!-- TWITTER INFORMATION -->
-        <div class="col-sm-6">
-          <div class="well">
-            <h3 class="text-info"><span class="fa fa-twitter"></span> Twitter</h3>
-          </div>
-        </div>
+	  <hr>
+	  
+	  <h3>Portfolio</h3>
+	  
+	  <div class="pure-g profile-main-display">
+	 
+	    <div class="pure-u-3-4 enable-scrolling">
+	      <div class="pure-g">
 
-        <!-- GOOGLE INFORMATION -->
-        <div class="col-sm-6">
-          <div class="well">
-            <h3 class="text-danger"><span class="fa fa-google-plus"></span> Google+</h3>
+		<% for(var i = 0; i < profile.files.length; i++) { %>
+		   <!-- style="background-image: url( <%- profile.files[i].links.thumbnail %>);"-->
+		   <div class="pure-u-1-6 dataspace-tile" >
+		     <a href="<%- profile.files[i].links.local %>">
+		       <h4><%= profile.files[i].displaySettings.title %></h4>
+		       <p class="view-count">Views: <%= profile.files[i].statistics.viewCount %></p>
+		       <p class="view-count">Comments: <%= profile.files[i].comments.length %></p>
+		       <p class="visibility">Visibility: <span class="capitalize"><%= profile.files[i].displaySettings.visibility %></span></p>
+		     </a>		   
 
-          </div>
-        </div>
-      </div>
+		     <% if (isOwner) { %>
+		     <a class="bottom-right" href="<%- profile.files[i].links.local %>/settings">
+		       <i class="fa fa-cog fa-2x rotate-on-hover"></i>
+		     </a>
+		     <% } %>
+		   </div>
+		   <% } %>
+		   
+	      </div>
+	      
+	    </div>
 
-      <div class="text-center">
-        <p>A demo by <a href="http://scotch.io">Scotch</a>.</p>
-        <p>Visit the <a href="http://scotch.io/tutorials/javascript/easy-node-authentication-setup-and-local">tutorial</a>.</p>
-      </div>
-
-    </div>
-  </body>
+	    <div class="pure-u-1-4">	      
+	      <img class="pure-img avatar" src="<%- profile.links.avatar %>">
+	      <p><%= profile.name.first %> <%= profile.name.last %></p>
+	      
+	      <% if (profile.profileSettings.displayEmail) { %>
+	      <a href="mailto:<%- profile.email %>"><%= profile.email %></a>
+	      <% } %>
+	      
+	    </div>
+	  </div>	  
+	  
+	  
+	  <div id="comments-container" class="jquery-comments"></div> 
+	</div>
+    </main>
+    <%- include footer.ejs %>  
+  </body>  
 </html>

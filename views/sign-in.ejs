@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+  <%- include head.ejs %>  
+  <body>
+    <%- include header.ejs %>      
+    <main>
+      
+
+      <div class="app-content">
+
+	<div class="form-container">
+	  
+	  <% if (message.length > 0) { %>
+	  <div class="pure-alert pure-alert-error"><%= message %></div>
+	  <% } %>
+	  
+	  <form class="pure-form pure-form-aligned" action="/sign-in" method="post">
+	    <fieldset>
+              
+	      
+	      <div class="pure-control-group">
+		<label for="email">Email</label>
+		<input id="email" name="email" type="email" placeholder="Email Address">
+              </div>
+	      
+	      <div class="pure-control-group">
+		<label for="password">Password</label>
+		<input id="password" name="password" type="password" placeholder="Password">
+              </div> 
+      
+            </fieldset>
+	    
+	    <button type="submit" class="pure-button pure-button-primary">Sign in</button>
+	  </form>
+	  
+	  <p> Don't have an account? <a href="/sign-up">Sign up</a>.</p>
+	</div>
+      </div>
+
+      
+    </main>
+    <%- include footer.ejs %>  
+  </body>  
+</html>

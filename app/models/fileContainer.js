@@ -1,18 +1,22 @@
 'user strict'
 
-var formidable     = require('formidable');
-var mongoose       = require('mongoose');
-var grid           = require('gridfs-stream');
-var fs             = require('fs');
-var util           = require('util');
-var multipart      = require('multipart');
-var async          = require('async');
-var config         = require('../../config/config');
-var asyncRemove    = require('../helpers/async-remove');
-var mailer         = require('../../config/mailer');
-var BaseSchema     = require('./base-schema');
-var Comments       = require('./comments');
-var Notification   = require('./notification');
+var formidable        = require('formidable');
+var mongoose          = require('mongoose');
+var grid              = require('gridfs-stream');
+var fs                = require('fs');
+var util              = require('util');
+var multipart         = require('multipart');
+var async             = require('async');
+var mongoosePaginate  = require('mongoose-paginate');
+var mkdirp            = require('mkdirp');
+var rimraf            = require('rimraf');
+
+var config            = require('../../config/config');
+var asyncRemove       = require('../helpers/async-remove');
+var generateThumbnail = require('../helpers/generate-datascape-thumbnail');
+var mailer            = require('../../config/mailer');
+var Comments          = require('./comments');
+var Notification      = require('./notification');
 
 var FileContainerSchema = new mongoose.Schema({
     
@@ -20,31 +24,62 @@ var FileContainerSchema = new mongoose.Schema({
     lastUpdated:     { type: Number,  default: Date.now },     // Last seen
     parent: {
         collectionName:  { type: String,  required: true },     // collection
-        id:              { type: String,  required: true },      // id
-	name:        { type: mongoose.Schema.Types.Mixed, default: undefined }
+        id:              { type: String,  required: true },     // id
+	name:            { type: mongoose.Schema.Types.Mixed, default: undefined }, // name
+	username:        { type: String,  default: '' },        // username
     },
     file: {
      	name:            { type: String,  required: true },              // Path to file
 	path:            { type: String,  required: true },              // Path to file
      	id:              { type: Object, default: mongoose.Types.ObjectId().toString() } 
-    },     
+    },
     fileOptions: {
 	keepFile:        { type: Boolean, default: false }, 
     },
     sharedWith:      { type: [],      default: [] },
     comments:        { type: [],      default: [] },
-    metaData:        { type: Object,  default: {} },
     statistics: {
 	viewCount:       { type: Number, default: 0 }      // File metadata
     },
     displaySettings: {
 	visibility:      { type: String,  default: 'PRIVATE', required: true},  // Visibility
-	parentLink:      { type: String,  required: true },
-	customURL:       { type: String,  required: true },
-	bulletLink:      { type: String,  required: true },
-	link:            { type: String,  required: true },
+	title:           { type: String,  required: true },                     // Display title
+	
+	caption:         { type: String,  default: ''    },                     // description
+	display:         { type: Object,  required: true, default: {}},         // Tells the painter how to interpret the data
+	legacy:          { type: Object,  required: true, default: {}},         // Tells OLD painter how to interpret the data
+    },
+    localDataPath:  { type: String, required: true },
+    publicDataPath: { type: String, required: true },
+    links: {
+	parent:          { type: String,  required: true },
+	thumbnail:       { type: String,  required: true },
+	custom:          { type: String,  required: true },
+	bullet:          { type: String,  required: true, unique: true },        // Should never have two identicle bullets
+	link:            { type: String,  required: true, unique: true },        // Unique links prvent users from having two files with 
+	local:           { type: String,  required: true, unique: true },        // files with the same name having the same link
+	base:            { type: String,  required: true }                // /user/USERNAME/dataset/
     }
 }).extend({});
+
+
+FileContainerSchema.plugin(mongoosePaginate);
+
+// Validater
+FileContainerSchema.path('displaySettings.title').validate( function(custom){
+
+    // Check to ensure string does not contain a space or "~!@#$%^&*()`{}[]:";'<>,\|/?"
+    var regexPF     = ( /^[a-z0-9\_\-\.]+$/i.test(custom) );
+  
+    // length least length 5 
+    var minLengthPF  =  custom.length >= 5;
+
+    // And is at most length 15 
+    var maxLengthPF  =  custom.length <= 30;
+    
+    return regexPF && minLengthPF && maxLengthPF
+    
+}, 'Title can only contain alphanumeric charachters, ".", "-", and "_" and must be between 5 and 15 characters long');
 
 
 FileContainerSchema.method({
@@ -95,7 +130,7 @@ FileContainerSchema.method({
 	    notification.save( function(err){
 		if( err ) return callback( err );
 		// TODO: move this into notificationx
-		mailer.useTemplate( 'shared-dataset', sharedEntity, fileContainer, callback );
+		mailer.useTemplate( 'shared-datascape', sharedEntity, fileContainer, callback );
 	    });
 	
 	} else if( typeof sharedEntity ===  'string' || sharedEntity instanceof String ){
@@ -105,20 +140,20 @@ FileContainerSchema.method({
 		if( !doc ){
 		    // Not user. Email non-user and save email 
 		    this.sharedWith.push( sharedeeEntity );
-		    mailer.useTemplate( 'shared-dataset-with-unregistered-user', sharedEntity, fileContainer, callback );
+		    mailer.useTemplate( 'shared-datascape-with-unregistered-user', sharedEntity, fileContainer, callback );
 		    
 		} else {
 		    
 		    this.sharedWith.push( sharedEntity.email );
 		    
-		    var notificationTitle = "A new dataset has been shared with you";
+		    var notificationTitle = "A new datascape has been shared with you";
 		    var notification = Notification.register( doc, this, notificationTitle );
 		    
 		    notification.save( function(err){
 			if( err ) return callback( err );
 			
 			// TODO: move this into notificationx
-			mailer.useTemplate( 'shared-dataset', sharedEntity, callback );
+			mailer.useTemplate( 'shared-datascape', sharedEntity, callback );
 		    });	    
 		}
 	    });
@@ -141,12 +176,30 @@ FileContainerSchema.method({
 	}
     },
     
-    saveDisplaySettings: function( newSettings ){
+    updateSettings: function( newSettings ){
 	// Maybe want to keep history 
         // array of objects perhaps?
 	
+	// Deep copy as not to disturb the OP settings
 	var settings = JSON.parse(JSON.stringify( newSettings ));
 	
+	this.sharedWith      = settings.sharedWith;
+	this.fileOptions     = settings.fileOptions
+	this.displaySettings = settings.displaySettings,
+	this.displaySettings.legacy =
+	    this.model.convertDisplaySettingsToLegacy( this.displaySettings );
+	
+	var custom = this.displaySettings.title
+	// Replace ' ' with '-'
+	    .replace(/\s/g, '-');
+	
+	
+	
+	fileContainer.links.custom = custom;
+	fileContainer.links.link   = this.links.parent  + "/datascapes/" + custom;
+	fileContainer.links.local  = this + "/datascapes/" + fileContainer.links.custom;
+
+
 	// If/when more settings are added, this method will become more usefull
 	settings.visibility = newSettings.visibility || this.displaySettings.visibility;
 	
@@ -204,32 +257,68 @@ FileContainerSchema.method({
 });
 
 FileContainerSchema.static({
+
+    // Converts form inputs into something recognizable to the legacy painter
+    convertDisplaySettingsToLegacy: function( displaySettings ){
+	var lagacySettings = {
+	    "fields-pca":     [],
+	    "fields-meta":    [],
+	    "fields-meta-id": [],
+	    'omit':           [],
+	    "caption": displaySettings.caption
+	}
+	
+	displaySettings.display.columnTypes.forEach(function(column, index){
+	    var bucket = null;
+	    
+	    if( column === 'id' )         bucket = "fields-meta-id";
+	    else if( column === 'meta' )  bucket = "fields-meta";
+	    else if( column === 'omit' )  bucket = "omit";
+	    else                          bucket = "fields-pca";
+	    
+	    lagacySettings[ bucket ].push( index +1 );
+	});
+	
+	return lagacySettings;
+    },
+    
     register: function(parent, file, settings){
 	
+	console.log( 'Register', file );
+	var documentId = mongoose.Types.ObjectId();        		
 	var fileContainer = new this({
+	    _id: documentId,
 	    parent: {
 		id: parent._id,
 		collectionName: parent.__t,
-		name: parent.name
+		name: parent.name,
+		username: parent.username
 	    },
 	    file: {
 		name: file.name,
 		path: file.path
 	    },
+	    sharedWith: settings.sharedWith ? settings.sharedWith : [], 
+	    fileOptions: settings.fileOptions,	    
 	    displaySettings: settings.displaySettings,
-	    fileOptions: settings.fileOptions
+	    localDataPath:  parent.localDataPath,
+	    publicDataPath: parent.publicDataPath,
+	    links: {
+		thumbnail: parent.publicDataPath + "/files/thumbnails/" + documentId +".png",
+		parent: parent.links.link,
+		bullet: Math.random().toString(36).substring(5) 
+	    }
 	});
-	fileContainer.displaySettings.parentLink = parent.displaySettings.link,	
-	fileContainer.displaySettings.bulletLink = Math.random().toString(36).substring(5) 
+	fileContainer.displaySettings.title = fileContainer.displaySettings.title || file.name;	    	
+	fileContainer.displaySettings.legacy = this.convertDisplaySettingsToLegacy( fileContainer.displaySettings );
 	
-	fileContainer.displaySettings.customURL = fileContainer.displaySettings.customURL 
-	    || fileContainer.displaySettings.bulletLink
 	
-	fileContainer.displaySettings.link = 
-	    parent.displaySettings.link
-	    + "/"
-	    + fileContainer.displaySettings.customURL
 	
+	fileContainer.links.custom = (settings.links || {}).customURL || fileContainer.links.bullet;
+	fileContainer.links.link  = parent.links.link  + "/datascapes/" + fileContainer.links.custom;
+	fileContainer.links.local = parent.links.local + "/datascapes/" + fileContainer.links.custom;
+	fileContainer.links.base  = parent.links.local + "/datascapes/";
+
 	return fileContainer;
     } 
 });	
@@ -272,10 +361,20 @@ FileContainerSchema.pre('save', function(next){
 	    //writestream.on('error', throw new Error);
 	    writestream.on('finish', function(){
 		if( !fileContainer.fileOptions.keepFile ) fs.unlinkSync(fileContainer.file.path);	    
-		next();
+		
+		
+		// create thumbnail path and thumbnail
+		mkdirp( fileContainer.localDataPath + "/files/thumbnails/", function(mkdirErr){
+		    if( mkdirErr ) return next( mkdirErr );
+		    
+		    generateThumbnail( fileContainer.localDataPath + "/files/thumbnails/" + fileContainer._id +".png", next );
+
+		});
 	    });
 	    
-	    read.pipe(writestream);
+	    
+	    read.pipe(writestream);	    
+	    
 	});
     } else { 	
 	next();

@@ -20,7 +20,24 @@ exports.genUser = function(){
     };
     
     return user;
-}
+};
+
+exports.fileTemplate =	{
+    file: {
+	name: 'test file',
+	path: './data/test/test-file.txt'
+	},
+    settings:{
+	fileOptions: {
+	    keepFile: true
+	    },
+	displaySettings:{
+	    display: {
+		columnTypes: ['id','id','id'] // Arbitrary 
+	    }
+	}
+    }
+};
 
 exports.check = function( done ){
     return function(tests){

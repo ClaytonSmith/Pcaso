@@ -12,8 +12,10 @@ var config       = require('../../config/config');
 var FakeSchema = new mongoose.Schema({
     dateAdded:      { type: Number,  default: Date.now },            // Join date
     lastUpdated:    { type: Number,  default: Date.now },            // Last seen
-    displaySettings: {
-	link: { type: String, default: "http://localhost/3000/cool" }
+    links: {
+	link: { type: String, default: config.service.domain + "404" }, //point to 404 page
+	local: { type: String, default: "/404" },
+	avatar: { type: String, default: "/404" }
     }
 }).extend({});
 

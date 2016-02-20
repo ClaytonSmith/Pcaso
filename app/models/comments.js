@@ -1,12 +1,14 @@
 'use strict'
 
-var formidable     = require('formidable');
-var mongoose       = require('mongoose');
-var util           = require('util');
-var extend         = require('mongoose-schema-extend')
-var async          = require('async');
-var config         = require('../../config/config');
-var asyncRemove    = require('../helpers/async-remove');
+var formidable        = require('formidable');
+var mongoose          = require('mongoose');
+var util              = require('util');
+var extend            = require('mongoose-schema-extend')
+var async             = require('async');
+var mongoosePaginate  = require('mongoose-paginate');
+
+var config            = require('../../config/config');
+var asyncRemove       = require('../helpers/async-remove');
 
 //var BaseSchema   = mongoose.model("BaseSchema");
 
@@ -22,16 +24,23 @@ var CommentSchema = new mongoose.Schema({
         collectionName: { type: String,  required: true },    // collection
         id:             { type: String,  required: true }     // id
     },
-    subject:    { type: String,  required: true },
+    topic: {                                                  // topic of the comment tree
+        collectionName: { type: String,  required: true },    // Used to search for all things 
+        id:             { type: String,  required: true }     // id
+    },
+    subject:    { type: String, required: true },
     children:   { type: [],     default: [] },                // Comments on comment
     from:       { type: String, required: true },
     body:       { type: String, required: true },
-    displaySettings: {
-	parentLink:     { type: String, required: true },
-	link:           { type: String, required: true }
+    links: {
+	parent:         { type: String, required: true },
+	avatar:         { type: String, required: true },
+	link:           { type: String, required: true },
+	local:          { type: String, required: true }
     }
 }).extend({});
 
+CommentSchema.plugin(mongoosePaginate); 
 
 CommentSchema.method({
     
@@ -67,9 +76,63 @@ CommentSchema.method({
 });
 
 CommentSchema.static({
+    collectByParent: function(parent,  callback){
+	var query = { 
+	    "parent.id": parent._id || parent.id,
+	    "parent.collectionName": parent.__t || parent.collectionName 
+	}           
+	
+	console.log( query );
+	this.find( query, callback );
+    },
+
+    collectByTopic: function(topic,  callback){
+	
+	var query = { 
+	    "topic.id": topic._id || topic.id,
+	    "topic.collectionName": topic.__t || topic.collectionName 
+	}
+	
+	this.find( query, callback );
+    },
+
+    commentMap: function(entity){
+	var map = {
+	    'User': 'profile',
+	    'Comment': 'comment',
+	    'ds': 213
+	    
+	}
+
+    },
+    jqueryCommentsTransform: function( comments ){
+	
+	function formatDate( date ){
+	    return (new Date( date ).getMonth()+1)
+		+ ' '
+		+ new Date( date ).getDate()
+		+ ', '
+		+ new Date( date ).getFullYear();
+	}   
+	
+	return comments.map( function(comment){
+	    return {
+		id: comment._id, // If root comment, exclude topic or jquery comments gets mad
+		target: comment.target.id === comment.topic.id ? null : comment.target.id, 
+		created: formatDate( comment.dateAdded ), 
+		body: comment.body,
+		username: comment.from,
+		profile_picture_url: comment.links.avatar,
+		profile_url: comment.links.parent
+	    }; 
+	});
+    },
+	
     register: function(parent, target, from, subject, body){
 
+	var id = mongoose.Types.ObjectId();
 	var newComment = new this({
+	    __id: id,
 	    parent: {
 		id: parent._id,
 		collectionName: parent.__t
@@ -78,15 +141,21 @@ CommentSchema.static({
 		id: target._id,
 		collectionName: target.__t
 	    },
-	    from: from,
+	    topic: { // If the target it a comment, it will have a topic, if not then topic is target
+		id: (target.topic || {} ).id || target._id,
+		collectionName: (target.topic || {} ).collectionName || target.__t
+	    },
+	    from: from, // name of user who left the comment
 	    subject: subject,
 	    body: body,
-	    displaySettings: {
-		parentLink: parent.displaySettings.link,
-		link: target.displaySettings.link, // Will add comment direct link
+	    links: {
+		parent: parent.links.link,
+		avatar: parent.links.avatar,
+		link:  parent.links.link, //+ '/' + id.toString()  
+		local: parent.links.local 
 	    }
 	});
-	
+
 	target.addComment( newComment._id );
 	
 	return newComment;

@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+  <%- include head.ejs %>  
+  <body>
+    <%- include header.ejs %>      
+    <main>
+     
+      <div class="app-content">
+	<div class="form-container">
+	  <h1> Request Access To "<%= file.name %>"</h1>
+	  <p> You currently do not have access to this file.</p>
+	  
+	  <form class="pure-form pure-form-aligned" action="<%- file.requestLink %>" method="post">
+	    <button type="submit" class="pure-button pure-button-primary">Request Access</button>
+	  </form>
+	</div>
+      </div>
+      
+      
+    </main>
+    <%- include footer.ejs %>  
+  </body>  
+</html>
