@@ -44,6 +44,7 @@ var FileContainerSchema = new mongoose.Schema({
     displaySettings: {
 	visibility:      { type: String,  default: 'PRIVATE', required: true},  // Visibility
 	title:           { type: String,  required: true },                     // Display title
+	
 	caption:         { type: String,  default: ''    },                     // description
 	display:         { type: Object,  required: true, default: {}},         // Tells the painter how to interpret the data
 	legacy:          { type: Object,  required: true, default: {}},         // Tells OLD painter how to interpret the data
@@ -54,14 +55,32 @@ var FileContainerSchema = new mongoose.Schema({
 	parent:          { type: String,  required: true },
 	thumbnail:       { type: String,  required: true },
 	custom:          { type: String,  required: true },
-	bullet:          { type: String,  required: true },
-	link:            { type: String,  required: true },
-	local:           { type: String,  required: true },
+	bullet:          { type: String,  required: true, unique: true },        // Should never have two identicle bullets
+	link:            { type: String,  required: true, unique: true },        // Unique links prvent users from having two files with 
+	local:           { type: String,  required: true, unique: true },        // files with the same name having the same link
+	base:            { type: String,  required: true }                // /user/USERNAME/dataset/
     }
 }).extend({});
 
 
 FileContainerSchema.plugin(mongoosePaginate);
+
+// Validater
+FileContainerSchema.path('displaySettings.title').validate( function(custom){
+
+    // Check to ensure string does not contain a space or "~!@#$%^&*()`{}[]:";'<>,\|/?"
+    var regexPF     = ( /^[a-z0-9\_\-\.]+$/i.test(custom) );
+  
+    // length least length 5 
+    var minLengthPF  =  custom.length >= 5;
+
+    // And is at most length 15 
+    var maxLengthPF  =  custom.length <= 30;
+    
+    return regexPF && minLengthPF && maxLengthPF
+    
+}, 'Title can only contain alphanumeric charachters, ".", "-", and "_" and must be between 5 and 15 characters long');
+
 
 FileContainerSchema.method({
 
@@ -111,7 +130,7 @@ FileContainerSchema.method({
 	    notification.save( function(err){
 		if( err ) return callback( err );
 		// TODO: move this into notificationx
-		mailer.useTemplate( 'shared-dataset', sharedEntity, fileContainer, callback );
+		mailer.useTemplate( 'shared-datascape', sharedEntity, fileContainer, callback );
 	    });
 	
 	} else if( typeof sharedEntity ===  'string' || sharedEntity instanceof String ){
@@ -121,20 +140,20 @@ FileContainerSchema.method({
 		if( !doc ){
 		    // Not user. Email non-user and save email 
 		    this.sharedWith.push( sharedeeEntity );
-		    mailer.useTemplate( 'shared-dataset-with-unregistered-user', sharedEntity, fileContainer, callback );
+		    mailer.useTemplate( 'shared-datascape-with-unregistered-user', sharedEntity, fileContainer, callback );
 		    
 		} else {
 		    
 		    this.sharedWith.push( sharedEntity.email );
 		    
-		    var notificationTitle = "A new dataset has been shared with you";
+		    var notificationTitle = "A new datascape has been shared with you";
 		    var notification = Notification.register( doc, this, notificationTitle );
 		    
 		    notification.save( function(err){
 			if( err ) return callback( err );
 			
 			// TODO: move this into notificationx
-			mailer.useTemplate( 'shared-dataset', sharedEntity, callback );
+			mailer.useTemplate( 'shared-datascape', sharedEntity, callback );
 		    });	    
 		}
 	    });
@@ -157,12 +176,30 @@ FileContainerSchema.method({
 	}
     },
     
-    saveDisplaySettings: function( newSettings ){
+    updateSettings: function( newSettings ){
 	// Maybe want to keep history 
         // array of objects perhaps?
 	
+	// Deep copy as not to disturb the OP settings
 	var settings = JSON.parse(JSON.stringify( newSettings ));
 	
+	this.sharedWith      = settings.sharedWith;
+	this.fileOptions     = settings.fileOptions
+	this.displaySettings = settings.displaySettings,
+	this.displaySettings.legacy =
+	    this.model.convertDisplaySettingsToLegacy( this.displaySettings );
+	
+	var custom = this.displaySettings.title
+	// Replace ' ' with '-'
+	    .replace(/\s/g, '-');
+	
+	
+	
+	fileContainer.links.custom = custom;
+	fileContainer.links.link   = this.links.parent  + "/datascapes/" + custom;
+	fileContainer.links.local  = this + "/datascapes/" + fileContainer.links.custom;
+
+
 	// If/when more settings are added, this method will become more usefull
 	settings.visibility = newSettings.visibility || this.displaySettings.visibility;
 	
@@ -227,6 +264,7 @@ FileContainerSchema.static({
 	    "fields-pca":     [],
 	    "fields-meta":    [],
 	    "fields-meta-id": [],
+	    'omit':           [],
 	    "caption": displaySettings.caption
 	}
 	
@@ -235,6 +273,7 @@ FileContainerSchema.static({
 	    
 	    if( column === 'id' )         bucket = "fields-meta-id";
 	    else if( column === 'meta' )  bucket = "fields-meta";
+	    else if( column === 'omit' )  bucket = "omit";
 	    else                          bucket = "fields-pca";
 	    
 	    lagacySettings[ bucket ].push( index +1 );
@@ -245,7 +284,7 @@ FileContainerSchema.static({
     
     register: function(parent, file, settings){
 	
-	console.log( 'Register', settings );
+	console.log( 'Register', file );
 	var documentId = mongoose.Types.ObjectId();        		
 	var fileContainer = new this({
 	    _id: documentId,
@@ -259,7 +298,7 @@ FileContainerSchema.static({
 		name: file.name,
 		path: file.path
 	    },
-	    sharedWith: settings.sharedWith ? seettings.sharedWith : [], 
+	    sharedWith: settings.sharedWith ? settings.sharedWith : [], 
 	    fileOptions: settings.fileOptions,	    
 	    displaySettings: settings.displaySettings,
 	    localDataPath:  parent.localDataPath,
@@ -270,14 +309,16 @@ FileContainerSchema.static({
 		bullet: Math.random().toString(36).substring(5) 
 	    }
 	});
-	
+	fileContainer.displaySettings.title = fileContainer.displaySettings.title || file.name;	    	
 	fileContainer.displaySettings.legacy = this.convertDisplaySettingsToLegacy( fileContainer.displaySettings );
-
-	fileContainer.displaySettings.title = fileContainer.displaySettings.title || file.name;	    
-	fileContainer.links.custom = (settings.links || {}).customURL || fileContainer.links.bullet;
-	fileContainer.links.link  = parent.links.link  + "/datasets/" + fileContainer.links.custom;
-	fileContainer.links.local = parent.links.local + "/datasets/" + fileContainer.links.custom;
 	
+	
+	
+	fileContainer.links.custom = (settings.links || {}).customURL || fileContainer.links.bullet;
+	fileContainer.links.link  = parent.links.link  + "/datascapes/" + fileContainer.links.custom;
+	fileContainer.links.local = parent.links.local + "/datascapes/" + fileContainer.links.custom;
+	fileContainer.links.base  = parent.links.local + "/datascapes/";
+
 	return fileContainer;
     } 
 });	

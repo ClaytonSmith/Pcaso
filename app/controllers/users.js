@@ -10,7 +10,6 @@ var config                = require('../../config/config');
 var async                 = require('async');
 var AsyncCollect          = require('../helpers/async-collect').asyncCollect;
 
-
 // Load other models
 var Users                 = mongoose.model('User');
 var UnauthenticatedUsers  = mongoose.model('UnauthenticatedUser');
@@ -89,6 +88,24 @@ exports.getUserProfile = function(req, res){
 }
 
 
+exports.getNotifications = function(req, res){
+    
+    if( !req.isAuthenticated() )
+	return res.redirect('/sign-in');
+    
+    var noteQuery = {
+	'parent.id': req.user._id,
+ 	'parent.collectionName': req.user.__t
+    };
+    
+    Notifications.find( noteQuery, function(err, docs){
+	
+	res.render('notifications-display.ejs', {
+	    user: req.user,
+	    notifications: docs
+	})
+    });
+}
 
 exports.getProfile = function(req, res){
     if( !req.isAuthenticated() )
@@ -227,7 +244,6 @@ exports.authenticateAccount = function(req, res){
 
 exports.createDataset = function(req, res){
     var form = new formidable.IncomingForm();
-    console.log(req.body, 'This is a cool test');
     form.uploadDir = __dirname + "../../../data/temp";
     form.keepExtensions = true;
     
@@ -235,21 +251,27 @@ exports.createDataset = function(req, res){
     form.parse(req, function(err, fields, files) {
 	
     	if (err) throw new Error( err );
-	
+
+
+	console.log(files,"\n\n\n"); 	
+	if( !files.file ) return res.sendStatus(500);
+
+
         Users.findOne( {_id: req.user._id }, function( err, user ){  
 	    console.log( user ); 
-
+	    
   	    if( err ) return handleError( err ) ;
     	    if( !user ) return res.send( 504 );
 	    
 	    var form = JSON.parse( fields.revertUponArival );
-
+	    
     	    var fileContainer = user.registerFile( files.file, form, function(fileRegErr){
 		if( fileRegErr ) {
+		    
 		    console.log( fileRegErr );
 		    throw new Error( error );
 		}
-	
+		
 		user.save(function(userSaveErr){
 		    if( userSaveErr ) {
 			console.log( userSaveErr );		    
@@ -260,5 +282,69 @@ exports.createDataset = function(req, res){
     		});
 	    });    	    
         });   
+    });
+}
+
+exports.profileSettings = function(req, res){
+    var isOwner = req.isAuthenticated() && req.user.username === req.params.username;
+    
+    if( !isOwner )
+	res.redirect('/');
+    
+    var query = {
+	_id: req.user._id
+    }
+    
+    Users.findOne( query, function(err, doc){
+	console.log(!!doc);
+	if( err  ) return res.render('500.ejs', {user: req.user});
+	if( !doc ) return res.render('404.ejs', {user: req.user});
+	
+	res.render('profile-settings.ejs', {user: req.user, profile: doc });
+    });
+}
+
+// TODO: do not res.render 
+exports.editProfileSettings = function(req, res){
+    var isOwner = req.isAuthenticated() && req.user.username === req.params.username;
+    
+    if( !isOwner )
+	res.sendCode(403);
+    
+    var query = {
+	_id: req.user._id
+    }
+    
+    var form = new formidable.IncomingForm();
+    form.uploadDir = __dirname + "../../../data/temp";
+    form.keepExtensions = true;
+    
+    // var fileInfo = // check req	
+    form.parse(req, function(err, fields, files) {
+	if( err  ) return res.render('500.ejs', {user: req.user});	
+	
+	Users.findOne( query, function(userErr, doc){
+	    if( userErr) return res.render('500.ejs', {user: req.user});
+	    if( !doc )   return res.render('404.ejs', {user: req.user});
+	    	    
+	    // Boolean are not converted so check string true or false
+	    doc.profileSettings.displayEmail = fields.displayEmail === 'true';
+	    doc.fileSettings.defaults.visibility = fields.defaultVisibility;
+	    
+	    if( files.file ){
+		fs.rename( files.file.path, doc.localDataPath + '/imgs/avatar', function(writeErr){
+		    if( userErr) return res.render('500.ejs', {user: req.user});
+		    doc.save(function(saveErr){
+			if( saveErr ) res.render('500.ejs', {user: req.user});
+			res.send(doc.links.local);
+		    });
+		});
+	    } else {  
+		doc.save(function(saveErr){
+		    if( saveErr ) res.render('500.ejs', {user: req.user});
+		    res.send(doc.links.local);
+		});
+	    }
+	});
     });
 }

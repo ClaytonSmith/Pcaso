@@ -38,7 +38,14 @@ circle           { cursor:pointer; /*fill-opacity: 0.6;*/ }
 
 
 /* Caption */
-#show-caption    {height: 10vmin; overflow-y:auto; display:none; border: 1px solid #ccc; background: white; font-family: 'Lato'; padding: 2vmin 2vmin; font-size: 2vmin; margin: 2vmin 2vmin 2vmin 2vmin; color: black;}
+#show-caption{
+    display:none;
+    background: white;
+    padding: 2em 2em 2em 2em;
+    font-size: 14pt;
+    margin: 2em 2em 2em 2em; 
+    border-radius: 4pt;
+}
 
 /* Plotting area */
 #pcaso           {border: 2px solid #ccc; float:left; }
@@ -57,3 +64,10 @@ circle           { cursor:pointer; /*fill-opacity: 0.6;*/ }
     stroke: #fff;
 }
 
+#loading{
+    text-align: center;
+}
+
+.datascape-container{
+    padding: 1em 2em 2em 2em;
+}

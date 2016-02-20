@@ -39,6 +39,8 @@ NotificationSchema.static({
     // Title is optional
     
     register: function(parent, event, title){
+
+	
 	var note = new this({      
 	    parent: {
 		id: ( parent.parent || parent ).id || parent._id,
@@ -78,6 +80,35 @@ NotificationSchema.pre('save', function(next) {
 	    doc.save( next );
 	});
     } else next();
+});
+
+NotificationSchema.pre('remove', function(next) {
+
+    var note = this;
+
+    var parentCollection  = mongoose.model( note.parent.collectionName );    
+    function deleteFrom( collection, searchQuery, callback ){
+        collection.findOne( { _id: searchQuery }, function( err, doc ){
+            
+            if( err ) return callback( err );
+	    
+            // Parent has been removed
+            if( !doc ) return callback( null );
+            
+            // Make sure doc deletes the comment
+            // if doc is the caller, then the comment has allready been deleted.
+	    doc.deleteNotification( note._id );
+	    doc.save( callback );
+        });
+    };
+
+    
+    async.parallel(
+	[
+	    function(parellelCB){
+		deleteFrom( parentCollection, note.parent.id, parellelCB );
+	    }	    
+	], next );	    
 });
 
 module.exports = mongoose.model('Notification', NotificationSchema);

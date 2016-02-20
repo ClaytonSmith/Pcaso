@@ -200,9 +200,8 @@ function init() {
 		document.getElementById('pcaso-panel').style.display = "inline-block"
 		document.getElementById('pcaso').style.visibility = "visible"
 		//document.getElementById('backBtn').style.display = "block"
-		document.getElementById('loading').style.display = "none"
-
-		//
+		//document.getElementById('loading').style.display = "none"		//
+		
 		pcaso();
 	    }
 	}); //  POSSIBLE CAUSE
@@ -272,8 +271,8 @@ function init() {
 	    .attr("preserveAspectRatio", "xMinYMin meet")
 	    .classed("svg-responsive", true)
 	
-
-
+	
+	document.getElementById('loading').style.display = "none"
 	resizeWindow();
 
 

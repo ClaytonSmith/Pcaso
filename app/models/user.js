@@ -29,6 +29,7 @@ var bcrypt            = require('bcrypt-nodejs');
 var extend            = require('mongoose-schema-extend');
 var async             = require('async');
 var config            = require('../../config/config');
+var mailer            = require('../../config/mailer');
 var asyncRemove       = require('../helpers/async-remove');
 var copyFiles         = require('../helpers/copy-files');
 var mongoosePaginate  = require('mongoose-paginate');
@@ -79,7 +80,7 @@ var UserSchema                 = BaseUserSchema.extend({
     files:          { type: [], default: [] },                        // List of mongoId for containers
     fileSettings: {
 	defaults: {
-	    visibility:  { type: String,  'default': 'PRIVATE'},      // default file visibility, set for every future upload
+	    visibility:  { type: String,  'default': 'PUBLIC'},      // default file visibility, set for every future upload
 	    commentable:        { type: Boolean, 'default': true }    // default commenting on account
 	},
     },
@@ -88,6 +89,9 @@ var UserSchema                 = BaseUserSchema.extend({
     notifications:  { type: [], default: [] },                        // List of new and all notifications, hide this
     localDataPath:  { type: String, default: '' },
     publicDataPath: { type: String, default: '' },    
+    profileSettings: {
+	displayEmail: { type: Boolean, default: true }
+    },
     links: {
 	avatar:        { type: String, default: '' },
 	link:          { type: String, required: true },
@@ -106,8 +110,7 @@ UserSchema.method({
 
     // Saves file's ID in list of files
     registerFile: function(file, settings, callback){
-	
-	console.log( 'Settings', settings );
+
 	var user = this;
 	var options = JSON.parse(JSON.stringify( settings ));
 	
@@ -117,7 +120,7 @@ UserSchema.method({
 	
 	options.displaySettings.visibility = options.displaySettings.visibility 
 	    || this.fileSettings.defaults.visibility;
-	
+
 	var fileContainer = FileContainers.register(this, file, options);
 
 	fileContainer.save(function(err){
@@ -162,6 +165,8 @@ UserSchema.method({
 	var user = this;
 	var comment = Comments.register( user, entity, this.username, subject, commentBody);
 	
+
+	
 	comment.save(function(err){
 	    if( err ) callback( err ) ;
 	    user.userComments.push( comment._id );	
@@ -172,16 +177,25 @@ UserSchema.method({
 	    entity.save( function(err2){
 		if( err2 ) callback( err2 ) ;	
 		
-		var notificationTitle = user.username + " has commented on your " + entity.__t;
+		console.log("\n\n\n", entity, "\n\n\n");
+		var notificationTitle = user.name.first +" "+ user.name.first +"has commented on your " + Comments.commentMap( entity.__t );
 		var notification = Notification.register( entity, comment, notificationTitle );
 		
 		notification.save( function(err3){
 		    if( entity._id === user._id ){
 			entity.addNotification( notification.id );
+			
+		    } else {
+			mailer.useTemplate('new-comment', entity, {comment: comment, notification: notification}, function(mailErr,a,b,c,d){
+			    if( mailErr ) throw new Error( mailErr );
+			});
 		    }
 		    
 		    callback( err3 );
 		});
+		
+		
+		// MAILER
 	    });
 	});
 	
@@ -274,7 +288,6 @@ UnauthenticatedUserSchema.static({
     },
 
     register: function(first, last, email, pass, username){
-	console.log( copyFiles );
 	var user = new this({
 	    name: {
 		first: first,
@@ -311,7 +324,7 @@ UserSchema.static({
 	    localDataPath:  config.root +'/public/users-public-data/'+ username,
 	    publicDataPath: config.service.domain +'users-public-data/'+ username,
 	    links: {
-		avatar: config.service.domain +'users-public-data/'+ username +'/imgs/avatar.png',	   
+		avatar: config.service.domain +'users-public-data/'+ username +'/imgs/avatar',	   
 		link:   config.service.domain + "user/" + username,
 		local:  "/user/" + username
 	    }
@@ -333,13 +346,12 @@ UserSchema.static({
 	    localDataPath:  config.root +'/public/users-public-data/'+ unauthenticatedUser.username,
 	    publicDataPath: config.service.domain +'users-public-data/'+ unauthenticatedUser.username,
 	    links: {
-		avatar: config.service.domain +'users-public-data/'+ unauthenticatedUser.username +'/imgs/avatar.png',
+		avatar: config.service.domain +'users-public-data/'+ unauthenticatedUser.username +'/imgs/avatar',
 		link:   config.service.domain + "user/" + unauthenticatedUser.username,
 		local:  "/user/" + unauthenticatedUser.username
 	    }
 	});	
 	
-	console.log( user );
 	return user;
     }
 });
@@ -368,7 +380,7 @@ UserSchema.pre('save', function(next) {
 		mkdirp( publicDir + "imgs/", parellelCB );
 	    },
 	    function(parellelCB){
-		copyFiles( config.defaultAvatarPath, user.localDataPath +'/imgs/avatar.png', parellelCB );
+		copyFiles( config.defaultAvatarPath, user.localDataPath +'/imgs/avatar', parellelCB );
 	    }
 	    
 	], next );	    

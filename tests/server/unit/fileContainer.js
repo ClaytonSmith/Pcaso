@@ -173,6 +173,7 @@ describe('FileContainer', function(){
     
     it('Add shared user', function(done){
     	fileCntr.addSharedEntity( user1, function(err){
+	    console.log( err );
 	    expect( err ).to.be.null;
     	    expect( fileCntr.sharedWith.length ).to.equal( 1 );
     	    expect( fileCntr.sharedWith ).to.include( user1.email );

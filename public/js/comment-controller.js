@@ -25,15 +25,13 @@ function init() {
 	getComments: function(success, error) {
 	    
 	    var data = {
-		topic: {
-		    id: focusEntity._id,
-		    collectionName: focusEntity.__t
-		}
+		id: focusEntity._id,
+		collectionName: focusEntity.__t
 	    };
-
+	    
 	    $.ajax({
-		url: '/api/comments/get',
-		type: 'POST',
+		url: '/api/comments',
+		type: 'GET',
 		dataType:'json',	
 		cache: false,
 		data: data,
@@ -43,7 +41,7 @@ function init() {
 		
 		if( !user._id ) success( data );
 		else success( data.map( function(comment){
-
+		    console.log(comment)
 		    comment.createdByCurrentUser = ( user.username === comment.username);
 		    return comment;
 		}));

@@ -1,0 +1,127 @@
+<!doctype html>
+<html>
+  <%- include head.ejs %>  
+  <body>
+    <%- include header.ejs %>      
+    <main>
+
+      <div class="app-content">
+	<h1 class="page-title">About</h1>
+	<hr class="title-line">
+	
+	<div class="about-container">
+	  
+	  <h1>
+	    <b>In <span class="pcaso"></span>, share and fluidly explore data in many dimensions.</b>
+	  </h1>
+	  
+	  <h2>
+	    <i>Paint a new datascape</i>
+	  </h2>
+	  <p>
+	    <b>To make an <a href="#" target="_blank">interactive datascape</a>, just upload a .csv file* at
+	      <a href="http://www.pcaso.io" target="_blank">pcaso.io</a>
+	    </b>, pick fields to show as axes or metadata, add a caption if you like, and click <i>Load</i>. You’ll instantly get a datascape to explore.</p>
+	  <small>
+	    *Use a <i>Windows-formatted</i> .csv, e.g., as exported from Mac or Windows Excel via the <i>Save as</i> dropdown. And keep
+	    numeric data in standard decimal (not scientific/exponential) notation.
+	  </small>
+	  
+
+	  <h2><i>Explore a datascape</i></h2>
+	  <p>At the datascape’s URL, click any small plot to see it big. Click any metaclass (listed next to the plots) to recolor points by
+	    that kind of underlying data. Hover on a point in the big plot to see its metadata. And to highlight particular points that interest you, either
+	  </p>
+	  <ul>
+	    <li>click a value for the currently chosen metaclass</li>
+	    <li>search by text box to find points by <i>any</i> matching metadata</li>
+	    <li>click or click-drag one or more points in the big plot</li>
+	  </ul>
+
+	  <h2><i>Share a datascape</i></h2>
+	  <p>Drop the datascape’s URL into an email, text, tweet, research manuscript (great for <a href="http://biorxiv.org" target="_blank">preprints</a>),
+	    carrier pigeon, &amp;c. If you’re giving a talk, you can fluidly walk through data on- or off-line, and show your listeners the URL to explore live on their own.</p>
+	  
+	  <h2><i>Remix a datascape</i></h2>
+	  <p>To change the basic axes or metadata a datascape shows (for that browser session), click the <i>Pick input fields</i> button (near top left), change 
+	    settings as desired, and click <i>Load</i> to see the new datascape.</p>
+	  
+	  
+
+	  <h2><b>Why <span class="pcaso"></span> beats paper</b></h2>
+	  <p>We people see, and think, in too few dimensions to easily understand complex data with many variables.</p>
+	  <p>Conventionally, we’ve frozen such <a href="https://en.wikipedia.org/wiki/Point_cloud" target="_blank">point cloud</a> data flat, to view as dots
+	    scattered in the plane of a page or screen, perhaps varying by color or size to say a bit more. This convention can help spotlight one pattern...only
+	    to hide those lurking in other dimensions. And while adding plots to see other angles or metadata can help a bit,
+	    <i>in the end, static plots can’t readily show which dots in one view of a point cloud correspond to which in another – a key question in probing complex data.</i>
+	  </p>
+	  <p>To help understand many kinds of such data, in genomics and other fields, we built the <i>Point cloud analysis stereopticon</i>
+	    (<span class="pcaso"></span>), an easy way to collaboratively explore planar views
+	    (e.g., <a href="https://en.wikipedia.org/wiki/Principal_component_analysis" target="_blank">PCA</a>,
+	    <a href="https://en.wikipedia.org/wiki/Multidimensional_scalingMDS" target="_blank">MDS</a>, comparative abundance, &amp;c.) of data with many variables.
+	    <span class="pcaso"></span> lets you fluidly explore point cloud data posted by others – and easily make your own informatively responsive
+	    <a href="http://www.pcaso.io/miller" target="_blank">datascape</a> to drop into a paper, talk, or tweet for others to explore.</p>
+	  <p>Crucially, <span class="pcaso"></span> transcends key limitations of static plots, letting you
+	  </p>
+	  <ul>
+	    <li>informatively explore data in a responsive, shareable <a href="http://www.pcaso.io/mundo" target="_blank">datascape</a></li>
+	    <li>smoothly switch views of the data, <i>to track how each point shifts relative to others, among potentially many dimensions</i></li>
+	    <li>instantly recolor, highlight, and see more about points by clicking listed metadata, hovering or clicking on points, or text-searching all metadata</li>
+	    <li>smoothly zoom, to see patterns big and small</li>
+	    <li>caption a datascape to explain details, invite contact, &amp;c.</li>
+	  </ul>
+	  
+
+	  <h2>Burning questions</h2>
+	  <p><i>What kinds of data does <span class="pcaso"></span> help with?</i></p>
+	  <p>Basically, anything with many numeric dimensions and, ideally, several kinds of metadata. Could be principal components, of course – but lots of other data
+	    can benefit from smoothly switchable, metadata-responsive planar views. If you’ve got such data, try it out.</p>
+	  <p><i>Does <span class="pcaso"></span> itself run PCA (or otherwise statistically analyze data)?</i></p>
+	  <p>No. We aimed first to help explore and share many-dimension data that you (or others) have already generated, via a simple exchange format (.csv), knowing
+	    that many folks prefer to crunch rawer numbers with varied, question-tuned methods and software. Over time, we may build stats directly into
+	    <span class="pcaso"></span> – so stay tuned.</p>
+	  <p><i>Will you mine/rent/sell the data I upload?</i></p>
+	  <p>No. And we don’t snoop, or let others snoop or download, your files (though viewers could of course exhaustively hover on plots, to learn about them).</p>
+	  <p><i>How robust is <span class="pcaso"></span>?</i></p>
+	  <p>We’ve started with a beta hosted on a good standard web server, with basic features to spark collaborative insights – not (yet) to manage private or 
+	    versioned data, or stop determined bad actors. Please use <span class="pcaso"></span> responsibly.</p>
+	  <p><i>What about parallel-coordinate plots?</i></p>
+	  <p>They too can help a lot, by showing many dimensions (especially qualitative or naturally ordered ones) at once. But following tangled curves, and spotting
+	    correlations between coordinates shown far apart, can be tough.</p>
+	  <p><i>Why not show a 3d box instead of planes?</i></p>
+	  <p>We started with planes that mean something real from underlying data, and that our brains can easily track when switching axes. (Plus, for data with many axes,
+	    a box shows little more of the whole than a plane does.)</p>
+	  <p><i>But doesn’t a stereopticon show 3d images?</i></p>
+	  <p>That’s a <a href="https://en.wikipedia.org/wiki/Stereoscope" target="_blank">stereoscope</a> ;-) In steampunk days,
+	    <a href="https://en.wikipedia.org/wiki/Stereopticon" target="_blank">stereopticons</a> just let people switch from one slide to another. We were also inspired by
+	    <a href="https://www.mdc.edu/wolfson/Academic/ArtsLetters/art_philosophy/Humanities/Cubism/cubism%20front2.htm" target="_blank">cubists</a>
+	    (like <a href="https://en.wikipedia.org/wiki/Pablo_Picasso" target="_blank">Picasso</a>, of course) who splintered complex real-world shapes into many-planar views,
+	    to convey them more deeply.</p>
+	  
+
+	  <h2>Coming features</h2>
+	  <p>We hope to soon let you</p>
+	  <ul>
+	    <li><i>register</i> your datascape, in order to customize (e.g., by picking color schemes), update, delete, and/or control who can see it</li>
+	    <li>comment on a datascape, to spark discussion and new insights</li>
+	    <li>more extensively remix a datascape (e.g., reorder axes, omit extraneous plots in replicate time-series, &amp;c.)</li>
+	    <li>see simple regression or/and cluster analysis on plots, to better spot meaningful patterns</li>
+	  </ul>
+	  These and other handy features, elaborated by us and others via CC0-licensed d3+ code, may help interpret diverse complex, plane-projected datasets.
+	  
+	  <h2>Team</h2>
+	  <span class="pcaso"></span> reflects the joint hard work of
+	  <a href="https://twitter.com/GenomeNathan" target="_blank">Nathan Pearson</a>,
+	  <a href="https://twitter.com/RobAboukhalil" target="_blank">Robert Aboukhalil</a>,
+	  <a href="https://twitter.com/MariaNattestad" target="_blank">Maria Nattestad</a>,
+	  <a href="https://www.linkedin.com/in/carmeldudley" target="_blank">Carmel Dudley</a>, and
+	  <a href="https://twitter.com/EpgntxEinstein" target="_blank">John Greally</a>.
+	  
+	  We <i>greatly</i> value your feedback! Please <a href="mailto:npearson@nygenome.org?Subject='pcaso'" target="_top">send thoughts</a> – and look soon for source code and
+	  updates to <span class="pcaso"></span>, along with other tools, via the budding <i>Open Genomics Visualization Initiative</i> (OGVI).
+	</div>
+      </div>
+    </main>
+    <%- include footer.ejs %>  
+  </body>
+</html>

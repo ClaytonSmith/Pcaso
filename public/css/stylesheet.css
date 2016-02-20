@@ -3,6 +3,11 @@
     right: 2em;
 }
 
+a{
+
+    text-decoration: none;
+}
+
 .nav {
     padding: .5em 2em .5em 2em;
     background-color: #2980B9;
@@ -14,7 +19,22 @@
 
 
 body {
-    background: #ECF0F1;
+    background: #F8F8F8;
+}
+
+.app-footer{
+    margin-top: 2em;
+    margin-bottom: 6em;
+}
+
+
+/* Pcaso span */
+.pcaso:before{
+    content: "Pca";
+}
+.pcaso:after{
+    content: "so";
+    color: #787878;
 }
 
 
@@ -23,12 +43,62 @@ body {
     background-color: inherit;
 }
 
+.center{
+    text-align: center;
+}
 
 .pure-menu-item, .pure-menu-link{
     color: #ECF0F1;
     font-size: large;
 }
 
+.info-text{
+    font-size: 16pt;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.email-list-container{
+  display: -webkit-box;      /* OLD - iOS 6-, Safari 3.1-6 */
+  display: -moz-box;         /* OLD - Firefox 19- (buggy but mostly works) */
+  display: -ms-flexbox;      /* TWEENER - IE 10 */
+  display: -webkit-flex;     /* NEW - Chrome */
+  display: flex;             /* NEW, Spec - Opera 12.1, Firefox 20+ */
+}
+
+.radio-select{
+    text-align: left !important;
+    width: inherit !important;
+}
+
+.radio-select input{
+    margin-right: .5em;
+   
+}
+
+.avatar{
+    border-radius: 5px;
+}
+
+.remove-email{ 
+    color: #2F2F2F; 
+    position: relative;
+    background-color: white;
+}  
+
+.share-with-email{
+    margin-left: .5em !important;
+}
+
+#shared-user-collection{
+    height: 240px;
+    overflow-y: auto;
+}
+
+.top-m-1{ margin-top: 1em !important;}
+.top-m-2{ margin-top: 2em !important;}
+.top-m-3{ margin-top: 3em !important;}
+.top-m-4{ margin-top: 4em !important;}
 
 .splash-container {
     z-index: 1;
@@ -44,22 +114,21 @@ body {
 .splash {
     /* absolute center .splash within .splash-container */
     width: 80%;
-    height: 50%;
     margin: auto;
     position: absolute;
     top: 100px; left: 0; bottom: 0; right: 0;
     text-align: center;
-    text-transform: uppercase;
+ 
 }
 
 /* This is the main heading that appears on the blue section */
 .splash-head {
     font-size: 75px;
     font-weight: bold;
-    color: #2980B9;
     padding: .5em 1em;
     font-weight: 100;
     line-height: 1em;
+    margin-bottom: 0;
 }
 
 .splash-head h1{
@@ -69,10 +138,12 @@ body {
 
 /* This is the subheading that appears on the blue section */
 .splash-subhead {
-    color: #2980B9;
+    /* color: #2980B9; */
     letter-spacing: 0.05em;
-    font-size: 18px;
+    font-size: 24pt;
     opacity: 0.8;
+    margin-top: 0;
+    margin-bottom: 4em;
 }
 
 .lets-go{
@@ -81,7 +152,9 @@ body {
     border: 2px #2980B9;
     padding: .7em 2.7em;
     font-size: 125%;
-    background-color: #E74C3C !important;
+    padding-left: 1em;
+    padding-right: 1em;
+    margin-top: 2em;
 }
 
 .app-content {
@@ -89,7 +162,23 @@ body {
     max-width: 1500px;
     min-width: 350px;
     margin: auto;
-    margin-top: 5em;
+    margin-top: 3em;
+}
+
+.title-line{
+    border: 0;
+    height: 1px;
+    background-color: #1F75D6;
+    background-image: linear-gradient(to right, #B7C2FF, #1F75D6, #B7C2FF );
+}
+
+.about-container{
+    border-radius: 8px;
+    border-style: solid;
+    border-color: #2980B9;
+    border-width: 1px;
+    background-color: white;
+    padding: 1em;
 }
 
 .form-container {
@@ -110,6 +199,9 @@ body {
 .account-container .title{
 }
 
+.trumbowyg{
+    background-color: white;
+}
 
 .account-container hr{
     border: 0;
@@ -118,9 +210,24 @@ body {
     background-image: linear-gradient(to right, #B7C2FF, #1F75D6, #B7C2FF );
 }
 
-.upload-container .title{
+.dataset-title{
+    margin-top: 2em;
 }
 
+.basic-form{
+    border-radius: 8px;
+    border-style: solid;
+    border-color: #2980B9;
+    border-width: 1px;
+    margin-top: 2em;
+    background-color: white;
+    padding: 1em;
+}
+
+.submit-button{
+      margin-top: 2em;
+      margin-right: 1em;
+}
 
 .upload-container hr{
     border: 0;
@@ -129,18 +236,14 @@ body {
     background-image: linear-gradient(to right, #B7C2FF, #1F75D6, #B7C2FF );
 }
 
-.dropzone-previews {
-    border: 2px dashed #0087F7;
-    border-radius: 5px;
-    background: white;
-    width: 100%;
 
+#user-select{
+    margin-top: 2em;
 }
 
-#file-select {
-    margin: 2em 0 2em 0;
-    padding: 1em 1em 1em 1em; 
-    background-color: white;
+#table-display-container{
+    overflow: auto;
+    margin-top: 2em;
 }
 
 #data-display-table{
@@ -148,7 +251,6 @@ body {
     display: inline-box;
     max-height: 150em;
     display: -moz-inline-box;
-    overflow: auto !important;
 }
 
 #data-display-table thead{
@@ -169,8 +271,119 @@ body {
 
 
 .dataspace-tile{
-    text-align: center;
+    width: 20em;
+    margin: auto;
+    padding: .5em;
+    text-align: left;
     background-color: white;
-    border-radius: 6px;
-    margin: 1em;
+    border-radius: 8px;
+    border-style: solid;
+    border-color: #2980B9;
+    border-width: 1px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    height: 130px;
+    position: relative
 }
+
+
+.dataspace-tile a{
+    z-index: 100;
+    color: #353535;
+    text-shadow: -.5px -.5px 0 #FFFFFF, .5px -.5px 0 #FFFFFF, -.5px .5px 0 #FFFFFF, .5px .5px 0 #FFFFFF;
+}
+
+
+.dataspace-tile h4{
+    margin-top: 0.5em;
+    margin-left: 0.5em;
+    margin-bottom: 0.5em;
+    
+    text-decoration: none;
+    text-transform: capitalize; 
+        
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.dataspace-tile .view-count{
+    margin-top: 0.25em;
+    margin-left: 0.5em;
+    margin-bottom: 0.5em;
+    text-decoration: none;
+    text-transform: capitalize; 
+}
+
+.dataspace-tile .visibility{
+    margin-top: 0.25em;
+    margin-left: 0.5em;
+    margin-bottom: 0.5em;
+    text-decoration: none;
+}
+ 
+.capitalize { text-transform: lowercase; }
+.dataspace-tile .visibility span { display: inline-block; }
+.dataspace-tile .visibility span:first-letter { text-transform: uppercase; }
+
+
+.bottom-right {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    margin-right: .2em;
+    margin-bottom: .2em;   
+   
+}
+
+.fa-2x{ 
+    font-size: 1.5em !important;
+}
+
+
+.notifications-container{
+    width: 75%;
+    max-width: 1250px;
+    min-width: 350px;
+    margin: auto;
+    margin-top: 3em;
+}
+
+
+.notification{
+    margin-top: 1em;
+    background-color: white;
+    text-align: center;
+    border-radius: 5px;
+}
+
+.notification:hover{
+    margin-top: 1em;
+    background-color: #DFE3FF;
+    text-align: center;
+    border-radius: 5px;
+}
+
+.notification-content{
+    align-self: center;
+    color: black;
+}
+
+.rotate-on-hover{
+    
+    -webkit-transition: -webkit-transform 1s ease-in-out;
+    -ms-transition: -ms-transform 1s ease-in-out;
+    transition: transform 1s ease-in-out;
+}
+
+.rotate-on-hover:hover{
+    transform:rotate(360deg);
+    -ms-transform:rotate(360deg);
+    -webkit-transform:rotate(360deg);
+}
+
+
+.enable-scrolling{
+    overflow-y: auto;
+}
+

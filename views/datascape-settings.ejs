@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+  <%- include head.ejs %>  
+  <body>
+    <%- include header.ejs %>      
+    <main>
+      <script src="/js/upload-settings-controller.js"></script>
+
+      <div class="app-content">
+	
+	<% if (message.length > 0) { %>
+	<div class="pure-alert pure-alert-error"><%= message %></div>
+	<% } %>
+	
+	<div class="upload-container">
+	  <h1 class="title">Datascape settings</h1>
+	  <hr>
+	  
+	  <form action="<%- datascape.links.local %>/settings" method="post" id="dataset-upload-form" 
+		class="pure-form pure-form-stacked basic-form" name="dataset-upload-form">  <!-- novalidate="novalidate"> -->
+	    
+	    <div id="form-file-settings-container">
+	      
+	      <div class="pure-control-group dataset-title">
+		<label for="file-title">Title</label>
+		<input id="file-title" name="title" type="text" value="">
+	      </div>
+	           
+	      <div id="table-display-container"></div>
+	      
+	      <div class="pure-control-group dataset-title">
+		<label for="caption">Caption</label>
+		<div id="caption">
+		</div>
+	      </div>
+	      
+	      <div class="pure-g user-sharing-container">
+		<div class="pure-u-1-2">
+		  <label class="pure-radio" for="privacy-public">
+		    <input type="radio" name="privacySettings"
+			   value="PUBLIC" id="privacy-public">Share publicly
+		  </label>
+		  
+		  <label class="pure-radio" for="privacy-private">
+		    <input type="radio" name="privacySettings"
+			   value="PRIVATE" id="privacy-private">Share privately with <button class="pure-button" id="add-user">
+		      <i class="fa fa-plus"></i>	      
+		    </button>
+
+		<div class="pure-control-group" id="user-select">
+		    
+		  <ul class="top-m-1" id="shared-user-collection">
+		  </ul>
+		</div>
+		</div>
+		</label>
+	      </div>
+	      
+	      <div class="pure-u-1-2">
+		  
+		  
+		</div>
+	      </div>
+	    </div>
+	    
+	    <div class="pure-g">	      
+	      <button type="submit" id="delete-datascape-button"
+		      class="pure-button pure-button-error submit-button pure-g-u-1-5">
+		Delete datascape
+	      </button>
+	      
+	      <button type="submit" id="save-datascape-button"
+		      class="pure-button pure-button-success submit-button pure-g-u-1-5">
+		Update datascape
+	      </button>
+	    </div>
+	  </form>
+	</div>
+      </div>
+    </main>
+    <%- include footer.ejs %>  
+  </body>  
+</html>
+
+
+
+

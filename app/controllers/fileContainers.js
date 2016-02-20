@@ -48,7 +48,7 @@ exports.requestAccess = function(req, res){
     var fileContainer  = null;
     var fcQuery          = {
 	'parent.username': req.params.username,
-	'links.custom': req.params.fileLink 
+	'links.custom': req.params.datascape 
     }
     
     var promise = new Promise( function(resolve, reject){
@@ -83,25 +83,26 @@ exports.requestAccess = function(req, res){
     
 };
 
-//http://10.1.0.117:3000/user/username.cool/datasets/6qh4c0418aor
-exports.displayDataset = function(req, res){
+//http://10.1.0.117:3000/user/username.cool/datascapes/6qh4c0418aor
+exports.displayDatascape = function(req, res, next){
     
-    console.log( req.params );
-
-    var query = req.params.bulletURL ?
+    var query = req.params.bullet ?
 	{
-	    'links.bullet': req.params.bulletURL
+	    'links.bullet': req.params.bullet
 	} : {
 	    'parent.username': req.params.username,
-	    'links.custom': req.params.fileLink 
+	    'links.custom': req.params.datascape 
 	};
     
-    console.log( query, "URL\n", req.originalUrl, "\n", "/user/:username/datasets/:fileLink" );
     FileContainers.findOne( query, function(err, doc){
-    	console.log( err, doc, query);
+	if( err )  return res.render('500.ejs', {user: req.user});
+	if( !doc ) return res.render('404.ejs', {user: req.user});
 	
+	var isOwner = req.isAuthenticated && req.user && req.user._id.toString() === doc.parent.id;
+	
+
     	if( doc.viewableTo( req.user ) ){ 
-    	    res.render( 'dataset.ejs', { user: req.user, dataset: doc });
+    	    res.render( 'datascape.ejs', { user: req.user, datascape: doc, isOwner: isOwner });
     	} else {
     	    res.render( 'request-access.ejs', {
     		user: req.user,
@@ -112,19 +113,19 @@ exports.displayDataset = function(req, res){
     	    });
     	}
     });
-//    res.redirect('/profile');
+    //    res.redirect('/profile');
 }
 
 
-//http://10.1.0.117:3000/user/username.cool/datasets/6qh4c0418aor
-exports.datasetGetCSV = function(req, res){
+//http://10.1.0.117:3000/user/username.cool/datascapes/6qh4c0418aor
+exports.datascapeGetCSV = function(req, res){
     
-    var query = req.params.bulletURL ?
+    var query = req.params.bullet ?
 	{
-	    'links.bullet': req.params.bulletURL
+	    'links.bullet': req.params.bullet
 	} : {
 	    'parent.username': req.params.username,
-	    'links.custom': req.params.fileLink 
+	    'links.custom': req.params.datascape 
 	};
 
     FileContainers.findOne( query, function(err, doc){
@@ -141,14 +142,14 @@ exports.datasetGetCSV = function(req, res){
     });
 }
 
-exports.datasetGetLegacyConfig = function(req, res){
+exports.datascapeGetLegacyConfig = function(req, res){
     
-    var query = req.params.bulletURL ?
+    var query = req.params.bullet ?
 	{
-	    'links.bullet': req.params.bulletURL
+	    'links.bullet': req.params.bullet
 	} : {
 	    'parent.username': req.params.username,
-	    'links.custom': req.params.fileLink 
+	    'links.custom': req.params.datascape 
 	};
     
     FileContainers.findOne( query, function(err, doc){
@@ -169,48 +170,146 @@ exports.upload = function(req, res) {
     var form = new formidable.IncomingForm();
     var documentId = mongoose.Types.ObjectId();        		
     console.log(req.body);
-    
-    
-    // form.uploadDir = __dirname + "../../../data/temp";
-    // form.keepExtensions = true;
-   
-    // // var fileInfo = // check req	
-    // form.parse(req, function(err, fields, files) {
-	
-    // 	if (err) throw new Error( err );
-	
-    //     Users.findOne( {_id: req.user._id }, function( err, user ){
-    // 	    if( err ) return handleError( err ) ;
-    // 	    if( !user ) res.send( 504 );
-	    
-    // 	    var fileContainer = new FileContainers({
-    // 	        parent: {
-    // 		    id: user._id,
-    // 		    collection: user.__t
-    //             },
-    // 		file: {
-    // 		    name: files.file.name,
-    // 		    path: files.file.path
-    // 		},
-    // 	        visibility: user.settings.defaultVisibility
-    // 	    });
-	    
-    // 	    user.attachFile( fileContainer._id );
-	    
-    // 	    user.save(function(error){
-    // 		if( err ) throw new Error( error );
-    // 	    });
-	    
-    // 	    fileContainer.save(function(error){
-    // 		if( err ) throw new Error( error );
-    // 	    });
-    //     });   
-    // });
-    
-    // form.on('end', function() {       
-    // 	// may  not need
-    
-    // });
+
 };
 
 
+exports.getDatascapeSettings = function(req, res){
+    var query = req.params.bulletURL ?
+	{
+	    'links.bullet': req.params.bulletURL
+	} : {
+	    'parent.username': req.params.username,
+	    'links.custom': req.params.datascape 
+	};
+    
+    FileContainers.findOne( query, function(err, doc){
+	
+    	var isOwner = req.isAuthenticated() && req.user && req.user._id.toString() === doc.parent.id;
+	if( isOwner ){ 
+    	    res.render('datascape-settings.ejs', { 
+		user: req.user,
+		datascape: doc,
+		isOwner: isOwner,
+		message: req.flash('uploadMessage')
+	    });
+    	} else {
+    	    res.render( 'request-access.ejs', {
+    		user: req.user,
+    		file: {
+    		    name: doc.file.name,
+    		    requestLink: doc.displaySettings.link + '/request-access'
+    		}
+    	    });
+    	}
+    });
+}
+
+
+
+exports.getFileContainer = function(req, res){
+    
+    // Construct query
+    var query = {
+	_id: req.query.id
+    }
+    
+    FileContainers.findOne( query, function(err, doc){
+	if( err )  return res.send( 500 );
+	if( !doc ) return res.send( 404 );
+	if( !doc.viewableTo( req.user ) )
+	    return res.send( 404 );
+	
+	// At this point, no errors
+	// we found the doc, and the user,
+	// does have access to the file. Yay!
+
+	// Send fileContainer 
+	res.send( doc );
+    }); 
+    
+}
+
+
+exports.getFileContainerSource = function(req, res){
+    
+    // Construct query
+    var query = {
+	_id: req.query.id
+    }
+    
+    FileContainers.findOne( query, function(err, doc){
+	if( err )  return res.send( 500 );
+	if( !doc ) return res.send( 404 );
+	if( !doc.viewableTo( req.user ) )
+	    return res.send( 404 );
+	
+	// Send fileContainer 
+	doc.getFile( res );
+    }); 			    
+}
+
+exports.postDatascapeSettings = function(req, res){
+    
+    if( !req.isAuthenticated() )
+	res.sendStatus(403);
+    
+    var form = new formidable.IncomingForm();
+
+    form.parse(req, function(err, fields) {
+	if (err) throw new Error( err );
+	
+	var settings = JSON.parse( fields.revertUponArival );
+	var query = {
+	    'links.custom': req.params.datascape
+	}
+	
+	FileContainers.findOne( query, function(err, doc){
+	    if( err ) return res.sendStatus( 500 );
+	    if( doc.parent.id !== req.user._id.toString() )
+		res.sendStatus(403);
+
+	    console.log( settings );
+	    doc.displaySettings.display     = settings.displaySettings.display;
+	    doc.displaySettings.title       = settings.displaySettings.title;
+	    doc.displaySettings.caption     = settings.displaySettings.caption;
+	    doc.displaySettings.visibility  = settings.displaySettings.visibility;	    
+	    doc.sharedWith = settings.sharedWith;
+
+	    doc.displaySettings.legacy = FileContainers.convertDisplaySettingsToLegacy( settings.displaySettings );
+	    console.log(doc) 
+	    doc.save(function(saveErr){
+		if( saveErr ) return res.sendStatus( 500 );
+		
+		res.send( doc.links.link );
+	    })
+	});
+    });
+}
+
+
+exports.getPaginatedFiles = function(req, res){
+    
+    // Not need to authenticate, only public datascapes 
+    // will be shows
+    
+    var query = {
+	'displaySettings.visibility': 'PUBLIC'
+    }
+    
+    // Construct paginate params
+    // Don't forget to parse all incoming integer values
+    var paginateParams = {
+	offset: parseInt( req.query.page || 0 ),
+	limit: parseInt( req.query.limit || 30 ),
+	lean: true,
+	leanWithId: true,
+	sort: { dateAdded: -1 }	
+    };
+    
+    FileContainers.paginate(query, paginateParams, function(err, docs){
+	console.log(err, docs); 
+	if( err ) res.send( err ); 
+	res.send( docs.docs ); 
+    });    
+} 

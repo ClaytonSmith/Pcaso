@@ -13,10 +13,16 @@ var Comments              = mongoose.model('Comment');
 
 
 exports.getComments  = function(req, res){
-    console.log( req.body, req.params );
-    Comments.collectByTopic( req.body.topic, function(err, docs){
-	res.send( Comments.jqueryCommentsTransform( docs ));
-    }); 
+   
+    var query = {
+	id: req.query.id,
+	collectionName: req.query.collectionName
+    };
+
+    Comments.collectByTopic( query , function(err, docs){
+    	res.send( Comments.jqueryCommentsTransform( docs ));
+    });
+    
 }
 
 exports.postComment = function(req, res){

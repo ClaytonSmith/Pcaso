@@ -14,21 +14,31 @@
 	  <% } else { %>
 	  <h1><%= profile.username %></h1>
 	  <% } %>
+
 	  <hr>
 	  
-	  <div class="pure-g profile-main-display">
+	  <h3>Portfolio</h3>
 	  
-	    <div class="pure-u-3-4">
+	  <div class="pure-g profile-main-display">
+	 
+	    <div class="pure-u-3-4 enable-scrolling">
 	      <div class="pure-g">
 
 		<% for(var i = 0; i < profile.files.length; i++) { %>
-		   <div class="pure-u-1-6 dataspace-tile" style="background-image: url( <%- profile.files[i].links.thumbnail %>);">
+		   <!-- style="background-image: url( <%- profile.files[i].links.thumbnail %>);"-->
+		   <div class="pure-u-1-6 dataspace-tile" >
 		     <a href="<%- profile.files[i].links.local %>">
-		       <h3><%= profile.files[i].displaySettings.title %></h3>
+		       <h4><%= profile.files[i].displaySettings.title %></h4>
+		       <p class="view-count">Views: <%= profile.files[i].statistics.viewCount %></p>
+		       <p class="view-count">Comments: <%= profile.files[i].comments.length %></p>
+		       <p class="visibility">Visibility: <span class="capitalize"><%= profile.files[i].displaySettings.visibility %></span></p>
+		     </a>		   
+
+		     <% if (isOwner) { %>
+		     <a class="bottom-right" href="<%- profile.files[i].links.local %>/settings">
+		       <i class="fa fa-cog fa-2x rotate-on-hover"></i>
 		     </a>
-		     
-		     
-		     <p>Views: <%= profile.files[i].statistics.viewCount %></p>
+		     <% } %>
 		   </div>
 		   <% } %>
 		   
@@ -37,7 +47,13 @@
 	    </div>
 
 	    <div class="pure-u-1-4">	      
-	      <img class="pure-img" src="<%- profile.links.avatar %>">
+	      <img class="pure-img avatar" src="<%- profile.links.avatar %>">
+	      <p><%= profile.name.first %> <%= profile.name.last %></p>
+	      
+	      <% if (profile.profileSettings.displayEmail) { %>
+	      <a href="mailto:<%- profile.email %>"><%= profile.email %></a>
+	      <% } %>
+	      
 	    </div>
 	  </div>	  
 	  

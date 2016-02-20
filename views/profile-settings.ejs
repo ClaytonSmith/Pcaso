@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+  <%- include head.ejs %>  
+  <body>
+    <%- include header.ejs %>      
+    <main>
+      <script src="/js/profile-settings-controller.js"></script>
+      
+      <div class="app-content">
+	<div class="account-container">
+	  
+	  
+	  <h1 class="title">Profile settings</h1>
+	  <hr>
+	  
+	  <form action="<%- profile.links.local %>/settings" method="post" id="profile-settings-form" 
+		class="pure-form pure-form-aligned basic-form" name="dataset-upload-form">  <!-- novalidate="novalidate"> -->
+	    
+	    <div class="prue-g">
+	      <div class="pure-u-1-5">
+		<h2 class="center"><%= profile.username %></h2>
+		<img class="pure-img avatar" src="<%- profile.links.avatar %>" id="avatar-display" \>
+		<div class="pure-control-group top-m-2">
+		  <label for="avatar-select">Edit avatar</label>
+		  <input type="file" accept="image/x-png, image/gif, image/jpe" name="avitar-select" id="avatar-select">
+		</div>
+	      </div>
+
+	      <div class="pure-u-1-12">
+		<!-- Empty space-->
+	      </div>
+	      
+	      <div class="pure-u-2-5">
+		<div class="pure-control-group">
+		  <label for="username">Username</label>
+		  <p class="info-text"><%= profile.username %></p>
+		</div>
+		
+
+		<div class="pure-control-group">
+		  <label for="email">Email</label>
+		  <p class="info-text"><%= profile.email %></p>
+		  <label for="email-visibility">
+		    <input type="checkbox" name="email-visibility" id="email-visibility"> Show publicly</label> 
+		</div>
+		
+	      
+		
+		<div class="pure-control-group top-m-2">
+		  <label for="email-visibility">Default datascape visibility</label>
+		  
+		  <label class="pure-radio radio-select" for="privacy-public">
+		    <input type="radio" name="privacySettings" value="PUBLIC" id="privacy-public">Public
+		  </label>
+		  
+		  <label class="pure-radio radio-select" for="privacy-private">
+		    <input type="radio" name="privacySettings" value="PRIVATE" id="privacy-private">Private
+		  </label>
+
+		</div>
+		
+		<div class="pure-g">	      	      
+		  <button type="submit" id="save-datascape-button"
+			  class="pure-button pure-button-success submit-button pure-g-u-1-5">
+		    Save
+		  </button>
+		</div>
+	      </div>
+	    </div>
+	  </form>
+	</div>
+      </div>
+    </main>
+    <%- include footer.ejs %>  
+  </body>  
+</html>

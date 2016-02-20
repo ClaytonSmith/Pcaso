@@ -15,7 +15,7 @@
 	  
       <li class="pure-menu-item"><a href="/notifications" class="pure-menu-link">
 	  Notifications
-	
+	  
 	  <% if (user.notifications.length) { %>
 	  <span class="pure-badge-success"><%= user.notifications.length %></span>
 	  <% } %>
@@ -25,7 +25,7 @@
       <li class="pure-menu-item pure-menu-has-children pure-menu-allow-hover">
         <a href="/profile" id="menuLink1" class="pure-menu-link"><%= user.username %></a>
         <ul class="pure-menu-children nav child">
-          <li class="pure-menu-item"><a href="/profile/settings" class="pure-menu-link">Settings</a></li>
+          <li class="pure-menu-item"><a href="<%- user.links.local %>/settings" class="pure-menu-link">Settings</a></li>
           <li class="pure-menu-item"><a href="/sign-out" class="pure-menu-link">Sign Out</a></li>
         </ul>
       </li>

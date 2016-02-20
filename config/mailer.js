@@ -15,29 +15,44 @@ var templateClients = {
     'test': { 
 	subject: 'Test',
 	client: 'no-reply'
-    },
-    'shared-dataset': { 
-	subject: 'PCaso: A dataset has been shared with you',
+    }, // Email users a datascape has been shared with them 
+    'shared-with-authenticated-user': { 
+	subject: 'Pcaso: A dataset has been shared with you',
 	client: 'no-reply'
-    },
+    }, // Email unauthenticated sers a datascape has been shared with them 
+    'shared-with-unauthenticated-user': { 
+	subject: 'Pcaso: A dataset has been shared with you',
+	client: 'no-reply'
+    }, // Email owner when a share request is made by unauthenticated users 
+    'share-request-public': { 
+	subject: 'Pcaso: Someone has requested access to one of your datascapes',
+	client: 'no-reply'
+    },// Email owner when a share request is made by users 
+    'share-request-private': { 
+	subject: 'Pcaso: Someone has requested access to one of your datascapes',
+	client: 'no-reply'
+    }, // Email for any comment
+    'new-comment': { 
+	subject: 'Pcaso: You have recieved a new comment',
+	client: 'no-reply'
+    }, // Authentication email for user registration
     'authenticate-new-user': { 
-	subject: 'Welcome to Pcaso.io',
+	subject: 'Welcome to Pcaso',
 	client: 'no-reply'
-    }
-    
+    }    
 };
 
-function templateResourceCollector(data, extra){
+function templateResourceCollector(user, extra){
     return { 
 	config: config,
-	data: data,
+	user: user,
 	extra: extra
     }
 }
 
 function MailClient( client ){
     if( !config.secrets.emailCredentials.hasOwnProperty( client ))
-	return new Error( 'Unknown client' );
+	return new Error( 'Unknown client: ' + client );
 
     var newClient   = this;    
     var okayToSend  = { from: false, to: false, subject: false, body: false } 
@@ -110,10 +125,9 @@ function MailClient( client ){
 
 	// send
 	
-	// if( process.env['NODE_ENV'] === 'test' )
+	//if( process.env['NODE_ENV'] === 'test' )
 	    callback( false, {});
-	// else 
-	   // transport.sendMail(newClient.message, callback);
+	//else transport.sendMail(newClient.message, callback);
     }
     
     return  newClient;
@@ -122,7 +136,7 @@ function MailClient( client ){
 exports.useTemplate = function(templateName, recipients, additionalObjects, callback){
 
      if( callback === undefined ){
-     	 callback = additionalObjects;
+	 callback = additionalObjects;
      }
 
     // Get the mailer for the template 
@@ -157,7 +171,10 @@ exports.useTemplate = function(templateName, recipients, additionalObjects, call
     	    mailClient.subject( mailer.subject );
     	    mailClient.html( results.html );
     	    mailClient.text( results.text );
-	    
+
+	    console.log("\n\n\n", results.html, "\n\n\n");
+	    console.log("\n\n\n", results.text, "\n\n\n");
+
     	    mailClient.send( next );
     	});
     }, callback );

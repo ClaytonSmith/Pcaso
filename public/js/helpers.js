@@ -63,4 +63,23 @@
 
         return json;
     };
+
+
 })(jQuery);
+
+
+// Given a source element containing a file,
+// the file will be rendered into a destination
+// Targeted for file input and img elements
+function renderImageIntoElement(source, dest) {
+    if (source.files && source.files[0]) {
+        var reader = new FileReader();
+        
+        reader.onload = function (e) {
+            dest.attr('src', e.target.result);
+        }
+        
+        reader.readAsDataURL(source.files[0]);
+    }
+}
+

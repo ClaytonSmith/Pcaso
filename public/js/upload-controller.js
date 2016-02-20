@@ -5,34 +5,64 @@
 function init() {
     
     // Globals
-    var columnTypes = [];
-    var file = null;
-    var title = null;
+    var user         = window.globaData.user;
+    var focusEntity  = window.globaData.focusEntity;
+    var path         = location.pathname;
+    var columnTypes  = [];
+    var file         = null;
+    var title        = null;
     
-    function genTitle( title ){
-	var containerSettings = {
-	    class:"pure-control-group"
-	}
-	var labelSettings = {
-	    for: 'title',
-	    html: 'Title'
-	}
-	var inputSettings = {
-	    id:   'title',
-	    name: 'title',
-	    type: 'text',
-	    value: title
-	}
+    function genSharingWithEmail(){
+
+	var sharingCollection  = $("#shared-user-collection");
+	var addUser            = $("#add-user");
+	var privacySettings    = $('input:radio[name=privacySettings]');
+
+	// Select user defined default privacy settings
+	console.log(req.user.fileSettings.defaults.visibility);
+	privacySettings.filter('[value='+ req.user.fileSettings.defaults.visibility +' ]').
+	    prop('checked', true );
+	    
 	
-	var container = $('<div\>',   containerSettings);
-	var label     = $('<label/>', labelSettings);
-	var input     = $('<input/>', inputSettings);
+	// Onclick method to add new email field
+	addUser.click(function(){
+	    if( !$("#dataset-upload-form").valid() ) return;
+		
+	   
+	    var userEmailSettings = {
+		type: "email",
+		name: "email[]",
+		class: "share-with-email",
+		placeholder: "Recipient email"
+	    };
+	    var removeEmailSettings = { 
+		class: "pure-button fa fa-trash-o fa-2x remove-email"
+	    };	
+	    var emailContainerSettings = {	
+		class: "email-list-container"
+	    };
+	    
+	    // create list element, remove button, and input field 
+	    var userEmail      = $("<input\>",  userEmailSettings);	    
+	    var removeEmail    = $("<button\>", removeEmailSettings);
+	    var emailContainer = $("<li\>",     emailContainerSettings);
 
-	container.append( label );
-	container.append( input );
+	    // Make field required
+	    userEmail.prop('required', true);
 
-	return container;
+	    // Add remove button and feature
+	    emailContainer.append(removeEmail);	    
+	    emailContainer.append(userEmail);
+	    
+	    // Create `Remove` functionality
+	    removeEmail.click(function(){
+		emailContainer.remove();
+	    });
+	    
+	    sharingCollection.append( emailContainer );
+	});
     }
+    
     
     function genTable(data){
 	var tableConfig = {
@@ -66,13 +96,13 @@ function init() {
 	data[0].forEach(function(datum, index){
 	    var sID = 'evalColumns'+ index +'As';
 	    var select = $("<select\>", {name: sID, size: 4} );
-	
+	    
 	    select.append( $("<option\>", {value: 'id',    html: 'ID', slected: true }) );
 	    select.append( $("<option\>", {value: 'axis',  html: 'Axis' }) );
 	    select.append( $("<option\>", {value: 'meta',  html: 'Meta' }) );
 	    select.append( $("<option\>", {value: 'value', html: 'Value'}) );
 	    select.append( $("<option\>", {value: 'omit',  html: 'Omit' }) );
-	     
+	    
 	    // Init 
 	    columnTypes[ index ] = select.val();
 	    
@@ -91,40 +121,99 @@ function init() {
 	
 	return table;
     }
+
+    function genCaption(){
+	
+	var caption   = $("#caption");	
+	var settings  = {
+	    // No settings yet
+	}
+
+	caption.trumbowyg( settings );
+    }
     
-    function insertTable(table, file){
+    // @fileContainer and @CSV are overrides form the default data
+    function populateForm(table, file, fileContainer, CSV){
 	if( table.errors.length ) return console.log( table.errors );
 	
-	var csvDisplayContainer = $("#csv-display-container")
-	var layout = $('<div\>');
-	
-
-
-	var title = $('<h3\>', {class:'file-title', html: file.name });
-	var tableContainer = $('<div\>');
-	var description = $("<textarea\>", { name: "caption", id: "caption"});
-	
-	// Clear any existing elements
-	csvDisplayContainer.empty();
-	
-	// Create table
-	tableContainer.append( genTable( table.data ) );
+	// Get the container for the new elements
+	var formContainer   = $("#form-file-settings-container")
+	var tableContainer  = $("#table-display-container");
 	
 	// Create layout with title and table
-	layout.append( genTitle( file.name ));
-	layout.append( tableContainer );
-	layout.append( description );
+	setTitle( file.name  );
 	
-	// Insert into dom
-	csvDisplayContainer.append( layout );
-	console.log( columnTypes );
-    }
-
-    function isValid(form){
-	// Soon to come
-	return true;
+	// Create table
+	tableContainer.append( genTable(table.data ) );
+	
+	// Insert caption
+	setCaption( fileContainer.displaySettings.caption );
+        setSharingArea( fileContainer.displaySettigns.visibility, fileContainer.sharedWith );
     }
     
+    $.validator.prototype.checkForm = function () {
+        //overriden in a specific page
+        this.prepareForm();
+        for (var i = 0, elements = (this.currentElements = this.elements()); elements[i]; i++) {
+            if (this.findByName(elements[i].name).length != undefined
+		&& this.findByName(elements[i].name).length > 1) {
+                for (var cnt = 0; cnt < this.findByName(elements[i].name).length; cnt++) {
+                    this.check(this.findByName(elements[i].name)[cnt]);
+                }
+            } else {
+                this.check(elements[i]);
+            }
+        }
+        return this.valid();
+    }
+    
+    // Form validation
+    $("#dataset-upload-form").validate({
+	ignore: [],
+	rules: {
+	    'email[]': { 
+		required: true,
+	    }
+	},
+	submitHandler: function(form) {
+    	    var form      = $("#dataset-upload-form");
+    	    var formData  = new FormData();	
+	    var actionURL = form.attr('action');
+	    var method    = form.attr('method').toUpperCase();
+            var title     = form.find('input[name="title"]').val();
+
+	    var data = {
+		displaySettings: {
+		    title: title,
+		    caption: $('#caption').trumbowyg('html'),	    
+		    display: {
+			columnTypes: columnTypes
+		    },
+		    visibility: $('input[name="privacySettings"]').val()
+		},
+		
+		sharedWith: $('input[name^="email[]"]').map(function(){ return $(this).val();}).get()
+	    };
+	    
+	    console.log( data );
+	    // I hate to do this but I don't know how else to send objects
+	    formData.append( 'revertUponArival', JSON.stringify( data ) );
+	    formData.append( 'file', file);
+	    
+	    
+	    $.ajax({
+                url: actionURL,
+                type: method,
+                data: formData,
+                cache: false,
+                contentType: false,
+                processData: false,
+	    }).success( function(data, textStatus){
+                window.location.replace( data );
+	    });
+	}
+    });
+   
     $("#file-select").change(function (e){
 	if( !e.target.files ) return null;
 	
@@ -132,53 +221,13 @@ function init() {
 	console.log(file.name);
 	
 	Papa.parse( file, {
-	    complete: function(parsedObj){ insertTable( parsedObj, file ); }
+	    complete: function(parsedObj){ populateForm( parsedObj, file ); }
 	});
     });
+    
 
     
-    $("#dataset-upload-form").submit(function(e){	
-     	e.preventDefault();
-	return false;
-    });
     
-    $("#submit-button").click(function(){
-    	var form      = $("#dataset-upload-form");
-    	var formData  = new FormData();	
-	var actionURL = form.attr('action');
-	var method    = form.attr('method').toUpperCase();
-        var title     = form.find('input[name="title"]').val();
-
-	var data = {
-	    displaySettings: {
-		title: title,
-		caption: $('#caption').val(),	    
-		display: {
-		    columnTypes: columnTypes
-		}
-	    },
-	    ownership: $("input:radio[name=ownership]").val()
-	};
-	    
-	// I hate to do this but I don't know how else to send objects
-	formData.append( 'revertUponArival', JSON.stringify( data ) );
-	formData.append( 'file', file);
-	
-	//console.log( 'Hi', actionURL, formData.getAll('file'), formData.getAll('legacyData') ); 
-	
-	$.ajax({
-            url: actionURL,
-            type: method,
-            data: formData,
-            cache: false,
-            contentType: false,
-            processData: false,
-	}).success( function(data, textStatus){
-            window.location.replace( data );
-	});
-    });
-
-    return false;
 }
 
 document.addEventListener("DOMContentLoaded", init);

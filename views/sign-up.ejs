@@ -9,7 +9,6 @@
       <div class="app-content">
 
 	<div class="form-container">
-	  <h1> Sign up</h1>
 	  
 	  <% if (message.length > 0) { %>
 	  <div class="pure-alert pure-alert-warning"><%= message %></div>
@@ -19,38 +18,46 @@
               
 
               <div class="pure-control-group">
-		<label for="firstname">First same</label>
-		<input id="firstName" name="firstName" type="text" placeholder="First name"> 
+		<label for="firstname">First name</label>
+		<input id="firstName" name="firstName" type="text" 
+		       maxlength="25" placeholder="First name"> 
               </div>
 
               <div class="pure-control-group">
-		<label for="lastname">Last same</label>
-		<input id="lastName" name="lastName" type="text" placeholder="Last name">
+		<label for="lastname">Last name</label>
+		<input id="lastName" name="lastName" type="text"
+		       maxlength="25" placeholder="Last name">
               </div>
 
 	      <div class="pure-control-group">
-		<label for="email">Email Address</label>
-		<input id="email" name="email" type="email" placeholder="Email Address">
+		<label for="username">Username</label>
+		<input id="username" name="username" type="text"
+		       maxlength="20" pattern="[a-zA-Z0-9\_\-]+"
+		       oninvalid="setCustomValidity(
+				  'Only alphanumeric character, underscores, and dashes are allowed'
+				  )"		       
+		       placeholder="Username">
               </div>
+
+	      <div class="pure-control-group">
+		<label for="email">Email</label>
+		<input id="email" name="email" type="email" placeholder="Email Address">
+	      </div>
 	      
               <div class="pure-control-group">
 		<label for="password">Password</label>
 		<input id="password" name="password" type="password" placeholder="Password">
               </div> 
-	      <div class="pure-control-group">
-		<label for="username">Username</label>
-		<input id="username" name="username" type="text" placeholder="Username">
-              </div>
 
-	      
+	     	      
 	      <label for="cb" class="pure-checkbox terms-and-conditions-cb">
-		<input id="cb" type="checkbox"> I've read the
-		<a href="/terms-and-conditions">terms and conditions</a>
+		<input id="cb" type="checkbox"> I accept the
+		<a href="/terms-and-conditions">terms and conditions.</a>
 	      </label>
               
-	      <button type="submit" class="pure-button pure-button-primary">Submit</button>
+	      <button type="submit" class="pure-button pure-button-primary">Sign up</button>
 	  </form>
-	  <p> Already have an account? sign-in <a href="/sign-in">here</a>.</p>
+	  <p> Already have an account? <a href="/sign-in">Sign in</a>.</p>
 	</div>
       </div>
 

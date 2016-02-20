@@ -2,9 +2,10 @@
 
 var mongoose = require('mongoose');
 
-var files      = require('./controllers/fileContainers');
-var users      = require('./controllers/users');
-var comments   = require('./controllers/comments'); 
+var files          = require('./controllers/fileContainers');
+var users          = require('./controllers/users');
+var comments       = require('./controllers/comments'); 
+var notifications  = require('./controllers/notifications'); 
 
 module.exports = function(app, passport) {
 
@@ -46,46 +47,62 @@ module.exports = function(app, passport) {
         req.logout();
         res.redirect('/');
     });
-    
+   
     app.get('/upload', function(req, res){
-	res.render('upload.ejs', { message: req.flash('uploadMessage'), user: req.user });	
+	res.render('upload-datascape.ejs', { message: req.flash('uploadMessage'), user: req.user });	
     });
     
-    app.post( '/upload-dataset', users.createDataset);
-    
-    app.get(    '/user/:username',          users.getUserProfile );
-    //app.post(   '/user/:username/update', users.updateProfile );
-    //app.delete( '/user/:username/delete', users.deleteAccount);
+    app.post(   '/upload-datascape',        users.createDataset);
 
-    //app.get(    '/user/:username/datasets/',                         files.displayUserDatasets );
-    app.get(    '/user/:username/datasets/:fileLink',                files.displayDataset );
-    app.get(    '/user/:username/datasets/:fileLink/csv',            files.datasetGetCSV );
-    app.get(    '/user/:username/datasets/:fileLink/config',         files.datasetGetLegacyConfig );
-
-    //app.post(   '/user/:username/datasets/:fileLink/update',         files.updateDataset );
-    //app.get(    '/user/:username/datasets/:fileLink/download',       files.downloadDataset);    
-    //app.delete( '/user/:username/datasets/:fileLink/delete',         users.deleteDataset );
-    app.post(   '/user/:username/datasets/:fileLink/request-access', files.requestAccess );    
-    
-    //app.get( '/gallery', files.displayGallery );    
-
-    app.get( '/about', function(req, res){
-	res.render('about', { user: req.user });
-    });
+    app.get(    '/notifications',           users.getNotifications);
+    app.get(    '/notifications/:notificationID', notifications.redirect );
  
-    // Ajax does some awful stuff that forces the 'get' to be a 'post'
-    // I miss angular's `http` so much :(
-    app.post(   '/api/comments/get',        comments.getComments);
+    app.get(    '/user/:username',          users.getUserProfile );
+    app.get(    '/user/:username/settings', users.profileSettings );
+    app.post(   '/user/:username/settings', users.editProfileSettings );
+    //app.delete( '/user/:username/delete', users.deleteAccount);
+    //app.get(    '/user/:username/datasets/',                         files.displayUserDatasets );
+    
+    app.get(    '/user/:username/datascapes/:datascape',                files.displayDatascape );
+    app.get(    '/user/:username/datascapes/:datascape/csv',            files.datascapeGetCSV );
+    app.get(    '/user/:username/datascapes/:datascape/config',         files.datascapeGetLegacyConfig );
+    app.get(    '/user/:username/datascapes/:datascape/settings',       files.getDatascapeSettings );
+    app.post(   '/user/:username/datascapes/:datascape/settings',       files.postDatascapeSettings );
+ 
+    //app.delete( '/user/:username/datascapes/:datascape/delete',         users.deleteDataset );
+    app.post(   '/user/:username/datascapes/:datascape/request-access', files.requestAccess );    
+    
+    app.get(    '/api/datascapes',          files.getFileContainer);
+    app.get(    '/api/datascapes/source',   files.getFileContainerSource);
+    app.get(    '/api/datascapes/paginate', files.getPaginatedFiles);
+    //app.delete( '/api/fileContainer/:fileContaienrID', files.getFileContainer);
+    
+    app.get(    '/api/comments',            comments.getComments);
     app.post(   '/api/comments/create',     comments.postComment);
     app.post(   '/api/comments/edit',       comments.editComment);
     app.delete( '/api/comments/:commentID', comments.deleteComment );
- 
-
-   //    app.get( '*',  function(req, res){
-    //	res.render('/404.ejs', { user: req.user });
-    //   });
     
-    //    app.get('/:bullet', files.isBullet, files.displayFile);
+    app.get(    '/api/notifications',       notifications.get);
+    app.delete( '/api/notifications',       notifications.remove);
+    
+    app.get(    '/api/*',  function(req, res){ res.sendStatus(404) });
+    app.post(   '/api/*',  function(req, res){ res.sendStatus(404) });
+    app.put(    '/api/*',  function(req, res){ res.sendStatus(404) });
+    app.delete( '/api/*',  function(req, res){ res.sendStatus(404) });
+
+    //app.get( '/gallery', files.displayGallery );    
+
+    app.get( '/about', function(req, res){
+	res.render('about.ejs', { user: req.user });
+    });
+
+    app.get('/:bullet',        files.displayDatascape);
+    app.get('/:bullet/config', files.datascapeGetLegacyConfig);
+    app.get('/:bullet/csv',    files.datascapeGetCSV);
+    
+    app.get( '*',  function(req, res){
+    	res.render('404.ejs', { user: req.user });
+    });
 };
 
 // route middleware to ensure user is logged in

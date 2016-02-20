@@ -117,8 +117,8 @@ module.exports = function(passport) {
 				newUser.save(function(err) {
 				    if (err) return done(err);   
 				    mailer.useTemplate( 'authenticate-new-user', newUser, function(mailError){
-					done(mailError, newUser, req.flash('signInMessage', config.service.domain + 'authenticate-account/' + newUser._id )); 
-					//done(mailError, newUser, req.flash('signInMessage', 'An authentication link will be sent to your email account shortly.')); 
+					//done(mailError, newUser, req.flash('signInMessage', config.service.domain + 'authenticate-account/' + newUser._id )); 
+					done(mailError, newUser, req.flash('signInMessage', 'An authentication link will be sent to your email account shortly.')); 
 				    }); 
 				});
 	

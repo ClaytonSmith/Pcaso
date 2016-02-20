@@ -95,7 +95,16 @@ CommentSchema.static({
 	
 	this.find( query, callback );
     },
-    
+
+    commentMap: function(entity){
+	var map = {
+	    'User': 'profile',
+	    'Comment': 'comment',
+	    'ds': 213
+	    
+	}
+
+    },
     jqueryCommentsTransform: function( comments ){
 	
 	function formatDate( date ){
@@ -142,8 +151,8 @@ CommentSchema.static({
 	    links: {
 		parent: parent.links.link,
 		avatar: parent.links.avatar,
-		link:  parent.links.link  + '/' + id.toString(),
-		local: parent.links.local + '/' + id.toString()
+		link:  parent.links.link, //+ '/' + id.toString()  
+		local: parent.links.local 
 	    }
 	});
 
