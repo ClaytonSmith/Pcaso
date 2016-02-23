@@ -27,7 +27,6 @@ var FileContainerSchema = new mongoose.Schema({
         collectionName:  { type: String,  required: true },     // collection
         id:              { type: String,  required: true },     // id
 	name:            { type: mongoose.Schema.Types.Mixed, default: undefined }, // name
-	username:        { type: String,  default: '' },        // username
     },
     file: {
      	name:            { type: String,  required: true },              // Path to file
@@ -59,7 +58,7 @@ var FileContainerSchema = new mongoose.Schema({
 	bullet:          { type: String,  required: true, unique: true },        // Should never have two identicle bullets
 	link:            { type: String,  required: true, unique: true },        // Unique links prvent users from having two files with 
 	local:           { type: String,  required: true, unique: true },        // files with the same name having the same link
-	base:            { type: String,  required: true }                // /user/USERNAME/dataset/
+	base:            { type: String,  required: true }                       // /u/USER_ID/dataset/
     }
 }).extend({});
 
@@ -300,7 +299,6 @@ FileContainerSchema.static({
 		id: parent._id,
 		collectionName: parent.__t,
 		name: parent.name,
-		username: parent.username
 	    },
 	    file: {
 		name: file.name,

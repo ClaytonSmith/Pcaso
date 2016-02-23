@@ -51,7 +51,7 @@ exports.postComment = function(req, res){
 	
 	
 	var subject = null;
-	if( doc.username ) subject =  doc.username +"'s account";
+	if( doc.name ) subject =  doc.name.first +' '+ doc.name.last +"'s account";
 	else if( ( doc.displaySettings || {}).title ) subject = doc.displaySettings.title;
 	else subject = 'New comment';
 
@@ -62,7 +62,6 @@ exports.postComment = function(req, res){
 	
 	console.log('Hello');
 	var comment = req.user.leaveComment( doc, subject, req.body.body, function(commentError){ 	    
-	    console.log(commentError, "heyyyyyyyyy"); 
 	    req.user.save(function(err){
 		if( err ) res.sendStatus(500);
 		res.send( Comments.jqueryCommentsTransform( [ comment ] )[0] );

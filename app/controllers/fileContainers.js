@@ -57,7 +57,7 @@ exports.requestAccess = function(req, res){
     var query = req.params.bullet ? {
 	'links.bullet': req.params.bullet
     } : {
-	'parent.username': req.params.username,
+	'parent.id': req.params.userID,
 	'links.custom': req.params.datascape 
     };
 
@@ -99,7 +99,7 @@ exports.displayDatascape = function(req, res, next){
 	{
 	    'links.bullet': req.params.bullet
 	} : {
-	    'parent.username': req.params.username,
+	    'parent.id': req.params.userID,
 	    'links.custom': req.params.datascape 
 	};
     
@@ -125,14 +125,14 @@ exports.displayDatascape = function(req, res, next){
 }
 
 
-//http://10.1.0.117:3000/user/username.cool/datascapes/6qh4c0418aor
+//http://10.1.0.117:3000/u/USER-ID/datascapes/6qh4c0418aor
 exports.datascapeGetCSV = function(req, res){
     
     var query = req.params.bullet ?
 	{
 	    'links.bullet': req.params.bullet
 	} : {
-	    'parent.username': req.params.username,
+	    'parent.id': req.params.userID,
 	    'links.custom': req.params.datascape 
 	};
 
@@ -160,7 +160,7 @@ exports.datascapeGetLegacyConfig = function(req, res){
     var query = req.params.bullet ? {
 	    'links.bullet': req.params.bullet
 	} : {
-	    'parent.username': req.params.username,
+	    'parent.id': req.params.userID,
 	    'links.custom': req.params.datascape 
 	};
     
@@ -192,7 +192,7 @@ exports.getDatascapeSettings = function(req, res){
     var query = req.params.bulletURL ? {
 	    'links.bullet': req.params.bulletURL
 	} : {
-	    'parent.username': req.params.username,
+	    'parent.id': req.params.userID,
 	    'links.custom': req.params.datascape 
 	};
     
@@ -350,7 +350,7 @@ exports.getPaginatedFiles = function(req, res){
 exports.addSharedUser = function(req, res){
 
     var datascapeQuery = {
-	'parent.username': req.params.username,
+	'parent.id': req.params.userID,
 	'links.custom': req.params.datascape 
     };
     

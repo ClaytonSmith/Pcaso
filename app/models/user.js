@@ -54,8 +54,7 @@ var BaseUserSchema = new mongoose.Schema({// BaseSchema.extend({
     name: { 
         first:          { type: String, required: true },
 	last:           { type: String, required: true }
-    },
-    username: { type: String,  required: true, unique : true, dropDups: true },
+    }
 });
 
 var UnauthenticatedUserSchema  = BaseUserSchema.extend({});
@@ -167,7 +166,8 @@ UserSchema.method({
     
     leaveComment: function( entity, subject, commentBody, callback ){
 	var user = this;
-	var comment = Comments.register( user, entity, this.username, subject, commentBody);
+	
+	var comment = Comments.register( user, entity, this.name.first +' '+ this.name.last, subject, commentBody);
 	
 	comment.save(function(err){
 	    if( err ) callback( err ) ;
@@ -186,11 +186,8 @@ UserSchema.method({
 		}
 		
 		// Full name
-		//var notificationTitle = user.name.first +" "+ user.name.last +" has commented on your " + Comments.commentMap( entity.__t );
+		var notificationTitle = user.name.first +" "+ user.name.last +" has commented on your " + Comments.commentMap( entity.__t );
 		
-		// Username
-		var notificationTitle = user.username +" has commented on your " + Comments.commentMap( entity.__t );
-
 
 		var notification = Notification.register( entity, comment, notificationTitle );
 
@@ -309,15 +306,14 @@ UnauthenticatedUserSchema.static({
 	return bcrypt.compareSync(password, this.password);
     },
 
-    register: function(first, last, email, pass, username){
+    register: function(first, last, email, pass){
 	var user = new this({
 	    name: {
 		first: first,
 		last: last,
 	    },
 	    email: email,
-	    password: this.generateHash( pass ),
-	    username: username
+	    password: this.generateHash( pass )
 	});	
 	
 	return user;
@@ -334,21 +330,25 @@ UserSchema.static({
 	return bcrypt.compareSync(password, this.password);
     },
 
-    register: function( first, last, email, pass, username){
+    register: function( first, last, email, pass){
+	
+	// give the doc an ID instead of letting it make its own.
+	var id = mongoose.Types.ObjectId();
+
 	var user = new this({
+	    _id: id, // feed the ID here
 	    name: {
 		first: first,
 		last: last,
 	    },
 	    email: email,
 	    password: this.generateHash( pass ),
-	    username: username,
-	    localDataPath:  config.root +'/public/users-public-data/'+ username,
-	    publicDataPath: config.service.domain +'users-public-data/'+ username,
+	    localDataPath:  config.root +'/public/users-public-data/'+ id.toString(),
+	    publicDataPath: config.service.domain +'users-public-data/'+ id.toString(),
 	    links: {
-		avatar: config.service.domain +'users-public-data/'+ username +'/imgs/avatar',	   
-		link:   config.service.domain + "user/" + username,
-		local:  "/user/" + username
+		avatar: config.service.domain +'users-public-data/'+ id.toString() +'/imgs/avatar',	   
+		link:   config.service.domain + "u/" + id.toString(),
+		local:  "/u/" + id.toString()
 	    }
 	});	
 	
@@ -357,20 +357,22 @@ UserSchema.static({
 
     convert: function(unauthenticatedUser){
 
+	var id = mongoose.Types.ObjectId();
+
 	var user = new this({
+	    _id: id,
 	    name: {
 		first: unauthenticatedUser.name.first,
 		last:  unauthenticatedUser.name.last,
 	    },
 	    email: unauthenticatedUser.email,
 	    password: unauthenticatedUser.password, // Pass is already encrypted 
-	    username: unauthenticatedUser.username,
-	    localDataPath:  config.root +'/public/users-public-data/'+ unauthenticatedUser.username,
-	    publicDataPath: config.service.domain +'users-public-data/'+ unauthenticatedUser.username,
+	    localDataPath:  config.root +'/public/users-public-data/'+ id.toString(),
+	    publicDataPath: config.service.domain +'users-public-data/'+ id.toString(),
 	    links: {
-		avatar: config.service.domain +'users-public-data/'+ unauthenticatedUser.username +'/imgs/avatar',
-		link:   config.service.domain + "user/" + unauthenticatedUser.username,
-		local:  "/user/" + unauthenticatedUser.username
+		avatar: config.service.domain +'users-public-data/'+ id.toString() +'/imgs/avatar',
+		link:   config.service.domain + "u/" + id.toString(),
+		local:  "/u/" + id.toString()
 	    }
 	});	
 	
@@ -392,7 +394,7 @@ UserSchema.pre('save', function(next) {
     if( user.isNew ){
 
 
-	var publicDir = config.root + '/public/users-public-data/'+ user.username +'/';
+	var publicDir = config.root + '/public/users-public-data/'+ user._id.toString() +'/';
 	//create public directory for things like avatars
 		
 	async.series(

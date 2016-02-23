@@ -20,10 +20,10 @@
 	  <span class="pure-badge-success"><%= user.notifications.length %></span>
 	  <% } %>
       </a></li>
-
+      
       
       <li class="pure-menu-item pure-menu-has-children pure-menu-allow-hover">
-        <a href="/profile" id="menuLink1" class="pure-menu-link"><%= user.username %></a>
+        <a href="/profile" id="menuLink1" class="pure-menu-link"><%= user.name.first %></a>
         <ul class="pure-menu-children nav child">
           <li class="pure-menu-item"><a href="<%- user.links.local %>/settings" class="pure-menu-link">Settings</a></li>
           <li class="pure-menu-item"><a href="/sign-out" class="pure-menu-link">Sign Out</a></li>

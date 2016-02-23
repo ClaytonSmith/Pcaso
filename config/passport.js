@@ -49,9 +49,9 @@ module.exports = function(passport) {
 			
 			if( err ) return done(err);
 			
-			if( !user ) return done(null, false, req.flash('signInMessage', 'Bad username or password.'));
+			if( !user ) return done(null, false, req.flash('signInMessage', 'Bad email or password. Sorry! '));
 			
-			if( !user.validPassword(password)) return done(null, false, req.flash('signInMessage', 'Bad username or password.'));
+			if( !user.validPassword(password)) return done(null, false, req.flash('signInMessage', 'Bad email or password. Sorry! '));
 			
 			return done(null, user);
 		    });
@@ -71,10 +71,7 @@ module.exports = function(passport) {
 		process.nextTick(function() {
 		    if (!req.user) {	
 			var query = {
-			    $or: [
-				{ email : email.toLowerCase() },
-				{ username: new RegExp( ["^", req.body.username, "$"].join(""), "i" ) } // Store the original but search for similar 
-			    ]                   
+			    email : email.toLowerCase()
 			};
 			
 			Async.parallel(
@@ -95,30 +92,21 @@ module.exports = function(passport) {
 				if( err ) return done(err); 
 				
 				var emails   = results.filter( function(result){ return ( result !== null && result.email    === req.body.email ) });
-				var username = results.filter( function(result){ return ( result !== null && result.username === req.body.username ) });
 				
 				// Make sure no users exist in users or unauthenticated users with this email
-				if( emails.length || username.length ){
-				    var errorString = 'The ' 
-					+ ( ( emails.length ) ? 'email' : '' )
-					+ ( ( emails.length && username.length ) ? ' and ' : '' )
-					+ ( ( username.length ) ? 'username' : '' )
-					+ ' provided have already in use.';
-				    
-				    console.log(errorString);
+				if( emails.length ){
+				    var errorString = 'The email provided have already in use.' 
 				    return done(null, false, req.flash('signUpMessage', errorString )); 
 				}
-
+				
 				// Make account
 				var newUser = UnauthenticatedUsers.register(
 				    req.body.firstName,
 				    req.body.lastName,
 				    email.toLowerCase(),
-				    password,
-				    req.body.username
+				    password
 				);
-				
-				console.log('Made', newUser);
+
 				newUser.save(function(err) {
 				    if (err) return done(err);   
 				    mailer.useTemplate( 'authenticate-new-user', newUser, function(mailError){

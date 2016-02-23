@@ -18,7 +18,7 @@
 	    
 	    <div class="prue-g">
 	      <div class="pure-u-1-5">
-		<h2 class="center"><%= profile.username %></h2>
+		<h2 class="center"><%= profile.name.first %></h2>
 		<img class="pure-img avatar" src="<%- profile.links.avatar %>" id="avatar-display" \>
 		<div class="pure-control-group top-m-2">
 		  <label for="avatar-select">Edit avatar</label>
@@ -31,12 +31,7 @@
 	      </div>
 	      
 	      <div class="pure-u-2-5">
-		<div class="pure-control-group">
-		  <label for="username">Username</label>
-		  <p class="info-text"><%= profile.username %></p>
-		</div>
 		
-
 		<div class="pure-control-group">
 		  <label for="email">Email</label>
 		  <p class="info-text"><%= profile.email %></p>
@@ -45,8 +40,7 @@
 		</div>
 		
 	      
-		
-		<div class="pure-control-group top-m-2">
+		<div class="pure-control-group top-m-1">
 		  <label for="email-visibility">Default datascape visibility</label>
 		  
 		  <label class="pure-radio radio-select" for="privacy-public">

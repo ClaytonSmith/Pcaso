@@ -33,7 +33,7 @@ exports.getUserProfile = function(req, res){
     // If user is signed on, then additional items will be rendered. Note `isOwner`
         
     var query = {
-	username: req.params.username
+	_id: req.params.userID
     };
     
     Users.findOne( query, function(err, doc){
@@ -42,7 +42,7 @@ exports.getUserProfile = function(req, res){
 	
 
 	console.log( AsyncCollect ); 
-	var isOwner = req.isAuthenticated() && req.user.username === req.params.username;
+	var isOwner = req.isAuthenticated() && req.user._id.toString() === req.params.userID;
 	var asyncCollect = new AsyncCollect( doc );
 	var noteQuery = null;	
     	var fcQuery   = {
@@ -107,17 +107,9 @@ exports.getNotifications = function(req, res){
     });
 }
 
-exports.getProfile = function(req, res){
-    if( !req.isAuthenticated() )
-	return res.redirect('/sign-in');
-
-    return res.redirect( '/user/' + req.user.username );
-    
-}
-
 exports.getUserProfileComments = function(req, res){
     
-    Users.findOne( { username: req.params.username }, function(err, doc){
+    Users.findOne( { _id: req.params.userID }, function(err, doc){
 	if( err || !doc ) return res.send(404);
 
 	
@@ -134,7 +126,7 @@ exports.postUserProfileComment = function(req, res){
 	res.send( 403 );
     
     var query = {
-	username: req.params.username
+	_id: req.params.userID
     };
     
     Users.findOne( query, function(err, doc){
@@ -143,7 +135,7 @@ exports.postUserProfileComment = function(req, res){
 	
 	var comment = {
 	    body: req.body.body,
-	    subject: doc.username+"'s account",
+	    subject: doc.name.first +" "+  doc.name.last + "'s account",
 	}
 	
 	req.user.leaveComment(doc, comment.subject, comment.body, function(commentError){ 
@@ -162,45 +154,6 @@ exports.deleteAccount = function(req, res){
     
     req.logout();
     res.redirect('/');
-}
-
-// deletion link:
-exports.deleteFile = function(req, res){
-    req.user.deleteFile( user.req.params.fileID )	
-    res.send(200);
-}
-
-// API: can delete many files at once
-exports.deleteFiles = function(req, res){
-    // is owner?
-    // log
-    var query = { _id: req.body._id };
-    
-    Users.find( query, function(err, user){
-	if( err ){
-	    res.render('520.ejs'); 
-	    return handleError( err );
-	    
-	} else if( !user ){
-	    res.send('404.ejs');
-	
-	} else {
-
-	    req.body.files.forEach( function(file){ user.deleteFile( file ); });	
-	    res.send(200);
-	}
-    });
-}
-
-exports.displayAccountPage = function(req, res){
-    var username = req.params.username;
-    
-    console.log(req.isAuthenticated());
-    
-    User.find({})
-    res.render('profile.ejs', {
-        user : req.user
-    });
 }
 
 // Moves user accounts from the 'Unauthenticated' collection to the regular user space 
@@ -286,7 +239,7 @@ exports.createDataset = function(req, res){
 }
 
 exports.profileSettings = function(req, res){
-    var isOwner = req.isAuthenticated() && req.user.username === req.params.username;
+    var isOwner = req.isAuthenticated() && req.user._id.toString() === req.params.userID;
     
     if( !isOwner )
 	res.redirect('/');
@@ -306,7 +259,7 @@ exports.profileSettings = function(req, res){
 
 // TODO: do not res.render 
 exports.editProfileSettings = function(req, res){
-    var isOwner = req.isAuthenticated() && req.user.username === req.params.username;
+    var isOwner = req.isAuthenticated() && req.user._id.toString() === req.params.userID;
     
     if( !isOwner )
 	res.sendCode(403);

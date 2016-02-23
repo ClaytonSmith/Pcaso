@@ -16,8 +16,9 @@ module.exports = function(app, passport) {
         res.render('index.ejs', { user: req.user });
     });   
         
-
-    app.get('/profile', users.getProfile);
+    app.get('/profile', isLoggedIn, function(req, res){
+	res.redirect( req.user.links.local );
+    });
     
     app.get('/sign-in', function(req, res){
 	res.render('sign-in.ejs', { message: req.flash('signInMessage'), user: req.user });	
@@ -65,23 +66,23 @@ module.exports = function(app, passport) {
 
     app.get(    '/notifications',           users.getNotifications);
     app.get(    '/notifications/:notificationID', notifications.redirect );
- 
-    app.get(    '/user/:username',          users.getUserProfile );
-    app.get(    '/user/:username/settings', users.profileSettings );
-    app.post(   '/user/:username/settings', users.editProfileSettings );
-    //app.delete( '/user/:username/delete', users.deleteAccount);
-    //app.get(    '/user/:username/datasets/',                         files.displayUserDatasets );
     
-    app.get(    '/user/:username/datascapes/:datascape',                files.displayDatascape );
-    app.get(    '/user/:username/datascapes/:datascape/csv',            files.datascapeGetCSV );
-    app.get(    '/user/:username/datascapes/:datascape/config',         files.datascapeGetLegacyConfig );
-    app.get(    '/user/:username/datascapes/:datascape/settings',       files.getDatascapeSettings );
-    app.get(    '/user/:username/datascapes/:datascape/access-grant/:sharedUserID',
+    app.get(    '/u/:userID',          users.getUserProfile );
+    app.get(    '/u/:userID/settings', users.profileSettings );
+    app.post(   '/u/:userID/settings', users.editProfileSettings );
+    //app.delete( '/u/:userID/delete', users.deleteAccount);
+    //app.get(    '/u/:userID/datasets/',                         files.displayUserDatasets );
+    
+    app.get(    '/u/:userID/datascapes/:datascape',                files.displayDatascape );
+    app.get(    '/u/:userID/datascapes/:datascape/csv',            files.datascapeGetCSV );
+    app.get(    '/u/:userID/datascapes/:datascape/config',         files.datascapeGetLegacyConfig );
+    app.get(    '/u/:userID/datascapes/:datascape/settings',       files.getDatascapeSettings );
+    app.get(    '/u/:userID/datascapes/:datascape/access-grant/:sharedUserID',
 		files.addSharedUser );
-    app.post(   '/user/:username/datascapes/:datascape/settings',       files.postDatascapeSettings );
+    app.post(   '/u/:userID/datascapes/:datascape/settings',       files.postDatascapeSettings );
  
-    //app.delete( '/user/:username/datascapes/:datascape/delete',         users.deleteDataset );
-    app.post(   '/user/:username/datascapes/:datascape/request-access', files.requestAccess );    
+    //app.delete( '/u/:userID/datascapes/:datascape/delete',         users.deleteDataset );
+    app.post(   '/u/:userID/datascapes/:datascape/request-access', files.requestAccess );    
     
     app.get(    '/api/datascapes',          files.getFileContainer);
     app.get(    '/api/datascapes/source',   files.getFileContainerSource);
