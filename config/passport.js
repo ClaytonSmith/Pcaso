@@ -1,14 +1,19 @@
 // load all the things we need
+
+// Passport strategies
 var LocalStrategy         = require('passport-local').Strategy;
+var GoogleStrategy        = require('passport-google-oauth').OAuth2Strategy;
+
+
 var Async                 = require('async');
 var mongoose              = require('mongoose');
+
 
 var Users                 = mongoose.model('User');
 var UnauthenticatedUsers  = mongoose.model('UnauthenticatedUser');
 
 
 var config                = require('./config');
-// load the auth variables
 var configAuth            = require('./auth'); // use this one for testing
 
 var mailer                = require('./mailer');
@@ -121,35 +126,93 @@ module.exports = function(passport) {
 					done(mailError, newUser, req.flash('signInMessage', 'An authentication link will be sent to your email account shortly.')); 
 				    }); 
 				});
-	
+				
 			    });
-			
-			// if the user is logged in but has no local account...
-		    } else if ( !req.user.email ) {
-			
-			console.log('CASE 3 of signup');
-			console.log('if the user is logged in but has no local account...');
-			
-			Users.findOne({ 'email' :  email.toLowerCase() }, function(err, user) {
-			    if (err) return done(err);
-
-			    if (user) return done(null, false, req.flash('loginMessage', 'That email is already taken.'));
-			    
-			    var user       = req.user;
-			    
-			    user.email     = email.toLowerCase();
-			    user.password  = user.generateHash(password);
-			    user.name      = req.user.name;
-			    
-			    user.save(function (err) {
-				done(err, user);
-			    });			    
-			});
 		    } else {
 			// user is logged in and already has a local account. Ignore signup. (You should log out before trying to create a new account, user!)
 			return done(null, req.user);
 		    }
 		});
 	}));
+
+
+    passport.use(new GoogleStrategy(
+	{
+	    // TODO: use config.secrets. ...
+            clientID        : configAuth.googleAuth.clientID,
+            clientSecret    : configAuth.googleAuth.clientSecret,
+            callbackURL     : configAuth.googleAuth.callbackURL,
+            passReqToCallback : true // allows us to pass in the req from our route (lets us check if a user is logged in or not)
+	    
+	},
+	function(req, token, refreshToken, profile, done) {
+	    
+	    console.log("Success?", token, refreshToken, profile );
+	    
+	    // asynchronous
+	    process.nextTick(function() {
+
+		// check if the user is already logged in
+		if (!req.user) {
+		    
+		    User.findOne({ 'email' : profile.email }, function(err, user) {
+			if (err) return done(err);
+			
+			if (user) {
+
+			    // if there is a user id already but no token (user was linked at one point and then removed)
+			    if (!user.google.token) {
+				user.google.token = token;
+				user.google.name  = profile.displayName;
+				user.google.email = (profile.emails[0].value || '').toLowerCase(); // pull the first email
+
+				user.save(function(err) {
+				    if (err)
+					return done(err);
+				    
+				    return done(null, user);
+				});
+			    }
+
+			    return done(null, user);
+			} else {
+			    var newUser          = new User();
+
+			    newUser.google.id    = profile.id;
+			    newUser.google.token = token;
+			    newUser.google.name  = profile.displayName;
+			    newUser.google.email = (profile.emails[0].value || '').toLowerCase(); // pull the first email
+
+			    newUser.save(function(err) {
+				if (err)
+				    return done(err);
+				
+				return done(null, newUser);
+			    });
+			}
+		    });
+
+		} else {
+		    // user already exists and is logged in, we have to link accounts
+		    var user               = req.user; // pull the user out of the session
+
+		    user.google.id    = profile.id;
+		    user.google.token = token;
+		    user.google.name  = profile.displayName;
+		    user.google.email = (profile.emails[0].value || '').toLowerCase(); // pull the first email
+
+		    user.save(function(err) {
+			if (err)
+			    return done(err);
+			
+			return done(null, user);
+		    });
+
+		}
+
+	    });
+
+	}));
+
 };
 

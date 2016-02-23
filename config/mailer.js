@@ -88,14 +88,18 @@ function MailClient( client ){
 	okayToSend.to = true;	
 	users = Array.isArray( users ) ? users : [ users ] ;	
 	newClient.message.to = users.map(function(user){
-	    //console.log(user.name, user.name.first, user.name.last);
-	    return '"' 
-		+ user.name.first
-		+ ' ' 
-		+ user.name.last
-		+ '" <'
-		+ user.email
-		+ '>';
+	    if(typeof user === 'string' || user instanceof String)
+		return '<'+ user +'>';
+	    else {
+		//console.log(user.name, user.name.first, user.name.last);
+		return '"' 
+		    + user.name.first
+		    + ' ' 
+		    + user.name.last
+		    + '" <'
+		    + user.email
+		    + '>';
+	    }
 	}).join(', ');
     }
     
@@ -125,9 +129,9 @@ function MailClient( client ){
 
 	// send
 	
-	//if( process.env['NODE_ENV'] === 'test' )
+	if( process.env['NODE_ENV'] === 'test' || process.env['NODE_ENV'] === 'disable-emails')
 	    callback( false, {});
-	//else transport.sendMail(newClient.message, callback);
+	else transport.sendMail(newClient.message, callback);
     }
     
     return  newClient;
@@ -160,10 +164,11 @@ exports.useTemplate = function(templateName, recipients, additionalObjects, call
     recipients = Array.isArray( recipients ) ? recipients : [ recipients ] ;
        
     // Be aware of plural and singular recipient/s
+    // Only send 10 emails at a time
     async.mapLimit( recipients, 10, function( recipient, next){
 
     	// render single recipient
-    	template.render( templateResourceCollector(recipient, additionalObjects), function( err, results){
+    	template.render( templateResourceCollector(recipient, additionalObjects), function(err, results){
     	    if(err) return callback( err );
 	    
     	    mailClient.from( mailer.client );
@@ -177,6 +182,7 @@ exports.useTemplate = function(templateName, recipients, additionalObjects, call
 
     	    mailClient.send( next );
     	});
+
     }, callback );
 };
 

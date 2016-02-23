@@ -21,14 +21,16 @@ exports.displayGallery = function(req, res){
 // GET
 exports.download = function(req, res){   
     FileContainers.findOne({_id: req.params.fileId}, function( err, doc ){
-        if( err ) return handleError( error );
-        
+        if( err ) {
+	    res.sendStatus( 500 );
+	    throw new Error( err );
+	}
 	if( !doc ) {
 	    res.send(404);
 	} else if( doc.viewableTo( req.user ) ){
             loadFile( doc.getFile( res ) );
         } else {
-            res.send(404);
+            res.sendStatus(404);
         }
     });
 }
@@ -46,41 +48,48 @@ exports.requestAccess = function(req, res){
 
     var user           = null;
     var fileContainer  = null;
-    var fcQuery          = {
+    var fcQuery        = null;
+    
+    // Only authenticated users can request access
+    if( !req.isAuthenticated() )
+	res.redirect('404.ejs', {user: req.user});
+
+    var query = req.params.bullet ? {
+	'links.bullet': req.params.bullet
+    } : {
 	'parent.username': req.params.username,
 	'links.custom': req.params.datascape 
-    }
-    
-    var promise = new Promise( function(resolve, reject){
-	FileContainers.findOne( fcQuery, function(err, doc){
-	    if( err ) reject( err, doc );
-	    else resolve( doc );
-	});
-    }).then( function(fc){
-	fileContainer  = fc;
-	
-	Users.findOn( { _id: fc.parent.id }, function(err, doc){
-	    if( err ) return 'Do something';
-	    if( !doc ) return 'Should not happen';	    
-	    user = doc; 
-	    
-	    var mailObject = { file: file, user: req.user};
+    };
 
-	    if( !req.isAuthenticated() ){
-		mailer.useTemplate( 'public-file-access-request', user, mailObject, function(mailError){
-		    // stuff
-		});
-	    } else {
-		mailer.useTemplate( 'private-file-access-request', user, mailObject, function(mailError){		
-		    // stuff
-		});
-	    }
-	});
-    }).catch( function(err){
+    FileContainers.findOne( fcQuery, function(fcErr, fc){
+	if( fcErr ){
+	    res.render('500.ejs', {user: req.user});
+	    throw new Error( fcErr );
+	}
+	if( !fc ) return res.render('404.ejs', {user: req.user});
 	
-	// Sxomething 
+	Users.findOne( { _id: fc.parent.id }, function(userErr, user){
+	    if( userErr ){
+		res.render('500.ejs', {user: req.user});
+		throw new Error( userErr );
+	    }
+	    
+	    // This should not hapen
+	    if( !fc ) return res.render('404.ejs', {user: req.user});
+	    
+	    // User here is the person requesting the datascape
+	    var mailObject = { datascape: fc, user: req.user};
+	    
+	    mailer.useTemplate( 'share-request-private', user, mailObject, function(mailError){
+		if( mailError ){ 
+		    res.render('500.ejs', {user: req.user});
+		    throw new Error( mailError );
+		}
+		
+		res.render('request-access-message-receipt.ejs', {user: req.user, datascape: fc});
+	    });
+	});
     });
-    
 };
 
 //http://10.1.0.117:3000/user/username.cool/datascapes/6qh4c0418aor
@@ -95,25 +104,24 @@ exports.displayDatascape = function(req, res, next){
 	};
     
     FileContainers.findOne( query, function(err, doc){
-	if( err )  return res.render('500.ejs', {user: req.user});
+	if( err ) {
+	    res.render('500.ejs', {user: req.user});
+	    throw new Error( err );
+	}
+	
 	if( !doc ) return res.render('404.ejs', {user: req.user});
 	
-	var isOwner = req.isAuthenticated && req.user && req.user._id.toString() === doc.parent.id;
-	
+	var isOwner = req.isAuthenticated() && req.user && req.user._id.toString() === doc.parent.id;	
 
     	if( doc.viewableTo( req.user ) ){ 
     	    res.render( 'datascape.ejs', { user: req.user, datascape: doc, isOwner: isOwner });
     	} else {
     	    res.render( 'request-access.ejs', {
     		user: req.user,
-    		file: {
-    		    name: doc.file.name,
-    		    requestLink: doc.displaySettings.link + '/request-access'
-    		}
+    		datascape: doc
     	    });
     	}
     });
-    //    res.redirect('/profile');
 }
 
 
@@ -129,12 +137,17 @@ exports.datascapeGetCSV = function(req, res){
 	};
 
     FileContainers.findOne( query, function(err, doc){
-	console.log( err, doc, query);
+	if( err){
+	    res.sendStatus(500);
+	    throw new Error( err );
+	}
 	
 	if( doc.viewableTo( req.user ) ){ 
 	    doc.getFile( res );
 	    doc.save(function(saveErr){
-		// Handle error 
+		if( saveErr ){
+		    throw new Error( saveError );
+		}
 	    });
 	} else {
 	    res.send(404);
@@ -144,8 +157,7 @@ exports.datascapeGetCSV = function(req, res){
 
 exports.datascapeGetLegacyConfig = function(req, res){
     
-    var query = req.params.bullet ?
-	{
+    var query = req.params.bullet ? {
 	    'links.bullet': req.params.bullet
 	} : {
 	    'parent.username': req.params.username,
@@ -153,12 +165,14 @@ exports.datascapeGetLegacyConfig = function(req, res){
 	};
     
     FileContainers.findOne( query, function(err, doc){
-	if( err ) throw new Error( err );
-	
+	if( err ){
+	    res.sendStatus( 500 );
+	    throw new Error( err );
+	}
 	if( doc.viewableTo( req.user ) ){ 
 	    res.send( doc.displaySettings.legacy );
 	} else {
-	    res.send(404);
+	    res.sendStatus(404);
 	}
     });
 }
@@ -175,8 +189,7 @@ exports.upload = function(req, res) {
 
 
 exports.getDatascapeSettings = function(req, res){
-    var query = req.params.bulletURL ?
-	{
+    var query = req.params.bulletURL ? {
 	    'links.bullet': req.params.bulletURL
 	} : {
 	    'parent.username': req.params.username,
@@ -185,6 +198,13 @@ exports.getDatascapeSettings = function(req, res){
     
     FileContainers.findOne( query, function(err, doc){
 	
+	if( err ){
+	    res.render('500.ejs', {user: req.user});
+	    throw new Error( err );
+	}
+
+	if( !doc) return res.render('404.ejs', {user: req.user});
+
     	var isOwner = req.isAuthenticated() && req.user && req.user._id.toString() === doc.parent.id;
 	if( isOwner ){ 
     	    res.render('datascape-settings.ejs', { 
@@ -215,7 +235,11 @@ exports.getFileContainer = function(req, res){
     }
     
     FileContainers.findOne( query, function(err, doc){
-	if( err )  return res.send( 500 );
+	if( err ){
+	    res.send( 500 );
+	    throw new Error( err );
+	}
+	
 	if( !doc ) return res.send( 404 );
 	if( !doc.viewableTo( req.user ) )
 	    return res.send( 404 );
@@ -239,7 +263,11 @@ exports.getFileContainerSource = function(req, res){
     }
     
     FileContainers.findOne( query, function(err, doc){
-	if( err )  return res.send( 500 );
+	if( err ){
+	    res.send( 500 );
+	    throw new Error( err );
+	}
+	
 	if( !doc ) return res.send( 404 );
 	if( !doc.viewableTo( req.user ) )
 	    return res.send( 404 );
@@ -257,32 +285,36 @@ exports.postDatascapeSettings = function(req, res){
     var form = new formidable.IncomingForm();
 
     form.parse(req, function(err, fields) {
-	if (err) throw new Error( err );
+	if (err){
+	    res.send(500);
+	    throw new Error( err );
+	}
 	
 	var settings = JSON.parse( fields.revertUponArival );
 	var query = {
 	    'links.custom': req.params.datascape
 	}
 	
-	FileContainers.findOne( query, function(err, doc){
-	    if( err ) return res.sendStatus( 500 );
+	FileContainers.findOne( query, function(fcErr, doc){
+	    if( fcErr ){
+		res.sendStatus( 500 );
+		throw new Error( fcErr );
+	    }
 	    if( doc.parent.id !== req.user._id.toString() )
 		res.sendStatus(403);
 
-	    console.log( settings );
-	    doc.displaySettings.display     = settings.displaySettings.display;
-	    doc.displaySettings.title       = settings.displaySettings.title;
-	    doc.displaySettings.caption     = settings.displaySettings.caption;
-	    doc.displaySettings.visibility  = settings.displaySettings.visibility;	    
-	    doc.sharedWith = settings.sharedWith;
-
-	    doc.displaySettings.legacy = FileContainers.convertDisplaySettingsToLegacy( settings.displaySettings );
-	    console.log(doc) 
+	    doc.updateSettings( settings, function(updateErr){
+		if( updateErr ) {
+		    res.sendStatus( 500 );
+		    throw new Error( updateErr );
+		}	
+	    });
+	    
+	    // no need to wait on emails
 	    doc.save(function(saveErr){
 		if( saveErr ) return res.sendStatus( 500 );
-		
 		res.send( doc.links.link );
-	    })
+	    });
 	});
     });
 }
@@ -313,3 +345,59 @@ exports.getPaginatedFiles = function(req, res){
 	res.send( docs.docs ); 
     });    
 } 
+
+
+exports.addSharedUser = function(req, res){
+
+    var datascapeQuery = {
+	'parent.username': req.params.username,
+	'links.custom': req.params.datascape 
+    };
+    
+    var userQuery = {
+	_id: req.params.sharedUserID
+    };
+
+    
+    FileContainers.findOne( datascapeQuery, function(fcErr, fc){
+	if( fcErr ){
+	    res.render( '500.ejs', { user: req.user} );
+	    throw new Error( fcErr );
+	}
+	if( !fc ) return res.render('404.ejs', {user: req.user});
+	var isOwner = req.isAuthenticated() && req.user && req.user._id.toString() === fc.parent.id;
+    
+    if(!isOwner)
+	return res.render('403.ejs', {user: req.user});
+    
+
+	Users.findOne( userQuery, function( userErr, user){
+	    if( userErr ){
+		res.render( '500.ejs', { user: req.user} );
+		throw new Error( userErr );
+	    }
+	    
+	    if( !user ) return res.render('404.ejs', {user: req.user});
+	    
+	    var newSettings = {
+		sharedWith: JSON.parse(JSON.stringify( fc.sharedWith ))
+	    }
+	    
+	    newSettings.sharedWith.push( user.email );
+	    
+	    fc.updateSettings( newSettings, function(updateErr){
+		if( updateErr ){
+		    res.render( '500.ejs', { user: req.user} );
+		    throw new Error( updateErr );
+		}
+
+		fc.save(function(saveErr){
+		    if( saveErr ){
+			res.render( '500.ejs', { user: req.user} );
+			throw new Error( saveErr );
+		    } else res.render('requested-user-added.ejs', {user: req.user, addedUser: user, datascape: fc }); 
+		});	    
+	    });
+	});
+    });
+}

@@ -21,3 +21,4 @@ public/users-public-data/*
 public/components/*
 
 config/secrets.js
+config/auth.js

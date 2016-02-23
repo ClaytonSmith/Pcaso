@@ -77,8 +77,10 @@ NotificationSchema.pre('save', function(next) {
 	    // Not really sure what this does but Stack-O claims it helps with
 	    // multiple instances of document being checked-out. Need to investigate
 	    doc.markModified("notifications");
+	       
 	    doc.save( next );
 	});
+
     } else next();
 });
 

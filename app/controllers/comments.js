@@ -27,11 +27,10 @@ exports.getComments  = function(req, res){
 
 exports.postComment = function(req, res){
     if( !req.isAuthenticated() )
-	res.send( 403 );
+	res.sendStatus( 403 );
 
     var query = null;
 
-    console.log( req.body );
     if( req.body.target !== '' ){
 	query = {
 	    '_id':  req.body.target,
@@ -48,7 +47,8 @@ exports.postComment = function(req, res){
     var collection = mongoose.model( query.__t );
 
     collection.findOne( query, function(err, doc){
-	if( err || !doc ) req.send(404);
+	if( err || !doc ) req.sendStatus(404);
+	
 	
 	var subject = null;
 	if( doc.username ) subject =  doc.username +"'s account";
@@ -60,11 +60,12 @@ exports.postComment = function(req, res){
 	    subject: subject
 	}
 	
-
-	var comment = req.user.leaveComment( doc, subject, req.body.body, function(commentError){ 
-	    
-	    res.send( Comments.jqueryCommentsTransform( [ comment ] )[0] );
+	console.log('Hello');
+	var comment = req.user.leaveComment( doc, subject, req.body.body, function(commentError){ 	    
+	    console.log(commentError, "heyyyyyyyyy"); 
 	    req.user.save(function(err){
+		if( err ) res.sendStatus(500);
+		res.send( Comments.jqueryCommentsTransform( [ comment ] )[0] );
 		// handle error somehow
 	    });
 	});
@@ -73,7 +74,7 @@ exports.postComment = function(req, res){
 
 exports.deleteComment  = function(req, res){
     if( !req.isAuthenticated() )
-	res.send( 403 );
+	res.sendStatus( 403 );
     
     var query = {
 	'_id': req.params.commentID,
@@ -82,11 +83,11 @@ exports.deleteComment  = function(req, res){
     };
     
     Comments.findOne( query, function(err, doc){
-	if( err || !doc ) return res.send( 403 );
+	if( err || !doc ) return res.sendStatus( 403 );
 	
 	doc.remove( function(removeError){
-	    if( removeError ) res.send( 500 );
-	    else res.send( 200 );
+	    if( removeError ) res.sendStatus( 500 );
+	    else res.sendStatus( 200 );
 	})
     });
 }
@@ -95,7 +96,7 @@ exports.deleteComment  = function(req, res){
 
 exports.editComment  = function(req, res){
     if( !req.isAuthenticated() )
-	res.send( 403 );
+	res.sendStatus( 403 );
     
     var query = {
 	'_id': req.body.id,
@@ -104,12 +105,12 @@ exports.editComment  = function(req, res){
     };
     
     Comments.findOne( query, function(err, doc){
-	if( err || !doc ) return res.send( 403 );
+	if( err || !doc ) return res.sendStatus( 403 );
 	doc.body = req.body.body;
 	
 	doc.save( function(saveError){
-	    if( saveError ) res.send( 500 );
-	    else res.send( 200 );
+	    if( saveError ) res.sendStatus( 500 );
+	    else res.sendStatus( 200 );
 	});
     });
 }
