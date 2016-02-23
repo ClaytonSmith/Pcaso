@@ -1,9 +1,5 @@
-Hola <% user.name.first %>,
+Hola <%= user.name.first %>,
 
-<%= extra.user.name.first %> <%= extra.user.name.last %> has requested access to
-<%= extra.datascape.displaySettings.title %>. To grant <%= extra.user.name.first %> access,
-simply add "<%= extra.user.email %>" to <%= extra.datascape.displaySettings.title %>'s
-list of shared users
+<%= extra.user.name.first %> <%= extra.user.name.last %> ("<%- extra.user.email %>") has asked to see your Pcaso datascape <%= extra.datascape.displaySettings.title %>
 
-
-Link to datascape: <%= extra.datascape.links.link %>
+Click here to let them see it: <%= extra.datascape.links.link %>/access-grant/<%= extra.user._id %>

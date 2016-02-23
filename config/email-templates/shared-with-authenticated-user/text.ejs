@@ -1,6 +1,5 @@
-Hola <% user.name.first %>,
+Hola <%= user.name.first %>,
 
-<%= extra.user.name.first %> <%= extra.user.name.last %> has invited you to explore an interactive
-datascape. Below is a link to view the new datascape.
+<%= extra.datascape.parent.name.first %> <%= extra.datascape.parent.name.last %> has invited you to explore an interactive
+datascape. Check it out here: <%= extra.datascape.links.link %>.
 
-<%= extra.target.links.link %>

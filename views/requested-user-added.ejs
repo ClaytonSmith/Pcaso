@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+  <%- include head.ejs %>  
+  <body>
+    <%- include header.ejs %>      
+    <main>
+      <div class="app-content">
+	
+	<h1 class="page-title">New shared user added</h1>
+	<hr class="title-line">
+        <p>
+          <%= addedUser.name.first %> <%= addedUser.name.last %> has been added to <%= datascape.displaySettings.title %>'s list of shared users. <br>
+          <a href="<%- datascape.links.local %>/settings">Click here</a> to further eddit <%= datascape.displaySettings.title %>'s settings.
+	</p>
+      </div>
+      
+    </main>
+    <%- include footer.ejs %>
+  </body>  
+</html>

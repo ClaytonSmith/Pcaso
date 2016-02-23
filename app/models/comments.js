@@ -96,14 +96,15 @@ CommentSchema.static({
 	this.find( query, callback );
     },
 
+    // Maps model types to user facing features
     commentMap: function(entity){
 	var map = {
 	    'User': 'profile',
 	    'Comment': 'comment',
-	    'ds': 213
-	    
+	    'FileContainer': 'datascape'
 	}
 
+	return map[entity] || entity;
     },
     jqueryCommentsTransform: function( comments ){
 	

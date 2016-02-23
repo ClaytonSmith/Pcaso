@@ -18,6 +18,7 @@ var mailer            = require('../../config/mailer');
 var Comments          = require('./comments');
 var Notification      = require('./notification');
 
+
 var FileContainerSchema = new mongoose.Schema({
     
     dateAdded:       { type: Number,  default: Date.now },     // Join date
@@ -176,36 +177,43 @@ FileContainerSchema.method({
 	}
     },
     
-    updateSettings: function( newSettings ){
+    updateSettings: function( newSettings, callback ){
 	// Maybe want to keep history 
         // array of objects perhaps?
-	
-	// Deep copy as not to disturb the OP settings
-	var settings = JSON.parse(JSON.stringify( newSettings ));
-	
-	this.sharedWith      = settings.sharedWith;
-	this.fileOptions     = settings.fileOptions
-	this.displaySettings = settings.displaySettings,
-	this.displaySettings.legacy =
-	    this.model.convertDisplaySettingsToLegacy( this.displaySettings );
-	
-	var custom = this.displaySettings.title
-	// Replace ' ' with '-'
-	    .replace(/\s/g, '-');
-	
-	
-	
-	fileContainer.links.custom = custom;
-	fileContainer.links.link   = this.links.parent  + "/datascapes/" + custom;
-	fileContainer.links.local  = this + "/datascapes/" + fileContainer.links.custom;
+	var fileContainer = this;
 
-
-	// If/when more settings are added, this method will become more usefull
-	settings.visibility = newSettings.visibility || this.displaySettings.visibility;
+	// Diff the `sharedWith` list to get the newly added users
+	var newSharedUsers = newSettings.sharedWith.filter(function(email){ return fileContainer.sharedWith.indexOf( email ) === -1; })
 	
-	this.displaySettings = settings;
-    
-	return this.displaySettings;
+	fileContainer.sharedWith = newSettings.sharedWith;
+
+	fileContainer.displaySettings.display     = ( newSettings.displaySettings || {} ).display     || fileContainer.displaySettings.display;
+	fileContainer.displaySettings.title       = ( newSettings.displaySettings || {} ).title       || fileContainer.displaySettings.title;
+	fileContainer.displaySettings.caption     = ( newSettings.displaySettings || {} ).caption     || fileContainer.displaySettings.caption;
+	fileContainer.displaySettings.visibility  = ( newSettings.displaySettings || {} ).visibility  || fileContainer.displaySettings.visibility;	    
+	    
+	fileContainer.displaySettings.legacy =
+	    fileContainer.constructor.convertDisplaySettingsToLegacy( fileContainer.displaySettings );
+
+	// Summon on the fly because including up-top would 
+	// create a circular dependany
+	Users = mongoose.model('User');
+
+	async.each(
+	    newSharedUsers, 
+	    function(email, eachCB){
+		Users.findOne({email: email}, function(err, doc){
+		    if( err ) return eachCB( err );
+		    if( doc ) {
+			console.log('NEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEW', "User\n\n\n\n\n\n\n\n");
+			mailer.useTemplate('shared-with-authenticated-user', doc, { datascape: fileContainer }, eachCB );
+		    } else
+			mailer.useTemplate('shared-with-unauthenticated-user', email, { datascape: fileContainer }, eachCB );
+		});
+	    },
+	    callback );	
+	
+	return fileContainer.displaySettings;
     },
     
     getFile: function( dest ){
@@ -311,8 +319,6 @@ FileContainerSchema.static({
 	});
 	fileContainer.displaySettings.title = fileContainer.displaySettings.title || file.name;	    	
 	fileContainer.displaySettings.legacy = this.convertDisplaySettingsToLegacy( fileContainer.displaySettings );
-	
-	
 	
 	fileContainer.links.custom = (settings.links || {}).customURL || fileContainer.links.bullet;
 	fileContainer.links.link  = parent.links.link  + "/datascapes/" + fileContainer.links.custom;

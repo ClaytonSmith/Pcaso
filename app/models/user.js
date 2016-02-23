@@ -77,6 +77,10 @@ UnauthenticatedUserSchema.method({
 
 // Regular users can have files
 var UserSchema                 = BaseUserSchema.extend({
+    googleCredentials: {
+	accessToken:          { type: String, unique: true },                        // List of mongoId for containers	
+	accessTokenSecret:    { type: String, unique: true }                         // List of mongoId for containers	
+    }, 
     files:          { type: [], default: [] },                        // List of mongoId for containers
     fileSettings: {
 	defaults: {
@@ -165,37 +169,55 @@ UserSchema.method({
 	var user = this;
 	var comment = Comments.register( user, entity, this.username, subject, commentBody);
 	
-
-	
 	comment.save(function(err){
 	    if( err ) callback( err ) ;
 	    user.userComments.push( comment._id );	
 	    
-	    if( entity.__t === "User" ){
-	    };
+	    entity.save( function(entSaveErr){
+		if( entSaveErr ) callback( entSaveErr ) ;	
 		
-	    entity.save( function(err2){
-		if( err2 ) callback( err2 ) ;	
+		if( entity._id.toString() === user._id.toString() ||
+		    ( entity.parent || {}).id === user._id.toString() ){
+		    
+		    // Relax, user is commenting on there own stuff. No 
+		    // need to bother them with emails and other notifications.
+		    
+		    return callback( entSaveErr );	
+		}
 		
-		console.log("\n\n\n", entity, "\n\n\n");
-		var notificationTitle = user.name.first +" "+ user.name.first +"has commented on your " + Comments.commentMap( entity.__t );
+		// Full name
+		//var notificationTitle = user.name.first +" "+ user.name.last +" has commented on your " + Comments.commentMap( entity.__t );
+		
+		// Username
+		var notificationTitle = user.username +" has commented on your " + Comments.commentMap( entity.__t );
+
+
 		var notification = Notification.register( entity, comment, notificationTitle );
-		
-		notification.save( function(err3){
-		    if( entity._id === user._id ){
-			entity.addNotification( notification.id );
+
+		notification.save( function(noteSaveErr){
+		    if( noteSaveErr ) throw new Error(noteSaveErr);
+		    
+		    callback( noteSaveErr );
+		    if( entity.__t === "User" ){
+			// Entity is a user account,
+			// We do not need to query for it
 			
-		    } else {
-			mailer.useTemplate('new-comment', entity, {comment: comment, notification: notification}, function(mailErr,a,b,c,d){
+			mailer.useTemplate('new-comment', entity, {comment: comment, notification: notification}, function(mailErr){
 			    if( mailErr ) throw new Error( mailErr );
 			});
+			
+		    } else { 
+			// Entity is not a user so the parent must be queried
+			
+			var model = mongoose.model(entity.parent.collectionName);
+			model.findOne({_id: entity.parent.id}, function(qreErr, doc){
+			    if( qreErr ) throw new Error( qreErr );
+			    mailer.useTemplate('new-comment', doc, {comment: comment, notification: notification}, function(mailErr){
+				if( mailErr ) throw new Error( mailErr );
+			    });
+	    		});
 		    }
-		    
-		    callback( err3 );
-		});
-		
-		
-		// MAILER
+		});		
 	    });
 	});
 	

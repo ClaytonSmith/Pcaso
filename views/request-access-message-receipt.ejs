@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+  <%- include head.ejs %>  
+  <body>
+    <%- include header.ejs %>      
+    <main>
+      <script src="/js/index-controller.js"></script>  
+      <div class="splash-container" style="height: 100%;">
+	<div class="splash">
+          <p class="splash-subhead" style="text-transform: none;">
+            An request message has been sent. <br>
+            You will be notified when <%= datascape.displaySettings.title %> has been shared with you
+	  </p>
+	</div>
+      </div>
+    </main>
+    <%- include footer.ejs %>
+  </body>  
+</html>

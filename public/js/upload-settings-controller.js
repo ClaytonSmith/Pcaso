@@ -25,6 +25,23 @@ function init() {
     }
     
     
+    function isId(data, index){	
+	// Applying null to all of data will pupulate all empty fields with undefined
+	// This will allow map to operate on each field
+	var column = Array.apply(null, data).map(function(row){ return row[ index ]; });
+	
+	return Array.apply( null, column).reduce(function(predicate, value, i, self){
+	    return predicate && value !== undefined && self.indexOf( value ) === i ;
+	});
+    }
+    
+    function isAxis(data, inex){
+	var column = Array.apply(null, data).map(function(row){ return row[ index ]; });
+	return Array.apply( null, column).reduce(function(predicate, value, i, self){
+	    return predicate && value !== undefined && parseFloat( value ) !== NaN ;
+	});
+    }
+    
     function setCaption(datascapeCaption){
 	var caption   = $("#caption");	
 	var settings  = {
@@ -151,20 +168,29 @@ function init() {
 	    var sID = 'evalColumns'+ index +'As';
 	    var select = $("<select\>", {name: sID, size: 4} );
 	    
-	    select.append( $("<option\>", {value: 'id',    html: 'ID'   }) );
+	    console.log('data', datum);
+	    
+	    // Invert the is*() results because `disabled` will disable elements if `true`
+	    // so if something IS true DON'T disable it
+	    
+	    select.append( $("<option\>", {value: 'id',    html: 'ID', disabled: !isId(data, index) }) );
+	    
 	    select.append( $("<option\>", {value: 'axis',  html: 'Axis' }) );
+	    
 	    select.append( $("<option\>", {value: 'meta',  html: 'Meta' }) );
-	    select.append( $("<option\>", {value: 'value', html: 'Value'}) );
+	    
 	    select.append( $("<option\>", {value: 'omit',  html: 'Omit' }) );
 	    	    
 
 	    // Init 
-	    select.val( settings.columnTypes[index] || 'id' );
+	    // Reselect values if loading settings, 
+	    select.val( settings.columnTypes[index] || '' );
 	    
 	    columnTypes[ index ] = select.val();
 	    
 	    // Creates a change method for each method built
 	    select.change( function(value){
+		console.log(this.value);
 		columnTypes[ index ] = this.value;
 	    });
 	    

@@ -39,8 +39,17 @@ module.exports = function(app, passport) {
         failureFlash : true               // allow flash messages
     }));
 
-
-    					     
+    app.get('/auth/google', passport.authenticate('google', { scope : ['profile', 'email'] }));
+    
+    // the callback after google has authenticated the user
+    app.get('/auth/google/callback',
+            passport.authenticate('google', {
+                successRedirect : '/profile',
+                failureRedirect : '/'
+            }));
+    
+    
+    
     app.get('/authenticate-account/:authenticationCode', users.authenticateAccount);
     
     app.get('/sign-out', function(req, res) {
@@ -67,6 +76,8 @@ module.exports = function(app, passport) {
     app.get(    '/user/:username/datascapes/:datascape/csv',            files.datascapeGetCSV );
     app.get(    '/user/:username/datascapes/:datascape/config',         files.datascapeGetLegacyConfig );
     app.get(    '/user/:username/datascapes/:datascape/settings',       files.getDatascapeSettings );
+    app.get(    '/user/:username/datascapes/:datascape/access-grant/:sharedUserID',
+		files.addSharedUser );
     app.post(   '/user/:username/datascapes/:datascape/settings',       files.postDatascapeSettings );
  
     //app.delete( '/user/:username/datascapes/:datascape/delete',         users.deleteDataset );
