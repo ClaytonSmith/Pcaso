@@ -144,7 +144,7 @@ module.exports = function(passport) {
 		// check if the user is already logged in
 		if (!req.user) {
 		    
-		    Users.findOne({ email: profile.email }, function(err, user) {
+		    Users.findOne({ email: profile.emails[0].value }, function(err, user) {
 			if (err) return done(err);
 			
 			if (user) {
@@ -169,7 +169,7 @@ module.exports = function(passport) {
 				profile.id // Use as password. 
 			    );
 			    
-			    newUser.avatar = profile._json.picture;
+			    newUser.links.avatar = profile._json.picture;
 			    newUser.google.id    = profile.id;
 			    newUser.google.token = token;
 			    newUser.google.refreshToken = refreshToken; 

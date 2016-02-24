@@ -24,6 +24,10 @@
     "public/components"
   ],
   "dependencies": {
-    "d3": "^3.5.14"
+    "d3": "^3.5.14",
+    "async": "^1.5.2",
+    "trumbowyg": "^1.1.7",
+    "jquery-comments": "^1.1.0",
+    "jquery-validation": "^1.14.0"
   }
 }

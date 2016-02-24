@@ -77,9 +77,8 @@ UnauthenticatedUserSchema.method({
 // Regular users can have files
 var UserSchema                 = BaseUserSchema.extend({
     google: {                                                         // Used for Google oauth
-	accessToken:          { type: String, unique: true },                        // List of mongoId for containers	
-	accessTokenSecret:    { type: String, unique: true },                        // List of mongoId for containers	
-	id:                   { type: String, default: '' }    
+	id:                   { type: String, default: '' },    
+	token:                { type: String, default: '' }    
     }, 
     files:          { type: [], default: [] },                        // List of mongoId for containers
     fileSettings: {
@@ -396,7 +395,7 @@ UserSchema.pre('save', function(next) {
     // On first save
     if( user.isNew ){
 
-
+	
 	var publicDir = config.root + '/public/users-public-data/'+ user._id.toString() +'/';
 	//create public directory for things like avatars
 		
