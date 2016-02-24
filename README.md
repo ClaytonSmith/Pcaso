@@ -27,6 +27,7 @@ V1 Backend
   - [X] Login 
   - [X] Logout
   - [X] Sessions 
+  - [X] Google OAuth
   - [X] Alerts 
     - [X] Email - WIP
     - [X] In app
@@ -57,7 +58,7 @@ V1 Backend
   - [X] Comments 
   - [x] Files
   - [X] User
-- [ ] Test
+- [ ] Test - Needs updating
   - [X] Unit tests 
     - [X] User accounts
     - [X] Email services
