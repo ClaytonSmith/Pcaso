@@ -5,7 +5,7 @@
 
 ### Installation
 
-Pcaso is meant to run in a linux environment. Assuming [nodejs V5.3.0^](https://nodejs.org/en/download/package-manager/) has been installed, 
+Pcaso is meant to run in a linux environment. Assuming [nodejs V5.4.1^](https://nodejs.org/en/download/package-manager/) has been installed, 
 
 Run the following:
 > git clone http://github.com/claytonsmith/pcaso
