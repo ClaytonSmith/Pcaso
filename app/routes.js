@@ -59,7 +59,7 @@ module.exports = function(app, passport) {
     });
    
     app.get('/upload', function(req, res){
-	res.render('upload-datascape.ejs', { message: req.flash('uploadMessage'), user: req.user });	
+	res.render('datascape-settings.ejs', { message: req.flash('uploadMessage'), user: req.user });	
     });
     
     app.post(   '/upload-datascape',        users.createDataset);

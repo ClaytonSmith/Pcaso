@@ -286,6 +286,7 @@ exports.postDatascapeSettings = function(req, res){
 
     form.parse(req, function(err, fields) {
 	if (err){
+	    console.log('bad', err)
 	    res.send(500);
 	    throw new Error( err );
 	}
@@ -297,6 +298,7 @@ exports.postDatascapeSettings = function(req, res){
 	
 	FileContainers.findOne( query, function(fcErr, doc){
 	    if( fcErr ){
+		console.log('ver bad', fcErr);
 		res.sendStatus( 500 );
 		throw new Error( fcErr );
 	    }
@@ -305,6 +307,7 @@ exports.postDatascapeSettings = function(req, res){
 
 	    doc.updateSettings( settings, function(updateErr){
 		if( updateErr ) {
+		    console.log('End it now', updateErr);
 		    res.sendStatus( 500 );
 		    throw new Error( updateErr );
 		}	
@@ -312,7 +315,10 @@ exports.postDatascapeSettings = function(req, res){
 	    
 	    // no need to wait on emails
 	    doc.save(function(saveErr){
-		if( saveErr ) return res.sendStatus( 500 );
+		if( saveErr ){
+		    console.log('salvageable', saveErr);
+		    return res.sendStatus( 500 );
+		}
 		res.send( doc.links.link );
 	    });
 	});

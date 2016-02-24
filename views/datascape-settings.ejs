@@ -13,13 +13,33 @@
 	<% } %>
 	
 	<div class="upload-container">
+
+	  <% if (locals.datascape) { %>
 	  <h1 class="title">Datascape settings</h1>
+	  <% } else { %>
+	  <h1 class="title">Upload CSV</h1>
+	  <% } %>
 	  <hr>
 	  
+	  <% if (locals.datascape) { %>
 	  <form action="<%- datascape.links.local %>/settings" method="post" id="dataset-upload-form" 
-		class="pure-form pure-form-stacked basic-form" name="dataset-upload-form">  <!-- novalidate="novalidate"> -->
+		enctype="multipart/form-data" class="pure-form pure-form-stacked basic-form"
+		name="dataset-upload-form">  <!-- novalidate="novalidate"> -->
 	    
-	    <div id="form-file-settings-container">
+	  <% } else { %>
+          <form action="/upload-datascape" method="POST"  id="dataset-upload-form"
+		enctype="multipart/form-data" class="pure-form pure-form-stacked basic-form"
+		name="dataset-upload-form">  <!-- novalidate="novalidate"> -->
+
+	    <div class="pure-control-group" id="file-select-container1">
+	      <label for="file">Select CSV file</label>
+	      <input type="file" accept=".csv" id="file-select" name="file">
+	    </div>
+	    
+	    <% } %>
+	      
+	    
+	    <div id="form-file-settings-container" hidden>
 	      
 	      <div class="pure-control-group dataset-title">
 		<label for="file-title">Title</label>
@@ -46,33 +66,41 @@
 			   value="PRIVATE" id="privacy-private">Share privately with <button class="pure-button" id="add-user">
 		      <i class="fa fa-plus"></i>	      
 		    </button>
-
-		<div class="pure-control-group" id="user-select">
+		  </label>
+		  <div class="pure-control-group" id="user-select">
 		    
-		  <ul class="top-m-1" id="shared-user-collection">
-		  </ul>
+		    <ul class="top-m-1" id="shared-user-collection">
+		    </ul>
+		  </div>
 		</div>
-		</div>
-		</label>
 	      </div>
 	      
 	      <div class="pure-u-1-2">
 		  
-		  
-		</div>
+		
 	      </div>
 	    </div>
+	  </div>
 	    
+	
 	    <div class="pure-g">	      
-	      <button type="submit" id="delete-datascape-button"
-		      class="pure-button pure-button-error submit-button pure-g-u-1-5">
+	      <% if (locals.datascape) { %>
+	      <a href="<%- datascape.links.local%>/delete" id="delete-datascape-button"
+		 class="pure-button pure-button-error submit-button pure-u-1-6">
 		Delete datascape
-	      </button>
+	      </a>
 	      
 	      <button type="submit" id="save-datascape-button"
-		      class="pure-button pure-button-success submit-button pure-g-u-1-5">
+		      class="pure-button pure-button-success submit-button pure-u-1-6">
 		Update datascape
 	      </button>
+	      <% } else { %>
+	      
+	      <button type="submit" id="save-datascape-button"
+		      class="pure-button pure-button-success submit-button pure-u-1-6">
+		Create datascape
+	      </button>
+	      <% } %>
 	    </div>
 	  </form>
 	</div>

@@ -65,22 +65,6 @@ var FileContainerSchema = new mongoose.Schema({
 
 FileContainerSchema.plugin(mongoosePaginate);
 
-// Validater
-FileContainerSchema.path('displaySettings.title').validate( function(custom){
-
-    // Check to ensure string does not contain a space or "~!@#$%^&*()`{}[]:";'<>,\|/?"
-    var regexPF     = ( /^[a-z0-9\_\-\.]+$/i.test(custom) );
-  
-    // length least length 5 
-    var minLengthPF  =  custom.length >= 5;
-
-    // And is at most length 15 
-    var maxLengthPF  =  custom.length <= 30;
-    
-    return regexPF && minLengthPF && maxLengthPF
-    
-}, 'Title can only contain alphanumeric charachters, ".", "-", and "_" and must be between 5 and 15 characters long');
-
 
 FileContainerSchema.method({
 

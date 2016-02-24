@@ -8,32 +8,45 @@
 
       <div class="app-content">
 
-	<div class="form-container">
+	<div class="register-container">
+	  
+	  <h1>Sign in</h1>
 	  
 	  <% if (message.length > 0) { %>
-	  <div class="pure-alert pure-alert-error"><%= message %></div>
+	  <div class="pure-alert pure-alert-warning"><%= message %></div>
 	  <% } %>
 	  
-	  <form class="pure-form pure-form-aligned" action="/sign-in" method="post">
-	    <fieldset>
-              
-	      
-	      <div class="pure-control-group">
-		<label for="email">Email</label>
-		<input id="email" name="email" type="email" placeholder="Email Address">
-              </div>
-	      
-	      <div class="pure-control-group">
-		<label for="password">Password</label>
-		<input id="password" name="password" type="password" placeholder="Password">
-              </div> 
-      
-            </fieldset>
+	  <div class="pure-g" style="margin-bottom: 3em">
+
+	    <div class="pure-u-11-24">
+	      <a href="/auth/google" class="oauth-link"><i class="fa fa-google-plus fa-2x"></i> Sign in with Google</a>		  
+	    </div>
 	    
-	    <button type="submit" class="pure-button pure-button-primary">Sign in</button>
-	  </form>
+	    
+	    <div class="pure-u-1-12 register-or-container">
+	      <h2 class="register-or">Or</h2>
+	    </div>
+	    <div class="pure-u-11-24">
+	      
+	      <form class="pure-form pure-form-aligned registration-form" action="/sign-in" method="post">
+
+		<div class="pure-control-group">
+		  <label for="email">Email</label>
+		  <input id="email" name="email" type="email" placeholder="Email Address">
+		</div>
+		
+		<div class="pure-control-group">
+		  <label for="password">Password</label>
+		  <input id="password" name="password" type="password" placeholder="Password">
+		</div> 
+		
+		<button type="submit" class="pure-button pure-button-primary top-m-1">Sign in</button>
+	      	
+	      </form>
+	    </div>
+	  </div>
+	  <p>Don't have an account? <a href="/sign-up">Sign up</a>.</p>
 	  
-	  <p> Don't have an account? <a href="/sign-up">Sign up</a>.</p>
 	</div>
       </div>
 

@@ -14,10 +14,12 @@ function init() {
     // Setup rradio buttons
     $("#privacy-public").click(function(event){
 	$("#user-select *").attr('disabled', true);
+	$("#add-user").attr('disabled', true);
     });
 
     $("#privacy-private").click(function(event){
 	$("#user-select *").attr('disabled', false);
+	$("#add-user").attr('disabled', false);
     });
 
     function setTitle(datascapeTitle){
@@ -116,8 +118,8 @@ function init() {
 	    forEach( addSharedUser );	
 	
 	if( visibility === 'PUBLIC') {
-	    console.log('visibility', visibility);
 	    $("#user-select *").attr('disabled', true);
+	    $("#add-user").attr('disabled', true);
 	} 
 	    
 	// // Onclick method to add new email field
@@ -298,7 +300,10 @@ function init() {
 	console.log(file.name);
 	
 	Papa.parse( file, {
-	    complete: function(parsedObj){ populateForm( parsedObj, file ); }
+	    complete: function(parsedObj){
+		populateForm( parsedObj, file );
+		$("#form-file-settings-container").fadeIn('slow').attr('hidden', false);
+	    }
 	});
     });
     
@@ -370,6 +375,7 @@ function init() {
 		Papa.parse( results[1], {
 		    complete: function(parsedObj){		
 			genTable( parsedObj.data, results[0].displaySettings.display );
+			$("#form-file-settings-container").fadeIn('slow').attr('hidden', false);
 		    }
 		});	
 	    });

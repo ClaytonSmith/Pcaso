@@ -8,52 +8,64 @@
 
       <div class="app-content">
 
-	<div class="form-container">
+	<div class="register-container">
+	  
+	  <h1>Sign up</h1>
 	  
 	  <% if (message.length > 0) { %>
 	  <div class="pure-alert pure-alert-warning"><%= message %></div>
 	  <% } %>
 	  
-	  <a href="/auth/google"><i class="fa fa-google-plus"></i></a>
-	  
-	  <form class="pure-form pure-form-aligned" action="/sign-up" method="post">
-              
+	  <div class="pure-g" style="margin-bottom: 3em">
 
-              <div class="pure-control-group">
-		<label for="firstname">First name</label>
-		<input id="firstName" name="firstName" type="text" 
-		       maxlength="25" placeholder="First name"> 
-              </div>
-
-              <div class="pure-control-group">
-		<label for="lastname">Last name</label>
-		<input id="lastName" name="lastName" type="text"
-		       maxlength="25" placeholder="Last name">
-              </div>
-
-	      <div class="pure-control-group">
-		<label for="email">Email</label>
-		<input id="email" name="email" type="email" placeholder="Email Address">
-	      </div>
+	    <div class="pure-u-11-24">
+	      <a href="/auth/google" class="oauth-link"><i class="fa fa-google-plus fa-2x"></i> Sign up with Google</a>		  
+	    </div>
+	    
+	    
+	    <div class="pure-u-1-12 register-or-container">
+	      <h2 class="register-or">Or</h2>
+	    </div>
+	    <div class="pure-u-11-24">
 	      
-              <div class="pure-control-group">
-		<label for="password">Password</label>
-		<input id="password" name="password" type="password" placeholder="Password">
-              </div> 
+	      <form class="pure-form pure-form-aligned registration-form" action="/sign-up" method="post">
+		
+		<div class="pure-control-group">
+		  <label for="firstname">First name</label>
+		  <input id="firstName" name="firstName" type="text" 
+			 maxlength="25" placeholder="First name"> 
+		</div>
 
-	     	      
-	      <label for="cb" class="pure-checkbox terms-and-conditions-cb">
-		<input id="cb" type="checkbox"> I accept the
-		<a href="/terms-and-conditions">terms and conditions.</a>
-	      </label>
-              
-	      <button type="submit" class="pure-button pure-button-primary">Sign up</button>
-	  </form>
-	  <p> Already have an account? <a href="/sign-in">Sign in</a>.</p>
+		<div class="pure-control-group">
+		  <label for="lastname">Last name</label>
+		  <input id="lastName" name="lastName" type="text"
+			 maxlength="25" placeholder="Last name">
+		</div>
+
+		<div class="pure-control-group">
+		  <label for="email">Email</label>
+		  <input id="email" name="email" type="email" placeholder="Email Address">
+		</div>
+		
+		<div class="pure-control-group">
+		  <label for="password">Password</label>
+		  <input id="password" name="password" type="password" placeholder="Password">
+		</div> 
+		
+		<button type="submit" class="pure-button pure-button-primary top-m-1">Sign up</button>
+	      	
+	      </form>
+	    </div>
+	  </div>
+	  <p>Already have an account? <a href="/sign-in">Sign in</a>.</p>
+	  <br>
+	  <p>By creating an accoung with Pcaso, you are agreeing to Pcaso's <a href="/terms-and-conditions">terms and conditions.</a></p>
+	  
+	  
 	</div>
       </div>
 
-      
+       
     </main>
     <%- include footer.ejs %>  
   </body>  

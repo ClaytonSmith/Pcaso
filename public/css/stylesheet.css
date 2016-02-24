@@ -88,6 +88,7 @@ body {
 
 .share-with-email{
     margin-left: .5em !important;
+    margin-right: 1em !important;
 }
 
 #shared-user-collection{
@@ -264,7 +265,7 @@ body {
 }
 
 .profile-main-display{
-    max-height: 25em;
+    max-height: 27em;
     overflow-y: scroll;
     margin-bottom: 3em;
 }
@@ -387,3 +388,54 @@ body {
     overflow-y: auto;
 }
 
+
+.oauth-link{
+    padding: 1.2em 1em 1.2em 1em;
+    color: black;
+    background-color: white;
+    border-radius: 100px;
+    border-style: solid;
+    border-color: #2980B9;
+    border-width: 1px;    
+    display: inline-table;
+    margin: 1em 0 1em 0;
+    float: right;
+    margin-right: 2em;
+}
+
+.oauth-link .fa-google-plus{
+    color: #DB4437;
+    margin-right: .5em;
+}
+
+
+.register-container {
+    margin: 0 auto;
+    text-align: center;
+    width: 75%;
+}
+
+.register-container h1{
+    font-size: 3em;
+    color: black;
+    margin-bottom: 2em
+
+}
+
+.register-container .register-or-container{
+    margin-top: 1em;
+}
+
+.register-container .register-or-container .register-or{
+}
+
+.registration-form{
+    padding-top: 2em;
+    padding-bottom: 1em;
+    background-color: white;
+    border-radius: 8px;
+    border-style: solid;
+    border-color: #2980B9;
+    border-width: 1px;    
+    margin-left: 1em;
+}
