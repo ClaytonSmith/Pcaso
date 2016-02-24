@@ -76,9 +76,9 @@ UnauthenticatedUserSchema.method({
 
 // Regular users can have files
 var UserSchema                 = BaseUserSchema.extend({
-    googleCredentials: {
-	accessToken:          { type: String, unique: true },                        // List of mongoId for containers	
-	accessTokenSecret:    { type: String, unique: true }                         // List of mongoId for containers	
+    google: {                                                         // Used for Google oauth
+	id:                   { type: String, default: '' },    
+	token:                { type: String, default: '' }    
     }, 
     files:          { type: [], default: [] },                        // List of mongoId for containers
     fileSettings: {
@@ -294,6 +294,7 @@ UserSchema.method({
 	return bcrypt.compareSync(password, this.password);
     }
 
+
 });
 
 UnauthenticatedUserSchema.static({
@@ -352,6 +353,7 @@ UserSchema.static({
 	    }
 	});	
 	
+
 	return user;
     },
 
@@ -393,7 +395,7 @@ UserSchema.pre('save', function(next) {
     // On first save
     if( user.isNew ){
 
-
+	
 	var publicDir = config.root + '/public/users-public-data/'+ user._id.toString() +'/';
 	//create public directory for things like avatars
 		

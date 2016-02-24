@@ -60,7 +60,7 @@ function init() {
 	var deleteButtonSettings = {
 	    id: 'notification-'+ notification._id +'-delete',
 	    class: 'pure-button pure-button-error',
-	    html: 'Delte'
+	    html: 'Delete'
 	}
 	
 	var container = $('<div/>', containerSettings);
