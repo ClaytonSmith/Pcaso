@@ -76,9 +76,10 @@ UnauthenticatedUserSchema.method({
 
 // Regular users can have files
 var UserSchema                 = BaseUserSchema.extend({
-    googleCredentials: {
+    google: {                                                         // Used for Google oauth
 	accessToken:          { type: String, unique: true },                        // List of mongoId for containers	
-	accessTokenSecret:    { type: String, unique: true }                         // List of mongoId for containers	
+	accessTokenSecret:    { type: String, unique: true },                        // List of mongoId for containers	
+	id:                   { type: String, default: '' }    
     }, 
     files:          { type: [], default: [] },                        // List of mongoId for containers
     fileSettings: {
@@ -294,6 +295,7 @@ UserSchema.method({
 	return bcrypt.compareSync(password, this.password);
     }
 
+
 });
 
 UnauthenticatedUserSchema.static({
@@ -352,6 +354,7 @@ UserSchema.static({
 	    }
 	});	
 	
+
 	return user;
     },
 

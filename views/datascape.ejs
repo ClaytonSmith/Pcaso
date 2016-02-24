@@ -17,8 +17,8 @@
 	<% } else { %>
 	<h1 class="title center"><%= datascape.displaySettings.title %></h1>
 	<% } %>
-	<h3 class="title center">By: <a href="<%- datascape.links.parent %>"> <%= datascape.parent.username %></a></h3>
-	    
+	<h3 class="title center">By: <a href="<%- datascape.links.parent %>"> <%= datascape.parent.name.first %> <%= datascape.parent.name.last %></a></h3>
+	
 	<div id="loading">
 	  <h3><i class="fa fa-spinner fa-spin fa-2x"> </i> Painting data...</h3>
 	</div>
