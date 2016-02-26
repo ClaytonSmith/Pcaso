@@ -16,7 +16,7 @@
 	  <form action="<%- profile.links.local %>/settings" method="post" id="profile-settings-form" 
 		class="pure-form pure-form-aligned basic-form" name="dataset-upload-form">  <!-- novalidate="novalidate"> -->
 	    
-	    <div class="prue-g">
+	    <div class="prue-g position-relative">
 	      <div class="pure-u-1-5">
 		<h2 class="center"><%= profile.name.first %></h2>
 		<img class="pure-img avatar" src="<%- profile.links.avatar %>" id="avatar-display" \>
@@ -26,11 +26,9 @@
 		</div>
 	      </div>
 
-	      <div class="pure-u-1-12">
-		<!-- Empty space-->
-	      </div>
+
 	      
-	      <div class="pure-u-2-5">
+	      <div class="pure-u-2-5 settings-container">
 		
 		<div class="pure-control-group">
 		  <label for="email">Email</label>
@@ -53,11 +51,22 @@
 
 		</div>
 		
-		<div class="pure-g">	      	      
+		<div class="pure-g bottom">
+		  <a href="<%- user.links.local %>" id="cancel-button"
+		     class="pure-button submit-button pure-u-1-4">
+		    Cancel
+		  </a>
+		  
 		  <button type="submit" id="save-datascape-button"
-			  class="pure-button pure-button-success submit-button pure-g-u-1-5">
+			  class="pure-button pure-button-success submit-button pure-u-1-4">
 		    Save
 		  </button>
+		  
+		  <a href="<%- user.links.local %>/delete-account" id="delete-account"
+		     class="pure-button pure-button-error submit-button pure-u-1-4">
+		    Delete Account
+		  </a>
+		 
 		</div>
 	      </div>
 	    </div>

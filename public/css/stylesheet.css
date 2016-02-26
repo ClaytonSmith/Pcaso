@@ -10,7 +10,8 @@ a{
 
 .nav {
     padding: .5em 2em .5em 2em;
-    background-color: #2980B9;
+    background-color: #2E2E2E;
+    border-bottom: 0.4em solid #2980B9;
 }
 
 .nav .child{
@@ -176,7 +177,7 @@ body {
 .about-container{
     border-radius: 8px;
     border-style: solid;
-    border-color: #2980B9;
+    border-color: rgba(41, 128, 185, 0.30);
     border-width: 1px;
     background-color: white;
     padding: 1em;
@@ -218,7 +219,7 @@ body {
 .basic-form{
     border-radius: 8px;
     border-style: solid;
-    border-color: #2980B9;
+    border-color: rgba(41, 128, 185, 0.30);
     border-width: 1px;
     margin-top: 2em;
     background-color: white;
@@ -265,26 +266,26 @@ body {
 }
 
 .profile-main-display{
-    max-height: 27em;
-    overflow-y: scroll;
+    max-height: 30em;
     margin-bottom: 3em;
 }
 
 
 .dataspace-tile{
-    width: 20em;
+    width: 16em;
     margin: auto;
     padding: .5em;
     text-align: left;
     background-color: white;
     border-radius: 8px;
     border-style: solid;
-    border-color: #2980B9;
+    border-color: rgba(41, 128, 185, 0.30);
     border-width: 1px;
     background-size: cover;
     background-repeat: no-repeat;
     height: 130px;
-    position: relative
+    position: relative;
+    margin-top: .5em;    
 }
 
 
@@ -395,12 +396,12 @@ body {
     background-color: white;
     border-radius: 100px;
     border-style: solid;
-    border-color: #2980B9;
+    border-color: rgba(41, 128, 185, 0.30);
     border-width: 1px;    
     display: inline-table;
     margin: 1em 0 1em 0;
-    float: right;
-    margin-right: 2em;
+    /* float: right; */
+    /* margin-right: 2em; */
 }
 
 .oauth-link .fa-google-plus{
@@ -418,8 +419,7 @@ body {
 .register-container h1{
     font-size: 3em;
     color: black;
-    margin-bottom: 2em
-
+    /* margin-bottom: 2em */
 }
 
 .register-container .register-or-container{
@@ -435,7 +435,52 @@ body {
     background-color: white;
     border-radius: 8px;
     border-style: solid;
-    border-color: #2980B9;
+    border-color: rgba(41, 128, 185, 0.30);
     border-width: 1px;    
     margin-left: 1em;
+}
+.bio-container{
+    margin-left: 2em;
+    margin-right: 2em;
+}
+
+.bio{
+
+    background-color: white;
+    border-radius: 8px;
+    border-style: solid;
+    border-color: rgba(41, 128, 185, 0.30);
+    border-width: 1px;    
+    padding: 1em 2em 1em 2em;
+}
+
+.position-relative{
+    position: relative;
+}
+
+.settings-container{
+    height: 100%;
+    position: absolute;
+    padding-left: 2em;
+    padding-right: 2em;
+}
+
+.bottom{
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+
+.datascape-tile-preview-container{
+    position: absolute;
+    height: 100%;
+    width: 100%;
+}
+
+#datascape-tile-preview-anchor{
+    max-height: inherit;
+    overflow-x: inherit;
+    overflow-y: auto;
+    height: calc( 100% - 80px);
+    position: relative;
 }

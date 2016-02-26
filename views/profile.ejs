@@ -5,59 +5,37 @@
     <%- include header.ejs %>      
     <main>
       <script src="/js/comment-controller.js"></script>  
-
+      <script src="/js/profile-controller.js"></script>
       <div class="app-content">
 	<div class="account-container">
 	  
 	  
-	  <% if (isOwner) { %>
-	  <h1>Hello <%= profile.name.first %></h1>
-	  <% } else { %>
-	  <h1><%= profile.username %></h1>
-	  <% } %>
-
-	  <hr>
 	  
-	  <h3>Portfolio</h3>
+	  
 	  
 	  <div class="pure-g profile-main-display">
-	 
-	    <div class="pure-u-3-4 enable-scrolling">
-	      <div class="pure-g">
-
-		<% for(var i = 0; i < profile.files.length; i++) { %>
-		   <!-- style="background-image: url( <%- profile.files[i].links.thumbnail %>);"-->
-		   <div class="pure-u-1-6 dataspace-tile" >
-		     <a href="<%- profile.files[i].links.local %>">
-		       <h4><%= profile.files[i].displaySettings.title %></h4>
-		       <p class="view-count">Views: <%= profile.files[i].statistics.viewCount %></p>
-		       <p class="view-count">Comments: <%= profile.files[i].comments.length %></p>
-		       <p class="visibility">Visibility: <span class="capitalize"><%= profile.files[i].displaySettings.visibility %></span></p>
-		     </a>		   
-
-		     <% if (isOwner) { %>
-		     <a class="bottom-right" href="<%- profile.files[i].links.local %>/settings">
-		       <i class="fa fa-cog fa-2x rotate-on-hover"></i>
-		     </a>
-		     <% } %>
-		   </div>
-		   <% } %>
-		   
-	      </div>
-	      
-	    </div>
-
-	    <div class="pure-u-1-4">	      
-	      <img class="pure-img avatar" src="<%- profile.links.avatar %>">
-	      <p><%= profile.name.first %> <%= profile.name.last %></p>
-	      
-	      <% if (profile.profileSettings.displayEmail) { %>
-	      <a href="mailto:<%- profile.email %>"><%= profile.email %></a>
-	      <% } %>
-	      
-	    </div>
-	  </div>	  
 	  
+	    <div class="pure-u-1-5 profile-info-display">	      
+	      <h1> <%= profile.name.suffix %>  <%= profile.name.first %> <%= profile.name.last %></h1>
+	      <img class="pure-img avatar" src="<%- profile.links.avatar %>">
+	      <p>Joined <%= profile.displaySettings.dateJoined %></p>
+	      <p><%= profile.files.length %> Datascapes</p>
+	      <% if (profile.profileSettings.displayEmail) { %>
+	      <p><a href="mailto:<%- profile.email %>"><%= profile.email %></a> </p>
+	      <% } %>
+	      <p><h3>
+	    </div>
+	    
+	    <div class="pure-u-4-5 position-relative">
+	      <div class="datascape-tile-preview-container">
+		<h1>Portfolio</h1>
+		<div class="pure-g" id="datascape-tile-preview-anchor">
+		  
+		</div>
+	      </div>
+	    </div>
+	    
+	  </div>  
 	  
 	  <div id="comments-container" class="jquery-comments"></div> 
 	</div>

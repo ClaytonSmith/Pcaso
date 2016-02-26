@@ -41,6 +41,10 @@ var FileContainers    = mongoose.model('FileContainer');
 var Comments          = mongoose.model('Comment');
 var Notification      = mongoose.model('Notification');
 
+var dateFormatOptions = {
+    year: "numeric", month: "short", day: "numeric"
+};
+    
 
 var BaseUserSchema = new mongoose.Schema({// BaseSchema.extend({    
     // User accound and reg
@@ -53,7 +57,8 @@ var BaseUserSchema = new mongoose.Schema({// BaseSchema.extend({
     password:       { type: String,  required: true },
     name: { 
         first:          { type: String, required: true },
-	last:           { type: String, required: true }
+	last:           { type: String, required: true },
+	suffix:         { type: String, default: '' }
     }
 });
 
@@ -93,8 +98,12 @@ var UserSchema                 = BaseUserSchema.extend({
     localDataPath:  { type: String, default: '' },
     publicDataPath: { type: String, default: '' },    
     profileSettings: {
-	displayEmail: { type: Boolean, default: true }
+	displayEmail: { type: Boolean, default: true },
+	biography:    { type: String, default: '' }
     },
+    displaySettings: {
+	dateJoined: { type: String, default: (new Date()).toLocaleString("en-us", dateFormatOptions) },
+    },                                                    
     links: {
 	avatar:        { type: String, default: '' },
 	link:          { type: String, required: true },

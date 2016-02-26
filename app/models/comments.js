@@ -118,13 +118,14 @@ CommentSchema.static({
 	
 	return comments.map( function(comment){
 	    return {
-		id: comment._id, // If root comment, exclude topic or jquery comments gets mad
-		target: comment.target.id === comment.topic.id ? null : comment.target.id, 
-		created: formatDate( comment.dateAdded ), 
-		body: comment.body,
-		username: comment.from,
-		profile_picture_url: comment.links.avatar,
-		profile_url: comment.links.parent
+		id:                   comment._id, // If root comment, exclude topic or jquery comments gets mad
+		target:               comment.target.id === comment.topic.id ? null : comment.target.id, 
+		created:              formatDate( comment.dateAdded ), 
+		body:                 comment.body,
+		username:             comment.from,
+		profile_picture_url:  comment.links.avatar,
+		profile_url:          comment.links.parent,
+		parent:               comment.parent 
 	    }; 
 	});
     },

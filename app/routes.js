@@ -67,10 +67,10 @@ module.exports = function(app, passport) {
     app.get(    '/notifications',           users.getNotifications);
     app.get(    '/notifications/:notificationID', notifications.redirect );
     
-    app.get(    '/u/:userID',          users.getUserProfile );
-    app.get(    '/u/:userID/settings', users.profileSettings );
-    app.post(   '/u/:userID/settings', users.editProfileSettings );
-    //app.delete( '/u/:userID/delete', users.deleteAccount);
+    app.get(    '/u/:userID',                 users.getUserProfile );
+    app.get(    '/u/:userID/settings',        users.profileSettings );
+    app.post(   '/u/:userID/settings',        users.editProfileSettings );
+    app.get(    '/u/:userID/delete-account',  users.deleteAccount);
     //app.get(    '/u/:userID/datasets/',                         files.displayUserDatasets );
     
     app.get(    '/u/:userID/datascapes/:datascape',                files.displayDatascape );

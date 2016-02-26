@@ -10,6 +10,8 @@ function init() {
     var path         = location.pathname;
     var columnTypes  = [];
     var file         = null;
+    
+    $("#save-datascape-button").attr('disabled', true);
 
     // Setup rradio buttons
     $("#privacy-public").click(function(event){
@@ -29,19 +31,28 @@ function init() {
     
     function isId(data, index){	
 	// Applying null to all of data will pupulate all empty fields with undefined
-	// This will allow map to operate on each field
+	// This will allow map to operate on each field. Otherwise, the field will be 
+	// skipped by map
 	var column = Array.apply(null, data).map(function(row){ return row[ index ]; });
-	
+		
+	// Remove first row
+	column.shift()
+	console.log('colum:', column)
 	return Array.apply( null, column).reduce(function(predicate, value, i, self){
 	    return predicate && value !== undefined && self.indexOf( value ) === i ;
-	});
+	}, true);
     }
     
-    function isAxis(data, inex){
+    function isAxis(data, index){
 	var column = Array.apply(null, data).map(function(row){ return row[ index ]; });
+	console.log(typeof column);
+	
+	// Remove first row
+	column.shift()
+
 	return Array.apply( null, column).reduce(function(predicate, value, i, self){
-	    return predicate && value !== undefined && parseFloat( value ) !== NaN ;
-	});
+	    return predicate && value !== undefined && !isNaN( parseFloat( value ));
+	}, true);
     }
     
     function setCaption(datascapeCaption){
@@ -167,29 +178,28 @@ function init() {
 	var trEvalAs = $("<tr\>", {class: 'eval-as'});
 	
 	data[0].forEach(function(datum, index){
-	    var sID = 'evalColumns'+ index +'As';
-	    var select = $("<select\>", {name: sID, size: 4} );
+	    var sID = 'eval-column-'+ index +'-as';
+	    var select = $("<select\>", {name: "column-eval-type[]", id: sID, size: 4} );
 	    
 	    console.log('data', datum);
 	    
 	    // Invert the is*() results because `disabled` will disable elements if `true`
 	    // so if something IS true DON'T disable it
 	    
-	    select.append( $("<option\>", {value: 'id',    html: 'ID', disabled: !isId(data, index) }) );
+	    //console.log( isAxis(data, index) );
+	    select.append( $("<option\>", {value: 'id',    html: 'ID',   disabled: !isId(data, index) }) );
 	    
-	    select.append( $("<option\>", {value: 'axis',  html: 'Axis' }) );
+	    select.append( $("<option\>", {value: 'axis',  html: 'Axis', disabled: !isAxis(data, index) }) );
 	    
 	    select.append( $("<option\>", {value: 'meta',  html: 'Meta' }) );
 	    
 	    select.append( $("<option\>", {value: 'omit',  html: 'Omit' }) );
 	    	    
-
+	    
 	    // Init 
 	    // Reselect values if loading settings, 
-	    select.val( settings.columnTypes[index] || '' );
-	    
-	    columnTypes[ index ] = select.val();
-	    
+	    select.val( settings.columnTypes[index] );
+	    	    
 	    // Creates a change method for each method built
 	    select.change( function(value){
 		console.log(this.value);
@@ -199,8 +209,12 @@ function init() {
 	    trEvalAs.append( $("<td\>", {html: select} ) );
 	}); 
 
-	tbody.append( trEvalAs ); 
-
+	
+	trEvalAs.find('select').each(function(index){
+	    columnTypes[ index ] = $(this).val();
+	});
+	
+	tbody.append( trEvalAs ); 	
 	table.append( thead );
 	table.append( tbody );
 
@@ -279,7 +293,7 @@ function init() {
 	    // I hate to do this but I don't know how else to send objects
 	    formData.append( 'revertUponArival', JSON.stringify( data ) );
 	    formData.append( 'file', file);
-	    
+	    console.log(columnTypes);
 	    $.ajax({
 	    	url: actionURL,
 	    	type: method,
@@ -303,6 +317,7 @@ function init() {
 	    complete: function(parsedObj){
 		populateForm( parsedObj, file );
 		$("#form-file-settings-container").fadeIn('slow').attr('hidden', false);
+		$("#save-datascape-button").attr('disabled', false);
 	    }
 	});
     });
@@ -376,6 +391,7 @@ function init() {
 		    complete: function(parsedObj){		
 			genTable( parsedObj.data, results[0].displaySettings.display );
 			$("#form-file-settings-container").fadeIn('slow').attr('hidden', false);
+			$("#save-datascape-button").attr('disabled', false);
 		    }
 		});	
 	    });

@@ -9,7 +9,7 @@ function init() {
 	profilePictureURL: user.links.avatar,
 	roundProfilePictures: true,
 	textareaRows: 1,
-	fullname: user.username,
+	fullname: user.name.first +" "+ user.name.last,
 	currentUserIsAdmin: false,
 	enableAttachments: false,
 	enableUpvoting: false,
@@ -42,7 +42,7 @@ function init() {
 		if( !user._id ) success( data );
 		else success( data.map( function(comment){
 		    console.log(comment)
-		    comment.createdByCurrentUser = ( user.username === comment.username);
+		    comment.createdByCurrentUser = ( user._id === comment.parent.id);
 		    return comment;
 		}));
 	    });
@@ -67,7 +67,6 @@ function init() {
 	    });
 	},
 	putComment: function(data, success, error) {
-	    
 	    $.ajax({
 		type: 'POST',
 		url: '/api/comments/edit',
@@ -78,9 +77,7 @@ function init() {
 		data.createdByCurrentUser = true;
 		console.log( data );
 		success( data );
-	    });
-	    
-	    
+	    });    
 	},
 	deleteComment: function(data, success, error) {
 	    $.ajax({

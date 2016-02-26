@@ -17,11 +17,11 @@ var templateClients = {
 	client: 'no-reply'
     }, // Email users a datascape has been shared with them 
     'shared-with-authenticated-user': { 
-	subject: 'Pcaso: A dataset has been shared with you',
+	subject: 'A Pcaso datascape has been shared with you',
 	client: 'no-reply'
     }, // Email unauthenticated sers a datascape has been shared with them 
     'shared-with-unauthenticated-user': { 
-	subject: 'Pcaso: A dataset has been shared with you',
+	subject: 'A Pcaso datascape has been shared with you',
 	client: 'no-reply'
     }, // Email owner when a share request is made by unauthenticated users 
     'share-request-public': { 

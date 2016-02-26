@@ -15,10 +15,12 @@
 	<div class="upload-container">
 
 	  <% if (locals.datascape) { %>
-	  <h1 class="title">Datascape settings</h1>
+	  <!-- <h1 class="title">Datascape settings</h1> -->
+	  
 	  <% } else { %>
-	  <h1 class="title">Upload CSV</h1>
-	  <% } %>
+	  <!-- <h1 class="title">Upload data to paint</h1> -->
+	  <h1 class="title">Upload .csv file to paint datascape</h1>	  
+<% } %>
 	  <hr>
 	  
 	  <% if (locals.datascape) { %>
@@ -32,8 +34,7 @@
 		name="dataset-upload-form">  <!-- novalidate="novalidate"> -->
 
 	    <div class="pure-control-group" id="file-select-container1">
-	      <label for="file">Select CSV file</label>
-	      <input type="file" accept=".csv" id="file-select" name="file">
+	      <input type="file" accept=".csv" id="file-select" name="file" >
 	    </div>
 	    
 	    <% } %>
@@ -74,11 +75,6 @@
 		  </div>
 		</div>
 	      </div>
-	      
-	      <div class="pure-u-1-2">
-		  
-		
-	      </div>
 	    </div>
 	  </div>
 	    
@@ -98,7 +94,7 @@
 	      
 	      <button type="submit" id="save-datascape-button"
 		      class="pure-button pure-button-success submit-button pure-u-1-6">
-		Create datascape
+		Paint datascape
 	      </button>
 	      <% } %>
 	    </div>

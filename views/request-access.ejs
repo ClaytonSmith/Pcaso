@@ -7,9 +7,9 @@
      
       <div class="app-content">
 	<div class="form-container">
-	  <h1> Request Access To "<%= datascape.displaySettings.title %>"</h1>
-	  <p> You currently do not have access to this file.</p>
-
+	  <h1>Datascape <i><%= datascape.displaySettings.title %></i> isn't public<% if (user) { %> (or shared with you)<% } %>.</h1>
+	  <!-- <p> You do not have access to this datascape.</p>-->
+	  
 	  <% if (user) { %>
 	  <form class="pure-form pure-form-aligned" action="<%- datascape.links.link %>/request-access" method="post">
 	    <button type="submit" class="pure-button pure-button-primary">Request Access</button>
@@ -17,13 +17,12 @@
 	  
 	  <% } else { %>
 	  
-	  <p> You must be logged in to request access to this datascape.</p>
+	  <p> <a href="/sign-in">Sign in</a> to Pcaso (or <a href="/sign-up">sign up</a>*) to request access <i><%= datascape.displaySettings.title %></i>.</p>
 	  
 	  <br>
 	  
-	  <p>If you have recieved an email invitation to view this datascape, please create an account using the email.</p>
-	  <p>address the invitation was sent to.</p>
-	  
+	  <p>*If you got a Pcaso invitation to see this datascape, make sure to sign in/up under the same email address the invitation came to.</p>
+
 	  <% } %>
 	</div>
       </div>

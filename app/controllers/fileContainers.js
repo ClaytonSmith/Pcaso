@@ -331,9 +331,24 @@ exports.getPaginatedFiles = function(req, res){
     // Not need to authenticate, only public datascapes 
     // will be shows
     
+    // Defualt to only searching for public datascapes
     var query = {
-	'displaySettings.visibility': 'PUBLIC'
+	'$or': [ 
+	    {'displaySettings.visibility': 'PUBLIC' }
+	]
+    };
+    
+    // If given a parentID, only search datascapes
+    // that are owned by that user
+    if( req.query.parentID ){
+	query['parent.id'] = req.query.parentID;
+    }	    
+    
+    // If parent, display all datascapes
+    if( req.query.parentID === req.user._id.toString() ){
+	query['$or'].push( {'displaySettings.visibility': 'PRIVATE' } );
     }
+    
     
     // Construct paginate params
     // Don't forget to parse all incoming integer values
@@ -342,11 +357,10 @@ exports.getPaginatedFiles = function(req, res){
 	limit: parseInt( req.query.limit || 30 ),
 	lean: true,
 	leanWithId: true,
-	sort: { dateAdded: -1 }	
+	sort: { dateAdded: -1 }	 // Sort from newest to oldest 
     };
     
     FileContainers.paginate(query, paginateParams, function(err, docs){
-	console.log(err, docs); 
 	if( err ) res.send( err ); 
 	res.send( docs.docs ); 
     });    

@@ -150,10 +150,15 @@ exports.postUserProfileComment = function(req, res){
 exports.deleteAccount = function(req, res){
     console.log('Account being deleted');
     
-    req.user.remove(function(err){ /*Log or handle*/});
-    
-    req.logout();
-    res.redirect('/');
+    req.user.remove(function(err){ 
+	if( err ){
+	    res.redirect('/500');
+	    throw new Error( err );
+	} else {
+	    req.logout();
+	    res.redirect('/');
+	}
+    });
 }
 
 // Moves user accounts from the 'Unauthenticated' collection to the regular user space 
@@ -259,10 +264,12 @@ exports.profileSettings = function(req, res){
 
 // TODO: do not res.render 
 exports.editProfileSettings = function(req, res){
-    var isOwner = req.isAuthenticated() && req.user._id.toString() === req.params.userID;
+    var isOwner = req.isAuthenticated() &&
+	req.user !== undefined && 
+	req.user._id.toString() === req.params.userID;
     
     if( !isOwner )
-	res.sendCode(403);
+	return res.sendStatus(403);
     
     var query = {
 	_id: req.user._id
