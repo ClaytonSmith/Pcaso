@@ -10,8 +10,12 @@ a{
 
 .nav {
     padding: .5em 2em .5em 2em;
-    background-color: #2E2E2E;
-    border-bottom: 0.4em solid #2980B9;
+
+    /* No a fan */
+    background-color: #757575;
+    
+/* background-color: #2E2E2E; */
+/* border-bottom: 0.4em solid #2980B9; */
 }
 
 .nav .child{
