@@ -123,7 +123,7 @@ body {
 
 .splash {
     /* absolute center .splash within .splash-container */
-    width: 80%;
+    width: 90%;
     margin: auto;
     position: absolute;
     top: 100px; left: 0; bottom: 0; right: 0;
@@ -154,7 +154,7 @@ body {
     font-size: 24pt;
     opacity: 0.8;
     margin-top: 0;
-    margin-bottom: 4em;
+    margin-bottom: 2em;
 }
 
 .lets-go{
@@ -418,6 +418,9 @@ body {
     margin-right: .5em;
 }
 
+.center-text{ 
+    text-align: center;
+}
 
 .register-container {
     margin: 0 auto;
@@ -447,14 +450,15 @@ body {
     border-color: rgba(41, 128, 185, 0.30);
     border-width: 1px;    
     margin-left: 1em;
+    margin: auto;
+    width: 30em;
 }
 .bio-container{
     margin-left: 2em;
     margin-right: 2em;
 }
 
-.bio{
-
+.bio {
     background-color: white;
     border-radius: 8px;
     border-style: solid;

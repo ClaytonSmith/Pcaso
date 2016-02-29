@@ -12,10 +12,10 @@
 	  <div class="pure-g profile-main-display">
 	  
 	    <div class="pure-u-1-5 profile-info-display">	      
-	      <h1> <%= profile.name.suffix %>  <%= profile.name.first %> <%= profile.name.last %></h1>
+	      <h2> <%= profile.name.suffix %>  <%= profile.name.first %> <%= profile.name.last %></h2>
 	      <img class="pure-img avatar" src="<%- profile.links.avatar %>">
 	      <p>Joined <%= profile.displaySettings.dateJoined %></p>
-	      <p><%= profile.files.length %> Datascapes</p>
+	      <p><%= profile.files.length %> datascape(s)</p>
 	      <% if (profile.profileSettings.displayEmail) { %>
 	      <p><a href="mailto:<%- profile.email %>"><%= profile.email %></a> </p>
 	      <% } %>
@@ -24,8 +24,8 @@
 	       
 	    <div class="pure-u-4-5 position-relative">
 	      <div class="datascape-tile-preview-container">
-		<h1>Portfolio </h1>
-		  
+		<h2 class="center-text">Portfolio </h2>
+		
 		<div class="pure-g" id="datascape-tile-preview-anchor">
 		  <!-- Anything placed in this div will be deleted when the page is loaded -->
 		</div>

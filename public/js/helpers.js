@@ -119,7 +119,7 @@ function buildTile( datascapeContainer ){
     };
     var authorSettings = {
 	class: "view-count",
-	html: 'Author: '
+	html: 'Painter: '
 	    + ( datascapeContainer.parent.name.prefix || '' )
 	    + ' '
 	    + datascapeContainer.parent.name.first 
