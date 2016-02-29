@@ -341,28 +341,32 @@ exports.getPaginatedFiles = function(req, res){
     // If given a parentID, only search datascapes
     // that are owned by that user
     if( req.query.parentID ){
-	query['parent.id'] = req.query.parentID;
+	query['parent.id'] = req.query.parentID._id;
     }	    
     
     // If parent, display all datascapes
-    if( req.query.parentID === req.user._id.toString() ){
+    if( req.user && ( ( req.query.parentID || {} )._id === req.user._id.toString() ) ){
 	query['$or'].push( {'displaySettings.visibility': 'PRIVATE' } );
     }
     
+    console.log("\n\n", query,"\n\n" );
     
     // Construct paginate params
     // Don't forget to parse all incoming integer values
     var paginateParams = {
-	offset: parseInt( req.query.page || 0 ),
+	page: parseInt( req.query.page || 0 ) + 1,
 	limit: parseInt( req.query.limit || 30 ),
 	lean: true,
 	leanWithId: true,
 	sort: { dateAdded: -1 }	 // Sort from newest to oldest 
     };
     
-    FileContainers.paginate(query, paginateParams, function(err, docs){
+    console.log(paginateParams);
+    
+    FileContainers.paginate(query, paginateParams, function(err, docs,a,b,c,d,e){
 	if( err ) res.send( err ); 
-	res.send( docs.docs ); 
+	console.log("\n",docs,"\n",a,"\n");
+	res.send( docs ); 
     });    
 } 
 

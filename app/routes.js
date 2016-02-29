@@ -101,9 +101,11 @@ module.exports = function(app, passport) {
     app.post(   '/api/*',  function(req, res){ res.sendStatus(404) });
     app.put(    '/api/*',  function(req, res){ res.sendStatus(404) });
     app.delete( '/api/*',  function(req, res){ res.sendStatus(404) });
-
-    //app.get( '/gallery', files.displayGallery );    
-
+    
+    app.get( '/gallery*', function(req, res){
+	res.render('gallery.ejs', {user: req.user});
+    });    
+    
     app.get( '/about', function(req, res){
 	res.render('about.ejs', { user: req.user });
     });

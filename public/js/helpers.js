@@ -2,15 +2,15 @@
     $.fn.serializeObject = function(){
 
         var self = this,
-            json = {},
-            push_counters = {},
-            patterns = {
-                "validate": /^[a-zA-Z][a-zA-Z0-9_]*(?:\[(?:\d*|[a-zA-Z0-9_]+)\])*$/,
-                "key":      /[a-zA-Z0-9_]+|(?=\[\])/g,
-                "push":     /^$/,
-                "fixed":    /^\d+$/,
-                "named":    /^[a-zA-Z0-9_]+$/
-            };
+        json = {},
+        push_counters = {},
+        patterns = {
+            "validate": /^[a-zA-Z][a-zA-Z0-9_]*(?:\[(?:\d*|[a-zA-Z0-9_]+)\])*$/,
+            "key":      /[a-zA-Z0-9_]+|(?=\[\])/g,
+            "push":     /^$/,
+            "fixed":    /^\d+$/,
+            "named":    /^[a-zA-Z0-9_]+$/
+        };
 
 
         this.build = function(base, key, value){
@@ -33,9 +33,9 @@
             }
 
             var k,
-                keys = this.name.match(patterns.key),
-                merge = this.value,
-                reverse_key = this.name;
+            keys = this.name.match(patterns.key),
+            merge = this.value,
+            reverse_key = this.name;
 
             while((k = keys.pop()) !== undefined){
 
@@ -96,4 +96,66 @@ function getUrlParameter(sParam) {
             return sParameterName[1] === undefined ? undefined : sParameterName[1];
         }
     }
+};
+
+function buildTile( datascapeContainer ){
+    var dsTime = new Date( datascapeContainer.dateAdded );
+
+    var timezoneOffset = new Date().getTimezoneOffset() / 60 * (-1) ;	
+
+    var dateFormatOptions = {
+	year: "numeric", month: "short",
+	day: "numeric", hour: "2-digit", minute: "2-digit"
+    };
+
+    
+    dsTime.setHours( dsTime.getHours() - timezoneOffset - 5);
+
+    var containerSettings = {
+	class: "dataspace-tile pure-u-1-5"
+    };
+    var linkSettings = {
+	href: datascapeContainer.links.local
+    };
+    var authorSettings = {
+	class: "view-count",
+	html: 'Author: '
+	    + ( datascapeContainer.parent.name.prefix || '' )
+	    + ' '
+	    + datascapeContainer.parent.name.first 
+	    + ' '
+	    + datascapeContainer.parent.name.last[0]
+    };
+    
+   var viewSettings = {
+	class: "view-count",
+	html: 'Views: '+ datascapeContainer.statistics.viewCount
+    };
+    var commentSettings = {
+	class: "view-count",
+	html: 'Comments: '+ datascapeContainer.comments.length
+    };
+    var createdSettings = {
+	class: "view-count",
+	html: 'Created: '+ dsTime.toLocaleTimeString("en-us", dateFormatOptions)
+    };
+    
+    
+    var container = $('<div/>', containerSettings )
+    var link      = $('<a/>', linkSettings )
+    var title     = $('<h4/>', {html: datascapeContainer.displaySettings.title });
+    var author    = $('<p/>', authorSettings);
+    var views     = $('<p/>', viewSettings);
+    var comments  = $('<p/>', commentSettings);
+    var created   = $('<p/>', createdSettings);
+    
+    link.append( title );
+    link.append( author );
+    link.append( views );
+    link.append( comments );
+    link.append( created );
+    container.append( link );
+
+    console.log( container ) ;
+    return container;
 };

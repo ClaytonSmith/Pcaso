@@ -284,8 +284,8 @@ exports.editProfileSettings = function(req, res){
 	if( err  ) return res.render('500.ejs', {user: req.user});	
 	
 	Users.findOne( query, function(userErr, doc){
-	    if( userErr) return res.render('500.ejs', {user: req.user});
-	    if( !doc )   return res.render('404.ejs', {user: req.user});
+	    if( userErr) return res.render('500.ejs', {user: req.user} );
+	    if( !doc )   return res.render('404.ejs', {user: req.user} );
 	    	    
 	    // Boolean are not converted so check string true or false
 	    doc.profileSettings.displayEmail = fields.displayEmail === 'true';
@@ -293,6 +293,8 @@ exports.editProfileSettings = function(req, res){
 	    
 	    if( files.file ){
 		fs.rename( files.file.path, doc.localDataPath + '/imgs/avatar', function(writeErr){
+		    doc.links.avatar = doc.publicDataPath + '/imgs/avatar';
+		    
 		    if( userErr) return res.render('500.ejs', {user: req.user});
 		    doc.save(function(saveErr){
 			if( saveErr ) res.render('500.ejs', {user: req.user});

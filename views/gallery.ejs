@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+  <%- include head.ejs %>  
+  <body>
+    <%- include header.ejs %>      
+    <main>
+      <script src="/js/gallery-controller.js"></script>
+      <div class="app-content">
+	<h1>Gallery</h1>
+	<hr class="title-line">
+	<div class="pure-g" id="datascape-tile-preview-anchor">	</div>
+	<div class="pure-g top-m-2">
+	  
+	  <div class="pure-u-1-2">
+	    <button class="pure-button centered-m" id="prev-page">
+	      Previous page
+	    </button>
+	  </div>
+	  
+	  <div class="pure-u-1-2">
+	    <button class="pure-button centered-m" id="next-page">
+	      Next page
+	    </button>
+	  </div>
+
+	</div>
+      </div>   
+    </main>
+    <%- include footer.ejs %>  
+  </body>  
+</html>
