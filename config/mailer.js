@@ -39,7 +39,11 @@ var templateClients = {
     'authenticate-new-user': { 
 	subject: 'Welcome to Pcaso',
 	client: 'no-reply'
-    }    
+    },
+    'password-recovery': {
+	subject: 'Pcaso: Password recovery',
+	client: 'no-reply'
+    }
 };
 
 function templateResourceCollector(user, extra){
@@ -85,18 +89,22 @@ function MailClient( client ){
     // User => '"First Last" <user@email.com>'
     newClient.to = function(users){
 	// TODO: error check and compose to field
-	okayToSend.to = true;	
+	okayToSend.to = true;
+
 	users = Array.isArray( users ) ? users : [ users ] ;	
 	newClient.message.to = users.map(function(user){
+	    
+	    console.log("USER \n\n\n",user);
 	    if(typeof user === 'string' || user instanceof String)
 		return '<'+ user +'>';
 	    else {
-		//console.log(user.name, user.name.first, user.name.last);
-		return '"' 
-		    + user.name.first
-		    + ' ' 
-		    + user.name.last
-		    + '" <'
+		var nameString =  
+		    (user.name) ? 
+		    '"'+ user.name.first +' '+ user.name.last +'"' 
+		    : '' ;
+		
+		return nameString 
+		    + '<'
 		    + user.email
 		    + '>';
 	    }

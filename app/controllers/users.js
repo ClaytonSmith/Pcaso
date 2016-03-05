@@ -288,8 +288,13 @@ exports.editProfileSettings = function(req, res){
 	    if( !doc )   return res.render('404.ejs', {user: req.user} );
 	    	    
 	    // Boolean are not converted so check string true or false
-	    doc.profileSettings.displayEmail = fields.displayEmail === 'true';
+	    doc.profileSettings.displayEmail     = fields.displayEmail === 'true';
 	    doc.fileSettings.defaults.visibility = fields.defaultVisibility;
+	    
+	    // If a new password has been provided
+	    if( fields.newPassword ){
+		doc.password = Users.generateHash( fields.defaultVisibility );  
+	    }
 	    
 	    if( files.file ){
 		fs.rename( files.file.path, doc.localDataPath + '/imgs/avatar', function(writeErr){

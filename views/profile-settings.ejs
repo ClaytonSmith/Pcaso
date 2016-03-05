@@ -14,63 +14,88 @@
 	  <hr>
 	  
 	  <form action="<%- profile.links.local %>/settings" method="post" id="profile-settings-form" 
-		class="pure-form pure-form-aligned basic-form" name="dataset-upload-form">  <!-- novalidate="novalidate"> -->
+		class="pure-form pure-form-aligned" name="dataset-upload-form">  <!-- novalidate="novalidate"> -->
 	    
-	    <div class="prue-g position-relative">
-	      <div class="pure-u-1-5">
-		<h2 class="center"><%= profile.name.first %></h2>
-		<img class="pure-img avatar" src="<%- profile.links.avatar %>" id="avatar-display" \>
-		<div class="pure-control-group top-m-2">
-		  <label for="avatar-select">Edit avatar</label>
-		  <input type="file" accept="image/x-png, image/gif, image/jpe" name="avitar-select" id="avatar-select">
+	    <div class=" basic-form">
+	      <div class="prue-g position-relative">
+		<div class="pure-u-1-5">
+		  <h2 class="center"><%= profile.name.first %></h2>
+		  <img class="pure-img avatar" src="<%- profile.links.avatar %>" id="avatar-display" \>
+		  <div class="pure-control-group top-m-2">
+		    <label for="avatar-select">Edit avatar</label>
+		    <input type="file" accept="image/x-png, image/gif, image/jpe" name="avitar-select" id="avatar-select">
+		  </div>
 		</div>
-	      </div>
 
 
-	      
-	      <div class="pure-u-2-5 settings-container">
 		
-		<div class="pure-control-group">
-		  <label for="email">Email</label>
-		  <p class="info-text"><%= profile.email %></p>
-		  <label for="email-visibility">
-		    <input type="checkbox" name="email-visibility" id="email-visibility"> Show publicly</label> 
-		</div>
-		
-	      
-		<div class="pure-control-group top-m-1">
-		  <label for="email-visibility">Default datascape visibility</label>
+		<div class="pure-u-2-5 settings-container">
 		  
-		  <label class="pure-radio radio-select" for="privacy-public">
-		    <input type="radio" name="privacySettings" value="PUBLIC" id="privacy-public">Public
-		  </label>
+		  <div class="pure-control-group">
+		    <label for="email">Email</label>
+		    <p class="info-text"><%= profile.email %></p>
+		    <label for="email-visibility">
+		      <input type="checkbox" name="email-visibility" id="email-visibility"> Show publicly</label> 
+		  </div>
 		  
-		  <label class="pure-radio radio-select" for="privacy-private">
-		    <input type="radio" name="privacySettings" value="PRIVATE" id="privacy-private">Private
-		  </label>
+		  <label for="old-password">Change password:</label>
+		  
+		  <div class="pure-control-group">
+		    <label for="old-password">Old password</label>
+		    <input type="password" name="old-password"></label> 
+		  </div>
+		  
+		  <div class="pure-control-group">
+		    <label for="new-password">New password</label>
+		    <input type="password" name="new-password"></label> 
+		  </div>
+		  
+		  <div class="pure-control-group">
+		    <label for="confirm-password">Confirm password</label>
+		    <input type="password" name="confirm-password"></label> 
+		  </div>
 
-		</div>
-		
-		<div class="pure-g bottom">
-		  <a href="<%- user.links.local %>" id="cancel-button"
-		     class="pure-button submit-button pure-u-1-4">
-		    Cancel
-		  </a>
+
+
+
+		  <div class="pure-control-group top-m-1">
+		    <label for="email-visibility">Default datascape visibility</label>
+		    
+		    <label class="pure-radio radio-select" for="privacy-public">
+		      <input type="radio" name="privacySettings" value="PUBLIC" id="privacy-public">Public
+		    </label>
+		    
+		    <label class="pure-radio radio-select" for="privacy-private">
+		      <input type="radio" name="privacySettings" value="PRIVATE" id="privacy-private">Private
+		    </label>
+
+		  </div>
+
 		  
-		  <button type="submit" id="save-datascape-button"
-			  class="pure-button pure-button-success submit-button pure-u-1-4">
-		    Save
-		  </button>
-		  
-		  <a href="<%- user.links.local %>/delete-account" id="delete-account"
-		     class="pure-button pure-button-error submit-button pure-u-1-4">
-		    Delete Account
-		  </a>
-		 
 		</div>
+
 	      </div>
 	    </div>
+	    <div class="">
+	      <a href="<%- user.links.local %>" id="cancel-button"
+		 class="pure-button submit-button">
+		Cancel
+	      </a>
+	      
+	      <button type="submit" id="save-datascape-button"
+		      class="pure-button pure-button-success submit-button">
+		Save
+	      </button>
+	      
+	      <a href="<%- user.links.local %>/delete-account" id="delete-account"
+		 class="pure-button pure-button-error submit-button" style="float: right;">
+		Delete Account
+	      </a>
+	      
+	    </div>
+	    
 	  </form>
+	  
 	</div>
       </div>
     </main>

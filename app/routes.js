@@ -2,10 +2,11 @@
 
 var mongoose = require('mongoose');
 
-var files          = require('./controllers/fileContainers');
-var users          = require('./controllers/users');
-var comments       = require('./controllers/comments'); 
-var notifications  = require('./controllers/notifications'); 
+var files            = require('./controllers/fileContainers');
+var users            = require('./controllers/users');
+var comments         = require('./controllers/comments'); 
+var notifications    = require('./controllers/notifications'); 
+var accountRecovery  = require('./controllers/password-recovery'); 
 
 module.exports = function(app, passport) {
 
@@ -40,6 +41,7 @@ module.exports = function(app, passport) {
         failureFlash : true               // allow flash messages
     }));
 
+    
     app.get('/auth/google', passport.authenticate('google', { scope : ['profile', 'email'] }));
     
     // the callback after google has authenticated the user
@@ -49,15 +51,22 @@ module.exports = function(app, passport) {
                 failureRedirect : '/'
             }));
     
-    
-    
     app.get('/authenticate-account/:authenticationCode', users.authenticateAccount);
     
     app.get('/sign-out', function(req, res) {
         req.logout();
         res.redirect('/');
     });
-   
+    
+
+    // Account recovery
+    
+    app.get(   '/recover-account', accountRecovery.requestRecoveryEmailForm );
+    app.post(  '/recover-account', accountRecovery.requestRecoveryEmail );
+    app.get(   '/recover-account/:recoveryID', accountRecovery.resetAccountPasswordForm );
+    app.post(  '/recover-account/:recoveryID', accountRecovery.resetAccountPassword );
+
+    
     app.get('/upload', function(req, res){
 	res.render('datascape-settings.ejs', { message: req.flash('uploadMessage'), user: req.user });	
     });
@@ -115,6 +124,8 @@ module.exports = function(app, passport) {
     app.get('/:bullet/csv',    files.datascapeGetCSV);
     
     app.get( '*',  function(req, res){
+
+	console.log('NOOO');
     	res.render('404.ejs', { user: req.user });
     });
 };

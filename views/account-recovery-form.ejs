@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+  <%- include head.ejs %>  
+  <body>
+    <%- include header.ejs %>      
+    <main>
+      
+
+      <div class="app-content">
+
+	<div class="register-container">
+	  
+	  <h1>Account recovery</h1>
+	  
+	  
+	  <div style="margin-bottom: 3em">
+	    <div class="register-or-container">
+	      
+	      
+	      <form class="pure-form pure-form-aligned registration-form" action="/recover-account" method="post">
+		
+		<div class="pure-control-group">
+		  <label for="email">Email</label>
+		  <input id="email" name="email" type="email" placeholder="Email Address">
+		</div>
+				
+		<button type="submit" class="pure-button pure-button-primary top-m-1">Retrieve account</button>
+	      	
+	      </form>
+	    </div>
+	  </div>
+	  
+	</div>
+      </div>
+	  
+	</div>
+      </div>
+
+      
+    </main>
+    <%- include footer.ejs %>  
+  </body>  
+</html>

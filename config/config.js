@@ -9,21 +9,13 @@ var production   = require('./env/production');
 var secrets      = require('./secrets');
 
 
-/*
-var notifier = {
-  service: 'postmark',
-  APN: false,
-  email: true, // true
-  actions: ['comment'],
-  tplPath: path.join(__dirname, '..', 'app/mailer/templates'),
-  key: 'POSTMARK_KEY'
-}; */
-
 var defaults = {
     root: path.join(__dirname, '..'),
     secrets: secrets,
-    defaultAvatarPath: path.join(__dirname, '..') +"/public/imgs/user-icon.png"
-    //notifier: notifier
+    defaultAvatarPath: path.join(__dirname, '..') +"/public/imgs/user-icon.png",
+    accounts: {
+	passwordRecoveryExpiration: 72 // hours
+    }
 };
 
 /**

@@ -10,40 +10,27 @@
 
 	<div class="register-container">
 	  
-	  <h1>Sign in</h1>
-	  
-	  <div>
-	    <a href="/auth/google" class="oauth-link"><i class="fa fa-google-plus fa-2x"></i> Sign in with Google</a>		  
-	  </div>
-	  
-	  <% if (message.length > 0) { %>
-	  <div class="pure-alert pure-alert-warning"><%= message %></div>
-	  <% } %>
-	  
+	  <h1>Create new password</h1> 
 
 	  <div style="margin-bottom: 3em">
 	    <div class="register-or-container">
-	      <form class="pure-form pure-form-aligned registration-form" action="/sign-in" method="post">
+	      <form class="pure-form pure-form-aligned registration-form" action="/recover-account/<%- recoveryID %>" method="post">
 		
 		<div class="pure-control-group">
-		  <label for="email">Email</label>
+		  <label for="email">Confirm Email</label>
 		  <input id="email" name="email" type="email" placeholder="Email Address">
 		</div>
 		
 		<div class="pure-control-group">
-		  <label for="password">Password</label>
+		  <label for="password">New password</label>
 		  <input id="password" name="password" type="password" placeholder="Password">
 		</div> 
 		
-		<button type="submit" class="pure-button pure-button-primary top-m-1">Sign in</button>
+		<button type="submit" class="pure-button pure-button-primary top-m-1">Submit</button>
 	      	
 	      </form>
 	    </div>
 	  </div>
-	  <p><a href="/recover-account">Forgotten password?</a></p>
-	  <br>
-	  <p>Want an account? <a href="/sign-up">Sign up</a>.</p>	  
-	  
 	</div>
       </div>
 	  
