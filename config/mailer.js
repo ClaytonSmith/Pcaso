@@ -41,7 +41,7 @@ var templateClients = {
 	client: 'no-reply'
     },
     'password-recovery': {
-	subject: 'Pcaso: Password recovery',
+	subject: 'Pcaso: Reset Password',
 	client: 'no-reply'
     }
 };
