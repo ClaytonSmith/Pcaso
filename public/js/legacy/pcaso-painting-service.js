@@ -606,7 +606,7 @@
 
 		// Set zoom icon to collapse            
 		_pcaso.select("#full_screen_toggle")
-		    .attr("xlink:href","images/grow-big.png")
+		    .attr("xlink:href","/imgs/grow-big.png")
 	    }
 	    else {
 		_pcaso.selectAll(".cell").style("visibility", "hidden");
