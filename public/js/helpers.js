@@ -112,10 +112,12 @@ function buildTile( datascapeContainer ){
     dsTime.setHours( dsTime.getHours() - timezoneOffset - 5);
 
     var containerSettings = {
-	class: "dataspace-tile pure-u-1-5"
+	class: "dataspace-tile pure-u-1-5",
+	style: 'background-image: url('+ datascapeContainer.links.thumbnail +');'
     };
     var linkSettings = {
 	href: datascapeContainer.links.local
+
     };
     var authorSettings = {
 	class: "view-count",
