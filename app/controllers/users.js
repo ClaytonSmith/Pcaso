@@ -39,9 +39,7 @@ exports.getUserProfile = function(req, res){
     Users.findOne( query, function(err, doc){
 	if( err )  return res.render('500.ejs', { user: req.user });
 	if( !doc ) return res.render('404.ejs', { user: req.user });
-	
 
-	console.log( AsyncCollect ); 
 	var isOwner = req.isAuthenticated() && req.user._id.toString() === req.params.userID;
 	var asyncCollect = new AsyncCollect( doc );
 	var noteQuery = null;	
@@ -75,7 +73,6 @@ exports.getUserProfile = function(req, res){
 	async.parallel( asyncCollect.getQueries(), function(err, results){
 	    asyncCollect.merge( results );
 	    
-	    //console.log( 
 	    res.render('profile.ejs', {
 		profile: doc,				
 		user : req.user,
@@ -115,7 +112,6 @@ exports.getUserProfileComments = function(req, res){
 	
 	Comments.collectByParent( doc, function(cmmtErr, comments){
 	    if( cmmtErr || !comments ) return res.send(404);
-	    console.log( cmmtErr, comments );
 	    res.send( Comments.jqueryCommentsTransform( comments ) );	    
 	});	
     });
@@ -139,17 +135,12 @@ exports.postUserProfileComment = function(req, res){
 	}
 	
 	req.user.leaveComment(doc, comment.subject, comment.body, function(commentError){ 
-	    console.log('no errors please', err);
-	    
-	    res.send( 200 );
-	    
+	    res.send( 200 );	    
 	});
     });
 }
 
 exports.deleteAccount = function(req, res){
-    console.log('Account being deleted');
-    
     req.user.remove(function(err){ 
 	if( err ){
 	    res.redirect('/500');
@@ -164,38 +155,29 @@ exports.deleteAccount = function(req, res){
 // Moves user accounts from the 'Unauthenticated' collection to the regular user space 
 exports.authenticateAccount = function(req, res){
     var query = { _id: req.params.authenticationCode };
-    console.log( query );
     UnauthenticatedUsers.findOne( query, function(err, unauthenticatedUser){
 	if( err ){
-	    //res.render('520.ejs');
-	    console.log('error :(');
-	    res.render('index.ejs');
-	    return handleError( err );
+	    res.redirect('/500');
+	    throw new Error( err );
 	    
-	} else if( !unauthenticatedUser){
-	    console.log('not found');
-	    //res.render('404.ejs');
-	    res.render('index.ejs');
+	} else if( !unauthenticatedUser ){
+	    res.redirect('/404');
 
 	} else {
 	    
 	    // Copy unauthenticated user to regular user collection
-	    console.log( unauthenticatedUser );
 	    var newUser = Users.convert( unauthenticatedUser );
 	    
 	    newUser.save(function(err) {
 		if (err) {
-		    console.log('BAD ERROR', err );
-		    return new Error( err ) ;}
+		    res.redirect('/500');
+		    return new Error( err );
+		}
 	    });	    	    
-	    
+
 	    // Delete temp account
-	    unauthenticatedUser.remove();
-	    
-	    res.render('sign-in.ejs', {
-		message: req.flash('loginMessage'), 
-		user: req.user
-	    });
+	    unauthenticatedUser.remove();   
+	    res.render('/sign-in');
 	}
     });
 }
@@ -207,33 +189,33 @@ exports.createDataset = function(req, res){
     
     // var fileInfo = // check req	
     form.parse(req, function(err, fields, files) {
+	if (err) {
+	    res.sendStatus(500);
+	    throw new Error( err );
+	}
 	
-    	if (err) throw new Error( err );
-
-
-	console.log(files,"\n\n\n"); 	
 	if( !files.file ) return res.sendStatus(500);
 
 
-        Users.findOne( {_id: req.user._id }, function( err, user ){  
-	    console.log( user ); 
-	    
-  	    if( err ) return handleError( err ) ;
-    	    if( !user ) return res.send( 504 );
+        Users.findOne( {_id: req.user._id }, function( userErr, user ){  	    
+  	    if( err ) {
+		res.sendStatus(500);
+		return handleError( err ) ;
+	    }
+    	    if( !user ) return res.sendStatus( 504 );
 	    
 	    var form = JSON.parse( fields.revertUponArival );
 	    
     	    var fileContainer = user.registerFile( files.file, form, function(fileRegErr){
 		if( fileRegErr ) {
-		    
-		    console.log( fileRegErr );
-		    throw new Error( error );
+		    res.sendStatus(500);
+		    throw new Error( fileRegErr );
 		}
 		
 		user.save(function(userSaveErr){
 		    if( userSaveErr ) {
-			console.log( userSaveErr );		    
-			throw new Error( error );
+			res.sendStatus(500);
+			throw new Error( userSaveErr );
 		    }
 		    
 		    res.send( fileContainer.links.link );
@@ -254,7 +236,6 @@ exports.profileSettings = function(req, res){
     }
     
     Users.findOne( query, function(err, doc){
-	console.log(!!doc);
 	if( err  ) return res.render('500.ejs', {user: req.user});
 	if( !doc ) return res.render('404.ejs', {user: req.user});
 	
@@ -292,8 +273,10 @@ exports.editProfileSettings = function(req, res){
 	    doc.fileSettings.defaults.visibility = fields.defaultVisibility;
 	    
 	    // If a new password has been provided
-	    if( fields.newPassword ){
-		doc.password = Users.generateHash( fields.defaultVisibility );  
+	    if( fields.newPassword && fields.newPassword !== '' ){
+		
+		console.log('fields.newPassword: ',fields.newPassword);
+		doc.password = Users.generateHash( fields.newPassword );  
 	    }
 	    
 	    if( files.file ){

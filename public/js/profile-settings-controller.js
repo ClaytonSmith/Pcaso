@@ -27,7 +27,7 @@ function init() {
 	filter('[value='+ focusEntity.fileSettings.defaults.visibility +' ]').
 	prop('checked', true );
 
-
+    
     $.validator.prototype.checkForm = function () {
         //overriden in a specific page
         this.prepareForm();
@@ -46,14 +46,34 @@ function init() {
     
     // Form validation
     $("#profile-settings-form").validate({
+	rules: {
+	    'confirm-password' : { 
+		equalTo: "#new-password" 
+	    }
+	},
+	messages: {
+	    'confirm-password' : {
+		equalTo: "Both passwords must match"
+	    }
+	},
 	submitHandler: function(form) {
     	    var form      = $("#profile-settings-form");
     	    var formData  = new FormData();	
 	    var actionURL = form.attr('action');
 	    var method    = form.attr('method').toUpperCase();
 
-	    formData.append( 'displayEmail', $('input:checkbox[name="email-visibility"]').is(':checked') );
-	    formData.append( 'defaultVisibility', $('input:radio[name=privacySettings]:checked').val() );
+	    var displayEmail = $('input:checkbox[name="email-visibility"]').is(':checked');
+	    var defaultVisibility = $('input:radio[name=privacySettings]:checked').val();
+	    var newPassword = $('#new-password').val();
+	    
+	    formData.append( 'displayEmail', displayEmail );
+	    formData.append( 'defaultVisibility', defaultVisibility );
+	    
+	    if( newPassword && newPassword !== "" )
+		formData.append( 'newPassword', newPassword );
+	
+	    
+	    console.log( newPassword );
 	    
 	    formData.append( 'file', file);	    
 	    

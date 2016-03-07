@@ -406,6 +406,7 @@ FileContainerSchema.pre('remove', function(next) {
 	    
 	    function(parellelCB){
 		conn.once('open', function () {
+		    console.log("Removal:",fileQuery);
 		    grid(conn.db).remove( fileQuery, parellelCB );	
 		});
 	    },

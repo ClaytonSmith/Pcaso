@@ -177,17 +177,6 @@ exports.datascapeGetLegacyConfig = function(req, res){
     });
 }
 
-// POST
-// Can only get here if user is authenticated
-exports.upload = function(req, res) {
-    
-    var form = new formidable.IncomingForm();
-    var documentId = mongoose.Types.ObjectId();        		
-    console.log(req.body);
-
-};
-
-
 exports.getDatascapeSettings = function(req, res){
     var query = req.params.bulletURL ? {
 	    'links.bullet': req.params.bulletURL
@@ -286,8 +275,7 @@ exports.postDatascapeSettings = function(req, res){
 
     form.parse(req, function(err, fields) {
 	if (err){
-	    console.log('bad', err)
-	    res.send(500);
+	    res.sendStatus(500);
 	    throw new Error( err );
 	}
 	
@@ -298,16 +286,16 @@ exports.postDatascapeSettings = function(req, res){
 	
 	FileContainers.findOne( query, function(fcErr, doc){
 	    if( fcErr ){
-		console.log('ver bad', fcErr);
 		res.sendStatus( 500 );
 		throw new Error( fcErr );
 	    }
-	    if( doc.parent.id !== req.user._id.toString() )
-		res.sendStatus(403);
 
+	    // Make sure the user exists and they are the parent 
+	    if( req.user && doc.parent.id !== req.user._id.toString() )
+		return res.sendStatus(403);
+	    
 	    doc.updateSettings( settings, function(updateErr){
 		if( updateErr ) {
-		    console.log('End it now', updateErr);
 		    res.sendStatus( 500 );
 		    throw new Error( updateErr );
 		}	
@@ -316,7 +304,6 @@ exports.postDatascapeSettings = function(req, res){
 	    // no need to wait on emails
 	    doc.save(function(saveErr){
 		if( saveErr ){
-		    console.log('salvageable', saveErr);
 		    return res.sendStatus( 500 );
 		}
 		res.send( doc.links.link );
@@ -325,6 +312,39 @@ exports.postDatascapeSettings = function(req, res){
     });
 }
 
+
+exports.deleteDatascape = function(req, res){
+
+    if( !req.isAuthenticated() )
+	res.redirect('/403');
+   
+    var query = {
+	'links.custom': req.params.datascape
+    }
+
+    console.log("\n\n\n", query);
+    
+    FileContainers.findOne( query, function(fcErr, doc){
+	if( fcErr ){
+	    res.redirect('/500' );
+	    throw new Error( fcErr );
+	}
+	
+	// Make sure the user exists and they are the parent 
+	if( req.user && doc.parent.id !== req.user._id.toString() )
+	    return res.redirect('/403');
+	
+	
+	    // no need to wait on emails
+	doc.remove(function(removeErr){
+	    if( removeErr ){
+		res.redirect('/500' );
+		throw new Error( removeErr );
+	    }
+	    res.redirect('/profile');
+	});
+    });
+}
 
 exports.getPaginatedFiles = function(req, res){
     
@@ -341,15 +361,13 @@ exports.getPaginatedFiles = function(req, res){
     // If given a parentID, only search datascapes
     // that are owned by that user
     if( req.query.parentID ){
-	query['parent.id'] = req.query.parentID._id;
+	query['parent.id'] = req.query.parentID;
     }	    
     
     // If parent, display all datascapes
-    if( req.user && ( ( req.query.parentID || {} )._id === req.user._id.toString() ) ){
+    if( req.user && ( req.query.parentID === req.user._id.toString() ) ){
 	query['$or'].push( {'displaySettings.visibility': 'PRIVATE' } );
     }
-    
-    console.log("\n\n", query,"\n\n" );
     
     // Construct paginate params
     // Don't forget to parse all incoming integer values
@@ -360,12 +378,9 @@ exports.getPaginatedFiles = function(req, res){
 	leanWithId: true,
 	sort: { dateAdded: -1 }	 // Sort from newest to oldest 
     };
-    
-    console.log(paginateParams);
-    
-    FileContainers.paginate(query, paginateParams, function(err, docs,a,b,c,d,e){
+
+    FileContainers.paginate(query, paginateParams, function(err, docs){
 	if( err ) res.send( err ); 
-	console.log("\n",docs,"\n",a,"\n");
 	res.send( docs ); 
     });    
 } 

@@ -60,7 +60,6 @@ exports.postComment = function(req, res){
 	    subject: subject
 	}
 	
-	console.log('Hello');
 	var comment = req.user.leaveComment( doc, subject, req.body.body, function(commentError){ 	    
 	    req.user.save(function(err){
 		if( err ) res.sendStatus(500);

@@ -76,7 +76,7 @@ function init() {
 
     function updateDatascapeDisplay(pageNumber){
 	var request = {
-	    parentID: focusEntity,
+	    parentID: focusEntity._id,
 	    page:  pageNumber,
 	    limit: displayLimit
 	};
@@ -88,7 +88,8 @@ function init() {
     	    cache: false,
     	    data: request
 	}).success(function(data){
-    	    constructDisplay( data );
+    	    console.log(data);
+	    constructDisplay( data );
 	    console.log(data.docs.length * data.offset >= data.total, data.docs.length, data.offset)
 	}).error(function(err){
     	    console.log(err);

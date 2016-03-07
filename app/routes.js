@@ -86,9 +86,9 @@ module.exports = function(app, passport) {
     app.get(    '/u/:userID/datascapes/:datascape/csv',            files.datascapeGetCSV );
     app.get(    '/u/:userID/datascapes/:datascape/config',         files.datascapeGetLegacyConfig );
     app.get(    '/u/:userID/datascapes/:datascape/settings',       files.getDatascapeSettings );
-    app.get(    '/u/:userID/datascapes/:datascape/access-grant/:sharedUserID',
-		files.addSharedUser );
+    app.get(    '/u/:userID/datascapes/:datascape/access-grant/:sharedUserID', files.addSharedUser );
     app.post(   '/u/:userID/datascapes/:datascape/settings',       files.postDatascapeSettings );
+    app.get(   '/u/:userID/datascapes/:datascape/delete',          files.deleteDatascape );
  
     //app.delete( '/u/:userID/datascapes/:datascape/delete',         users.deleteDataset );
     app.post(   '/u/:userID/datascapes/:datascape/request-access', files.requestAccess );    
@@ -119,13 +119,21 @@ module.exports = function(app, passport) {
 	res.render('about.ejs', { user: req.user });
     });
 
+    
+    app.get('/terms-and-conditions', function(req, res){
+	res.render('terms-and-conditions.ejs', { user: req.user });
+    });
+
+    app.get('/privacy-policy', function(req, res){
+	res.render('privacy-policy.ejs', { user: req.user });
+    });
+    
+    // Must be last in list of route declarations
     app.get('/:bullet',        files.displayDatascape);
     app.get('/:bullet/config', files.datascapeGetLegacyConfig);
     app.get('/:bullet/csv',    files.datascapeGetCSV);
     
     app.get( '*',  function(req, res){
-
-	console.log('NOOO');
     	res.render('404.ejs', { user: req.user });
     });
 };

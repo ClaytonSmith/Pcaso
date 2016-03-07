@@ -75,7 +75,7 @@ function init() {
 
     function updateDatascapeDisplay(pageNumber){
 	var request = {
-	    parentID: focusEntity,
+	    parentID: focusEntity._id,
 	    page:  pageNumber,
 	    limit: displayLimit
 	};

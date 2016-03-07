@@ -57,8 +57,7 @@ var BaseUserSchema = new mongoose.Schema({// BaseSchema.extend({
     password:       { type: String,  required: true },
     name: { 
         first:          { type: String, required: true },
-	last:           { type: String, required: true },
-	suffix:         { type: String, default: '' }
+	last:           { type: String, required: true }
     }
 });
 
