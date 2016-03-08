@@ -72,7 +72,9 @@
     _id:             "<%- datascape._id %>", 
     __t:             "<%- datascape.__t %>", 
     parent:           <%- datascape.parent %>,
-    file:             <%- datascape.file %>,
+    file: {
+    name:             "<%- datascape.file.name %>"
+    },
     statistics:       <%- datascape.statistics %>,
     //Not sharing user emails for security reasons									
     displaySettings:  <%- datascape.displaySettings %>,
@@ -92,8 +94,11 @@
   </script>
   
   <!-- Jquery -->
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+  <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.js"></script> -->
 
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.11.3.min.js"><\/script>')</script>
+  
   <script src="/components/async/dist/async.min.js"></scritp>
   <!-- D3 -->
   <script src="/components/d3/d3.min.js"></script>  
@@ -114,8 +119,5 @@
   <!-- Form2js -->
   <script src="/js/form2js/src/form2js.js"></script>
   <script src="/js/form2js/src/js2form.js"></script>
-  
-  <!-- Upload controllers-->
-  <script src="/js/helpers.js"></script>
   	  
 </head>

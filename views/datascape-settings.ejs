@@ -4,8 +4,6 @@
   <body>
     <%- include header.ejs %>      
     <main>
-      <script src="/js/upload-settings-controller.js"></script>
-
       <div class="app-content">
 	
 	<% if (message.length > 0) { %>
@@ -20,7 +18,7 @@
 	  <% } else { %>
 	  <!-- <h1 class="title">Upload data to paint</h1> -->
 	  <h1 class="title">Upload .csv file to paint datascape</h1>	  
-<% } %>
+	  <% } %>
 	  <hr>
 	  
 	  <% if (locals.datascape) { %>
@@ -28,17 +26,17 @@
 		enctype="multipart/form-data" class="pure-form pure-form-stacked basic-form"
 		name="dataset-upload-form">  <!-- novalidate="novalidate"> -->
 	    
-	  <% } else { %>
+	    <% } else { %>
           <form action="/upload-datascape" method="POST"  id="dataset-upload-form"
 		enctype="multipart/form-data" class="pure-form pure-form-stacked basic-form"
 		name="dataset-upload-form">  <!-- novalidate="novalidate"> -->
-
+	    
 	    <div class="pure-control-group" id="file-select-container1">
 	      <input type="file" accept=".csv" id="file-select" name="file" >
 	    </div>
 	    
 	    <% } %>
-	      
+	    
 	    
 	    <div id="form-file-settings-container" hidden>
 	      
@@ -46,7 +44,20 @@
 		<label for="file-title">Title</label>
 		<input id="file-title" name="title" type="text" value="">
 	      </div>
-	           
+
+	      
+	      <div>
+		<h4>Pick the following inputs</h4>
+		<ul>
+		  
+		  <li>0 or 1 <i>ID</i> field, to uniquely identify each datapoint (column needs a unique non-blank value in every row)</li>
+		  <li>2 to 8 <i>axis</i> fields, to plot datapoint positions (columns need numeric values in every row)</li>
+		  <li>1 or more <i>meta</i> field(s), to color datapoints by metadata (columns that each have several distinct values work best)</li>
+		  
+		</ul>
+	      </div>
+
+	      
 	      <div id="table-display-container"></div>
 	      
 	      <div class="pure-control-group dataset-title">
@@ -62,6 +73,12 @@
 			   value="PUBLIC" id="privacy-public">Share publicly
 		  </label>
 		  
+		  <label class="pure-radio" for="privacy-sself-private">
+		    <input type="radio" name="privacySettings"
+			   value="PRIVATE" id="privacy-self-private">Keep private to me
+		  </label>
+		  
+		  
 		  <label class="pure-radio" for="privacy-private">
 		    <input type="radio" name="privacySettings"
 			   value="PRIVATE" id="privacy-private">Share privately with <button class="pure-button" id="add-user">
@@ -70,15 +87,13 @@
 		  </label>
 		  <div class="pure-control-group" id="user-select">
 		    
-		    <ul class="top-m-1" id="shared-user-collection">
-		    </ul>
+		    <ul class="top-m-1" id="shared-user-collection"></ul>
+
 		  </div>
 		</div>
 	      </div>
 	    </div>
-	  </div>
-	    
-	
+
 	    <div class="pure-g">	      
 	      <% if (locals.datascape) { %>
 	      <a href="<%- datascape.links.local%>/delete" id="delete-datascape-button"
@@ -98,9 +113,15 @@
 	      </button>
 	      <% } %>
 	    </div>
+
+	    
 	  </form>
 	</div>
       </div>
+
+      <script src="/js/upload-settings-controller.js"></script>
+      
+      
     </main>
     <%- include footer.ejs %>  
   </body>  

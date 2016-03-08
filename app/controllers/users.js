@@ -161,7 +161,7 @@ exports.authenticateAccount = function(req, res){
 	    throw new Error( err );
 	    
 	} else if( !unauthenticatedUser ){
-	    res.redirect('/404');
+	    return res.redirect('/404');
 
 	} else {
 	    
@@ -171,13 +171,13 @@ exports.authenticateAccount = function(req, res){
 	    newUser.save(function(err) {
 		if (err) {
 		    res.redirect('/500');
-		    return new Error( err );
+		    throw new Error( err );
 		}
+		
+		// Delete temp account
+		unauthenticatedUser.remove();
+		res.redirect('/sign-in');
 	    });	    	    
-
-	    // Delete temp account
-	    unauthenticatedUser.remove();   
-	    res.render('/sign-in');
 	}
     });
 }
@@ -190,7 +190,9 @@ exports.createDataset = function(req, res){
     // var fileInfo = // check req	
     form.parse(req, function(err, fields, files) {
 	if (err) {
+	    console.log(err);
 	    res.sendStatus(500);
+	    //res.sendStatus(500);
 	    throw new Error( err );
 	}
 	

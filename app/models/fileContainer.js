@@ -276,7 +276,9 @@ FileContainerSchema.static({
     register: function(parent, file, settings){
 	
 	console.log( 'Register', file );
-	var documentId = mongoose.Types.ObjectId();        		
+	var documentId = mongoose.Types.ObjectId();
+	var fileId = mongoose.Types.ObjectId();        		
+	
 	var fileContainer = new this({
 	    _id: documentId,
 	    parent: {
@@ -285,6 +287,7 @@ FileContainerSchema.static({
 		name: parent.name,
 	    },
 	    file: {
+		id: fileId,
 		name: file.name,
 		path: file.path
 	    },
@@ -378,6 +381,7 @@ FileContainerSchema.pre('remove', function(next) {
     var conn   = mongoose.createConnection(config.db);
     var fileQuery = {_id: fileContainer.file.id, root: 'uploads'};
 
+    console.log(fileQuery);
 
     var parentCollection  = mongoose.model( fileContainer.parent.collectionName );    
     function deleteFrom( collection, searchQuery, callback ){
@@ -407,6 +411,8 @@ FileContainerSchema.pre('remove', function(next) {
 	    function(parellelCB){
 		conn.once('open', function () {
 		    console.log("Removal:",fileQuery);
+
+		    
 		    grid(conn.db).remove( fileQuery, parellelCB );	
 		});
 	    },

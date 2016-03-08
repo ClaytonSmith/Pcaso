@@ -37,6 +37,13 @@ body {
     display: block !important;
 }
 
+.paint-datascape{
+    border-radius: 20px;
+    margin-left: .5em;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
 /* Pcaso span */
 .pcaso:before{
     content: "Pca";
@@ -295,15 +302,19 @@ body {
     border-width: 1px;
     background-size: cover;
     background-repeat: no-repeat;
-    height: 130px;
+    height: 16em;
     position: relative;
-    margin-top: .5em;    
+    margin-top: .5em;
+    display: flex;
 }
 
 
 .dataspace-tile a{
     z-index: 100;
+    overflow: auto;
     color: #353535;
+    align-items: stretch;
+    width: 100%;
     text-shadow: -.5px -.5px 0 #FFFFFF, .5px -.5px 0 #FFFFFF, -.5px .5px 0 #FFFFFF, .5px .5px 0 #FFFFFF;
 }
 

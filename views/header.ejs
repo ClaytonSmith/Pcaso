@@ -3,11 +3,21 @@
     <a href="/" class="pure-menu-heading pure-menu-link">Pcaso</a>
     
     <ul class="pure-menu-list">
-      <% if (locals.user) { %>
-      <li class="pure-menu-item"><a href="/upload" class="pure-menu-link">Paint new datascape</a></li>
-      <% } %>
       <li class="pure-menu-item"><a href="/gallery" class="pure-menu-link">Gallery</a></li>
       <li class="pure-menu-item"><a href="/about" class="pure-menu-link">About</a></li>
+
+      
+      <% if (locals.user) { %>
+      <li class="pure-menu-item">
+	<a href="/upload" class="pure-menu-link pure-button pure-button-success paint-datascape" >
+	  <i class="fa fa-paint-brush">
+	  </i>
+	</a>
+      </li>
+	    
+      <% } %>
+	    
+
     </ul>
     
     <ul class="pure-menu-list pull-right">

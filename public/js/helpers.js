@@ -154,8 +154,8 @@ function buildTile( datascapeContainer ){
     link.append( title );
     link.append( author );
     link.append( views );
-    link.append( comments );
-    link.append( created );
+    //link.append( comments );
+    //link.append( created );
     container.append( link );
 
     console.log( container ) ;

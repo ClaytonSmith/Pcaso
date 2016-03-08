@@ -166,13 +166,13 @@ exports.datascapeGetLegacyConfig = function(req, res){
     
     FileContainers.findOne( query, function(err, doc){
 	if( err ){
-	    res.sendStatus( 500 );
+	    res.status( 500 ).send({});
 	    throw new Error( err );
 	}
 	if( doc.viewableTo( req.user ) ){ 
 	    res.send( doc.displaySettings.legacy );
 	} else {
-	    res.sendStatus(404);
+	    res.status(404).send({});
 	}
     });
 }

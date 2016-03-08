@@ -2,7 +2,7 @@
 
 // Call this somethings that is triggered when upload page is loaded
 
-function init() {
+$(document).ready(function(){
     
     // Globals
     var user         = window.globaData.user;
@@ -15,6 +15,11 @@ function init() {
 
     // Setup rradio buttons
     $("#privacy-public").click(function(event){
+	$("#user-select *").attr('disabled', true);
+	$("#add-user").attr('disabled', true);
+    });
+    
+    $("#privacy-self-public").click(function(event){
 	$("#user-select *").attr('disabled', true);
 	$("#add-user").attr('disabled', true);
     });
@@ -39,7 +44,8 @@ function init() {
 	column.shift()
 	console.log('colum:', column)
 	return Array.apply( null, column).reduce(function(predicate, value, i, self){
-	    return predicate && value !== undefined && self.indexOf( value ) === i ;
+	    return ( predicate && value !== undefined && self.indexOf( value ) === i )
+	    || ( predicate && i === column.length -1) ;
 	}, true);
     }
     
@@ -51,7 +57,8 @@ function init() {
 	column.shift()
 
 	return Array.apply( null, column).reduce(function(predicate, value, i, self){
-	    return predicate && value !== undefined && !isNaN( parseFloat( value ));
+	    return ( predicate && value !== undefined && !isNaN( parseFloat( value ) ) )
+		|| ( predicate && i === column.length -1) ; // Last row can get funky, ignore it
 	}, true);
     }
     
@@ -59,9 +66,11 @@ function init() {
 	var caption   = $("#caption");	
 	var settings  = {
 	    // Nothing to set yet
+
+	    
 	}
 	
-	caption.trumbowyg(settings);
+	caption.trumbowyg( settings );
 	caption.trumbowyg('html', datascapeCaption );
     }
     
@@ -77,8 +86,7 @@ function init() {
 	// Select user defined default privacy settings
 	// Reminder the string stored in `visibility` must 
 	// match one of the possible radio values. 
-	privacySettings.filter('[value='+ visibility +' ]').prop('checked', true );
-	console.log( visibility );
+	//	console.log( visibility );
 
 	function addSharedUser(sharedUser){
 	    if( !$("#dataset-upload-form").valid() ) return;
@@ -123,16 +131,31 @@ function init() {
 	// Make sure to add users and then disable elements
 	// Make sure only see user emails
 	// in the backend other things besides users can be on the shared list
-	sharedWith.
-	    filter(function(obj){ 
-		return typeof obj === 'string' || myVar instanceof String}).
-	    forEach( addSharedUser );	
+	var usersSharedWith = sharedWith.filter(function(obj){ return typeof obj === 'string' || myVar instanceof String});
+	usersSharedWith.forEach( addSharedUser );	
+
+
+	
+
 	
 	if( visibility === 'PUBLIC') {
+	    // Public 
 	    $("#user-select *").attr('disabled', true);
 	    $("#add-user").attr('disabled', true);
-	} 
-	    
+	    $("#privacy-public").prop('checked', true );
+
+	} else if( visibility === 'PRIVATE' && usersSharedWith.length === 0 ){
+	    //Private and shared with no one
+	    $("#user-select *").attr('disabled', true);
+	    $("#add-user").attr('disabled', true);
+	    $("#privacy-self-private").prop('checked', true );
+
+	} else {
+	    // Private but shared publicly 
+	    $("#privacy-private").prop('checked', true );
+
+	}
+	
 	// // Onclick method to add new email field
 	addUser.click( function(event){
 	    addSharedUser();
@@ -396,6 +419,5 @@ function init() {
 		});	
 	    });
     }
-}
+});
 
-document.addEventListener("DOMContentLoaded", init);

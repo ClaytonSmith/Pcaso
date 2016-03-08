@@ -95,7 +95,7 @@ module.exports = function(passport) {
 				
 				// Make sure no users exist in users or unauthenticated users with this email
 				if( emails.length ){
-				    var errorString = 'The email provided have already in use.' 
+				    var errorString = 'The email provided is already in use.' 
 				    return done(null, false, req.flash('signUpMessage', errorString )); 
 				}
 				
@@ -108,11 +108,12 @@ module.exports = function(passport) {
 				    password
 				);
 
-				newUser.save(function(err) {
-				    if (err) return done(err);   
+				done(null, newUser, req.flash('signInMessage', 'An authentication link will be sent to your email account shortly.'));
+				
+				newUser.save(function(saveErr) {
+				    if (err) throw new Error( saveErr );   
 				    mailer.useTemplate( 'authenticate-new-user', newUser, function(mailError){
 					//done(mailError, newUser, req.flash('signInMessage', config.service.domain + 'authenticate-account/' + newUser._id )); 
-					done(mailError, newUser, req.flash('signInMessage', 'An authentication link will be sent to your email account shortly.')); 
 				    }); 
 				});
 				
