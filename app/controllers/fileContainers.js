@@ -22,15 +22,15 @@ exports.displayGallery = function(req, res){
 exports.download = function(req, res){   
     FileContainers.findOne({_id: req.params.fileId}, function( err, doc ){
         if( err ) {
-	    res.sendStatus( 500 );
+	    res.status(500).send({err: "Server error"});
 	    throw new Error( err );
 	}
 	if( !doc ) {
-	    res.send(404);
+	    res.status(404).send({ err: "File not found"});
 	} else if( doc.viewableTo( req.user ) ){
             loadFile( doc.getFile( res ) );
         } else {
-            res.sendStatus(404);
+            res.status(404).send({ err: "File not found"});
         }
     });
 }
@@ -51,9 +51,9 @@ exports.requestAccess = function(req, res){
     var fcQuery        = null;
     
     // Only authenticated users can request access
-    if( !req.isAuthenticated() )
-	res.redirect('404.ejs', {user: req.user});
-
+    if( !req.isAuthenticated() ) 
+	return res.redirect('/404');
+    
     var query = req.params.bullet ? {
 	'links.bullet': req.params.bullet
     } : {
@@ -138,7 +138,7 @@ exports.datascapeGetCSV = function(req, res){
 
     FileContainers.findOne( query, function(err, doc){
 	if( err){
-	    res.sendStatus(500);
+	    res.status(500).send({err: "Server error"});
 	    throw new Error( err );
 	}
 	
@@ -150,7 +150,7 @@ exports.datascapeGetCSV = function(req, res){
 		}
 	    });
 	} else {
-	    res.send(404);
+	    res.status(404).send({err: "File not found"});
 	}
     });
 }
@@ -166,13 +166,13 @@ exports.datascapeGetLegacyConfig = function(req, res){
     
     FileContainers.findOne( query, function(err, doc){
 	if( err ){
-	    res.status( 500 ).send({});
+	    res.status(500).send({});
 	    throw new Error( err );
 	}
 	if( doc.viewableTo( req.user ) ){ 
 	    res.send( doc.displaySettings.legacy );
 	} else {
-	    res.status(404).send({});
+	    res.status(404).send({err: "File not found"});
 	}
     });
 }
@@ -188,13 +188,14 @@ exports.getDatascapeSettings = function(req, res){
     FileContainers.findOne( query, function(err, doc){
 	
 	if( err ){
-	    res.render('500.ejs', {user: req.user});
+	    res.redirect('/500');
 	    throw new Error( err );
 	}
 
-	if( !doc) return res.render('404.ejs', {user: req.user});
+	if( !doc) return res.redirect('/404');
 
     	var isOwner = req.isAuthenticated() && req.user && req.user._id.toString() === doc.parent.id;
+
 	if( isOwner ){ 
     	    res.render('datascape-settings.ejs', { 
 		user: req.user,
@@ -226,13 +227,13 @@ exports.getFileContainer = function(req, res){
     
     FileContainers.findOne( query, function(err, doc){
 	if( err ){
-	    res.send( 500 );
+	    res.status(500).send({err: "Server error"});
 	    throw new Error( err );
 	}
 	
-	if( !doc ) return res.send( 404 );
+	if( !doc ) return res.status(404).send({err: "File not found"});
 	if( !doc.viewableTo( req.user ) )
-	    return res.send( 404 );
+	    return res.status(404).send({err: "File not found"});
 	
 	// At this point, no errors
 	// we found the doc, and the user,
@@ -254,13 +255,13 @@ exports.getFileContainerSource = function(req, res){
     
     FileContainers.findOne( query, function(err, doc){
 	if( err ){
-	    res.send( 500 );
+	    res.status(500).send({err: "Server error"});
 	    throw new Error( err );
 	}
 	
-	if( !doc ) return res.send( 404 );
+	if( !doc ) return res.status(404).send({err: "File not found"});
 	if( !doc.viewableTo( req.user ) )
-	    return res.send( 404 );
+	    return res.status(404).send({err: "File not found"});
 	
 	// Send fileContainer 
 	doc.getFile( res );
@@ -270,13 +271,13 @@ exports.getFileContainerSource = function(req, res){
 exports.postDatascapeSettings = function(req, res){
     
     if( !req.isAuthenticated() )
-	res.sendStatus(403);
+	return res.status(403).send({err: "Forbidden"});
     
     var form = new formidable.IncomingForm();
 
     form.parse(req, function(err, fields) {
 	if (err){
-	    res.sendStatus(500);
+	    res.status(500).send({err: "Server error"});
 	    throw new Error( err );
 	}
 	
@@ -287,17 +288,17 @@ exports.postDatascapeSettings = function(req, res){
 	
 	FileContainers.findOne( query, function(fcErr, doc){
 	    if( fcErr ){
-		res.sendStatus( 500 );
+		res.status(500).send({err: "Server error"});
 		throw new Error( fcErr );
 	    }
 
 	    // Make sure the user exists and they are the parent 
 	    if( req.user && doc.parent.id !== req.user._id.toString() )
-		return res.sendStatus(403);
+		return res.status(403).send({err: "Forbidden"});
 	    
 	    doc.updateSettings( settings, function(updateErr){
 		if( updateErr ) {
-		    res.sendStatus( 500 );
+		    res.status(500).send({err: "Server error"});
 		    throw new Error( updateErr );
 		}	
 	    });
@@ -305,7 +306,7 @@ exports.postDatascapeSettings = function(req, res){
 	    // no need to wait on emails
 	    doc.save(function(saveErr){
 		if( saveErr ){
-		    return res.sendStatus( 500 );
+		    return res.status(500).send({err: "Server error"});
 		}
 		res.send( doc.links.link );
 	    });
@@ -401,23 +402,23 @@ exports.addSharedUser = function(req, res){
     
     FileContainers.findOne( datascapeQuery, function(fcErr, fc){
 	if( fcErr ){
-	    res.render( '500.ejs', { user: req.user} );
+	    res.redirect( '/500');
 	    throw new Error( fcErr );
 	}
-	if( !fc ) return res.render('404.ejs', {user: req.user});
+	
+	if( !fc ) return res.redirect('/404');
+	
 	var isOwner = req.isAuthenticated() && req.user && req.user._id.toString() === fc.parent.id;
     
-    if(!isOwner)
-	return res.render('403.ejs', {user: req.user});
-    
-
+	if(!isOwner) return res.redirect('/403');
+		
 	Users.findOne( userQuery, function( userErr, user){
 	    if( userErr ){
-		res.render( '500.ejs', { user: req.user} );
+		res.redirect( '/500');
 		throw new Error( userErr );
 	    }
 	    
-	    if( !user ) return res.render('404.ejs', {user: req.user});
+	    if( !user ) return res.redirect('/404');
 	    
 	    var newSettings = {
 		sharedWith: JSON.parse(JSON.stringify( fc.sharedWith ))
@@ -427,13 +428,13 @@ exports.addSharedUser = function(req, res){
 	    
 	    fc.updateSettings( newSettings, function(updateErr){
 		if( updateErr ){
-		    res.render( '500.ejs', { user: req.user} );
+		    res.redirect( '/500');
 		    throw new Error( updateErr );
 		}
 
 		fc.save(function(saveErr){
 		    if( saveErr ){
-			res.render( '500.ejs', { user: req.user} );
+			res.redirect( '/500' );
 			throw new Error( saveErr );
 		    } else res.render('requested-user-added.ejs', {user: req.user, addedUser: user, datascape: fc }); 
 		});	    

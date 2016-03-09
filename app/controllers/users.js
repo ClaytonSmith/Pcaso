@@ -37,8 +37,12 @@ exports.getUserProfile = function(req, res){
     };
     
     Users.findOne( query, function(err, doc){
-	if( err )  return res.render('500.ejs', { user: req.user });
-	if( !doc ) return res.render('404.ejs', { user: req.user });
+	if( err ) {
+	    res.redirect('/500');
+	    throw new Error( err );
+	}
+	
+	if( !doc ) return res.redirect('/404');
 
 	var isOwner = req.isAuthenticated() && req.user._id.toString() === req.params.userID;
 	var asyncCollect = new AsyncCollect( doc );
@@ -63,14 +67,15 @@ exports.getUserProfile = function(req, res){
 	    };
 	}
 	
-	asyncCollect.add( function(parellelCB){ FileContainers.find( fcQuery,  parellelCB ); }, 'files' );
+	// No place to display comments yet so don't load them
+	//asyncCollect.add( function(parellelCB){ FileContainers.find( fcQuery,  parellelCB ); }, 'files' );
 	//asyncCollect.add( function(parellelCB){ Comments.collectByParent( doc, parellelCB ); }, 'comments' );
 	
-	if( isOwner )
-	    asyncCollect.add( function(parellelCB){ Notifications.find( noteQuery, parellelCB ); }, 'notifications' );
+	//if( isOwner )
+	  //  asyncCollect.add( function(parellelCB){ Notifications.find( noteQuery, parellelCB ); }, 'notifications' );
 			  
 	
-	async.parallel( asyncCollect.getQueries(), function(err, results){
+	async.parallel( asyncCollect.getQueries(), function(asyncErr, results){
 	    asyncCollect.merge( results );
 	    
 	    res.render('profile.ejs', {
@@ -119,15 +124,19 @@ exports.getUserProfileComments = function(req, res){
 
 exports.postUserProfileComment = function(req, res){
     if( !req.isAuthenticated() )
-	res.send( 403 );
+	return res.status( 403 ).send({err: "Forbidden"});
     
     var query = {
 	_id: req.params.userID
     };
     
     Users.findOne( query, function(err, doc){
-	if( err )  return res.render('500.ejs', { user: req.user });
-	if( !doc ) return res.render('404.ejs', { user: req.user });
+	if( err ) {
+	    res.status( 500 ).send({err: "Server rrror"});
+	    throw new Error( err );
+	}
+	
+	if( !doc )  return res.status( 404 ).send({err: "User not found"});
 	
 	var comment = {
 	    body: req.body.body,
@@ -135,26 +144,51 @@ exports.postUserProfileComment = function(req, res){
 	}
 	
 	req.user.leaveComment(doc, comment.subject, comment.body, function(commentError){ 
-	    res.send( 200 );	    
+	    res.send( comment.body );	    
 	});
     });
 }
 
 exports.deleteAccount = function(req, res){
-    req.user.remove(function(err){ 
-	if( err ){
-	    res.redirect('/500');
+    if( !req.isAuthenticated() ) 
+	return res.redirect('/sign-in');
+    
+    var isOwner = req.user && req.user._id.toString() === req.params.userID;
+    
+    if( !isOwner )
+	return res.redirect('/profile');
+    
+
+    var query = {
+	_id: req.params.userID
+    };
+    
+    Users.findOne( query, function(err, doc){
+	if( err ) {
+	    res.redirect('/500' );
 	    throw new Error( err );
-	} else {
-	    req.logout();
-	    res.redirect('/');
 	}
-    });
+	
+	if( !doc )  return res.redirect('/404' );
+	
+
+	user.remove(function(err){ 
+	    if( err ){
+		res.redirect('/500');
+		throw new Error( err );
+	    } else {
+		req.logout();
+		res.redirect('/');
+	    }
+	});
+    });  
 }
 
 // Moves user accounts from the 'Unauthenticated' collection to the regular user space 
 exports.authenticateAccount = function(req, res){
+   
     var query = { _id: req.params.authenticationCode };
+    
     UnauthenticatedUsers.findOne( query, function(err, unauthenticatedUser){
 	if( err ){
 	    res.redirect('/500');
@@ -191,32 +225,32 @@ exports.createDataset = function(req, res){
     form.parse(req, function(err, fields, files) {
 	if (err) {
 	    console.log(err);
-	    res.sendStatus(500);
+	    res.status(500).send({err: "Server error" });
 	    //res.sendStatus(500);
 	    throw new Error( err );
 	}
 	
-	if( !files.file ) return res.sendStatus(500);
+	if( !files.file ) return res.status(500).send({err: "No file provided" });;
 
 
         Users.findOne( {_id: req.user._id }, function( userErr, user ){  	    
-  	    if( err ) {
-		res.sendStatus(500);
-		return handleError( err ) ;
+  	    if( userErr ) {
+		res.status(500).send({err: "Server error" });
+		return handleError( userErr ) ;
 	    }
-    	    if( !user ) return res.sendStatus( 504 );
+    	    if( !user ) return res.status( 404 ).send({err: "User not found"});
 	    
 	    var form = JSON.parse( fields.revertUponArival );
 	    
     	    var fileContainer = user.registerFile( files.file, form, function(fileRegErr){
 		if( fileRegErr ) {
-		    res.sendStatus(500);
+		    res.status(500).send({err: "Server error" });
 		    throw new Error( fileRegErr );
 		}
 		
 		user.save(function(userSaveErr){
 		    if( userSaveErr ) {
-			res.sendStatus(500);
+			res.status(500).send({err: "Server error" });
 			throw new Error( userSaveErr );
 		    }
 		    
@@ -228,18 +262,21 @@ exports.createDataset = function(req, res){
 }
 
 exports.profileSettings = function(req, res){
-    var isOwner = req.isAuthenticated() && req.user._id.toString() === req.params.userID;
+    var isOwner = req.isAuthenticated() && req.user && req.user._id.toString() === req.params.userID;
     
     if( !isOwner )
-	res.redirect('/');
+	return res.redirect('/');
     
     var query = {
 	_id: req.user._id
     }
     
     Users.findOne( query, function(err, doc){
-	if( err  ) return res.render('500.ejs', {user: req.user});
-	if( !doc ) return res.render('404.ejs', {user: req.user});
+	if( err  ) {
+	    res.redirect('/500');
+	    throw new Error( err );
+	}
+	if( !doc ) return res.redirect('/404');
 	
 	res.render('profile-settings.ejs', {user: req.user, profile: doc });
     });
@@ -252,7 +289,7 @@ exports.editProfileSettings = function(req, res){
 	req.user._id.toString() === req.params.userID;
     
     if( !isOwner )
-	return res.sendStatus(403);
+	return res.status(403).send({err: "Forbidden"});
     
     var query = {
 	_id: req.user._id
@@ -264,12 +301,18 @@ exports.editProfileSettings = function(req, res){
     
     // var fileInfo = // check req	
     form.parse(req, function(err, fields, files) {
-	if( err  ) return res.render('500.ejs', {user: req.user});	
+	if( err  ) {
+	    res.status(500).send({err: "Server error" });
+	    throw new Error( err );
+	}
 	
 	Users.findOne( query, function(userErr, doc){
-	    if( userErr) return res.render('500.ejs', {user: req.user} );
-	    if( !doc )   return res.render('404.ejs', {user: req.user} );
-	    	    
+	    if( userErr) {
+		res.status(500).send({err: "Server error" });
+		throw new Error( userErr );
+	    }
+	    if( !doc ) return res.status(404).send({err: "User not found" });
+
 	    // Boolean are not converted so check string true or false
 	    doc.profileSettings.displayEmail     = fields.displayEmail === 'true';
 	    doc.fileSettings.defaults.visibility = fields.defaultVisibility;
@@ -285,15 +328,26 @@ exports.editProfileSettings = function(req, res){
 		fs.rename( files.file.path, doc.localDataPath + '/imgs/avatar', function(writeErr){
 		    doc.links.avatar = doc.publicDataPath + '/imgs/avatar';
 		    
-		    if( userErr) return res.render('500.ejs', {user: req.user});
+		    if( writeErr ){
+			res.status(500).send({err: "Server error" });
+			throw new Error( 500 );
+		    }
+		    
 		    doc.save(function(saveErr){
-			if( saveErr ) res.render('500.ejs', {user: req.user});
+			if( saveErr ){
+			    res.status(500).send({err: "Server error" });
+			    throw new Error( saveErr );
+			}
 			res.send(doc.links.local);
 		    });
 		});
 	    } else {  
 		doc.save(function(saveErr){
-		    if( saveErr ) res.render('500.ejs', {user: req.user});
+		    if( saveErr ){
+			res.status(500).send({err: "Server error" });
+			throw new Error( saveErr );
+		    }
+		    
 		    res.send(doc.links.local);
 		});
 	    }

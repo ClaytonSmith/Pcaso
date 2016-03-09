@@ -13,7 +13,7 @@
 	<div class="upload-container">
 
 	  <% if (locals.datascape) { %>
-	  <!-- <h1 class="title">Datascape settings</h1> -->
+	  <h1 class="title">Datascape settings</h1>
 	  
 	  <% } else { %>
 	  <!-- <h1 class="title">Upload data to paint</h1> -->
@@ -23,83 +23,83 @@
 	  
 	  <% if (locals.datascape) { %>
 	  <form action="<%- datascape.links.local %>/settings" method="post" id="dataset-upload-form" 
-		enctype="multipart/form-data" class="pure-form pure-form-stacked basic-form"
+		enctype="multipart/form-data" class="pure-form pure-form-stacked "
 		name="dataset-upload-form">  <!-- novalidate="novalidate"> -->
 	    
 	    <% } else { %>
           <form action="/upload-datascape" method="POST"  id="dataset-upload-form"
-		enctype="multipart/form-data" class="pure-form pure-form-stacked basic-form"
+		enctype="multipart/form-data" class="pure-form pure-form-stacked "
 		name="dataset-upload-form">  <!-- novalidate="novalidate"> -->
-	    
-	    <div class="pure-control-group" id="file-select-container1">
-	      <input type="file" accept=".csv" id="file-select" name="file" >
-	    </div>
 	    
 	    <% } %>
 	    
-	    
-	    <div id="form-file-settings-container" hidden>
-	      
-	      <div class="pure-control-group dataset-title">
-		<label for="file-title">Title</label>
-		<input id="file-title" name="title" type="text" value="">
+	    <div class="basic-form">
+
+	      <% if (!locals.datascape) { %>
+	      <div class="pure-control-group" id="file-select-container1">
+		<input type="file" accept=".csv" id="file-select" name="file" >
 	      </div>
-
+	      <% } %>
 	      
-	      <div>
-		<h4>Pick the following inputs</h4>
-		<ul>
-		  
-		  <li>0 or 1 <i>ID</i> field, to uniquely identify each datapoint (column needs a unique non-blank value in every row)</li>
-		  <li>2 to 8 <i>axis</i> fields, to plot datapoint positions (columns need numeric values in every row)</li>
-		  <li>1 or more <i>meta</i> field(s), to color datapoints by metadata (columns that each have several distinct values work best)</li>
-		  
-		</ul>
-	      </div>
-
 	      
-	      <div id="table-display-container"></div>
-	      
-	      <div class="pure-control-group dataset-title">
-		<label for="caption">Caption</label>
-		<!-- <textarea id="caption" style="width: 100%;"> -->
-		<!-- </textarea> -->
-
-
-		<div id="caption">
-		</div>
-				
+	      <div id="form-file-settings-container" hidden>
 		
-	      </div>
-	      
-	      <div class="pure-g user-sharing-container">
-		<div class="pure-u-1-2">
-		  <label class="pure-radio" for="privacy-public">
-		    <input type="radio" name="privacySettings"
-			   value="PUBLIC" id="privacy-public">Share publicly
-		  </label>
-		  
-		  <label class="pure-radio" for="privacy-sself-private">
-		    <input type="radio" name="privacySettings"
-			   value="PRIVATE" id="privacy-self-private">Keep private to me
-		  </label>
-		  
-		  
-		  <label class="pure-radio" for="privacy-private">
-		    <input type="radio" name="privacySettings"
-			   value="PRIVATE" id="privacy-private">Share privately with <button class="pure-button" id="add-user">
-		      <i class="fa fa-plus"></i>	      
-		    </button>
-		  </label>
-		  <div class="pure-control-group" id="user-select">
-		    
-		    <ul class="top-m-1" id="shared-user-collection"></ul>
+		<div class="pure-control-group dataset-title">
+		  <label for="file-title">Title</label>
+		  <input id="file-title" name="title" type="text" value="">
+		</div>
 
+		
+		<div>
+		  <h4>Pick the following inputs</h4>
+		  <ul>
+		    
+		    <li>0 or 1 <i>ID</i> field, to uniquely identify each datapoint (column needs a unique non-blank value in every row)</li>
+		    <li>2 to 8 <i>axis</i> fields, to plot datapoint positions (columns need numeric values in every row)</li>
+		    <li>1 or more <i>meta</i> field(s), to color datapoints by metadata (columns that each have several distinct values work best)</li>
+		    
+		  </ul>
+		</div>
+
+		
+		<div id="table-display-container"></div>
+		
+		<div class="pure-control-group dataset-title">
+		  <label for="caption">Caption</label>
+		  
+		  <textarea id="caption" style="width: 100%;">
+		  </textarea>	
+		  
+		</div>
+		
+		<div class="pure-g user-sharing-container top-m-2">
+		  <div class="pure-u-1-2">
+		    <label class="pure-radio" for="privacy-public">
+		      <input type="radio" name="privacySettings"
+			     value="PUBLIC" id="privacy-public">Share publicly
+		    </label>
+		    
+		    <label class="pure-radio" for="privacy-self-private">
+		      <input type="radio" name="privacySettings"
+			     value="PRIVATE" id="privacy-self-private">Keep private to me
+		    </label>
+		    
+		    
+		    <label class="pure-radio" for="privacy-private">
+		      <input type="radio" name="privacySettings"
+			     value="PRIVATE" id="privacy-private">Share privately with <button class="pure-button" id="add-user">
+			<i class="fa fa-plus"></i>	      
+		      </button>
+		    </label>
+		    <div class="pure-control-group" id="user-select">
+		      
+		      <ul class="top-m-1" id="shared-user-collection"></ul>
+
+		    </div>
 		  </div>
 		</div>
 	      </div>
 	    </div>
-
 	    <div class="pure-g">	      
 	      <% if (locals.datascape) { %>
 	      <a href="<%- datascape.links.local%>/delete" id="delete-datascape-button"

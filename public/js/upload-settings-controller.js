@@ -42,7 +42,6 @@ $(document).ready(function(){
 		
 	// Remove first row
 	column.shift()
-	console.log('colum:', column)
 	return Array.apply( null, column).reduce(function(predicate, value, i, self){
 	    return ( predicate && value !== undefined && self.indexOf( value ) === i )
 	    || ( predicate && i === column.length -1) ;
@@ -51,7 +50,6 @@ $(document).ready(function(){
     
     function isAxis(data, index){
 	var column = Array.apply(null, data).map(function(row){ return row[ index ]; });
-	console.log(typeof column);
 	
 	// Remove first row
 	column.shift()
@@ -64,15 +62,31 @@ $(document).ready(function(){
     
     function setCaption(datascapeCaption){
 	var caption   = $("#caption");	
-	var settings  = {
-	    // Nothing to set yet
 
+
+	// For more TinyMCE settings, look here 
+	// https://www.tinymce.com/docs/demo/basic-example/
+	var settings  = {
 	    
-	}
+	    selector: 'textarea',
+	    height: 250,
+	    plugins: [
+		'advlist autolink lists link image charmap print preview anchor',
+		'searchreplace visualblocks code fullscreen',
+		'insertdatetime media table contextmenu paste code'
+	    ],
+	    toolbar: 'insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image',
+	    content_css: [
+		//'//fast.fonts.net/cssapi/e6dc9b99-64fe-4292-ad98-6974f93cd2a2.css'
+		//'//www.tinymce.com/css/codepen.min.css'
+	    ]
+	};
+
+	// Load content first
+	caption.val( datascapeCaption);
 	
-	caption.trumbowyg( settings );
-	caption.trumbowyg('html', datascapeCaption );
-	//caption.val( datascapeCaption);
+	// Activate TinyMCE
+	tinymce.init( settings );
     }
     
     
@@ -186,7 +200,6 @@ $(document).ready(function(){
 	data[0].forEach(function(datum){ trHead.append( $("<th\>", {html: datum} ) ); })
 	thead.append( trHead );
 	
-	console.log( settings );
 	
 	settings = settings ? settings : {};
 	settings.columnTypes = settings.columnTypes ? settings.columnTypes : [];
@@ -204,8 +217,6 @@ $(document).ready(function(){
 	data[0].forEach(function(datum, index){
 	    var sID = 'eval-column-'+ index +'-as';
 	    var select = $("<select\>", {name: "column-eval-type[]", id: sID, size: 4} );
-	    
-	    console.log('data', datum);
 	    
 	    // Invert the is*() results because `disabled` will disable elements if `true`
 	    // so if something IS true DON'T disable it
@@ -226,7 +237,6 @@ $(document).ready(function(){
 	    	    
 	    // Creates a change method for each method built
 	    select.change( function(value){
-		console.log(this.value);
 		columnTypes[ index ] = this.value;
 	    });
 	    
@@ -304,7 +314,7 @@ $(document).ready(function(){
 	    var data = {
 		displaySettings: {
 		    title: title,
-		    caption: $('#caption').val(),//.trumbowyg('html'),	    
+		    caption: tinymce.activeEditor.getContent({format : 'raw'}),	    
 		    display: {
 			columnTypes: columnTypes
 		    },
@@ -317,7 +327,6 @@ $(document).ready(function(){
 	    // I hate to do this but I don't know how else to send objects
 	    formData.append( 'revertUponArival', JSON.stringify( data ) );
 	    formData.append( 'file', file);
-	    console.log(columnTypes);
 	    $.ajax({
 	    	url: actionURL,
 	    	type: method,
@@ -335,7 +344,6 @@ $(document).ready(function(){
 	if( !e.target.files ) return null;
 	
 	file = e.target.files[0];
-	console.log(file.name);
 	
 	Papa.parse( file, {
 	    complete: function(parsedObj){
@@ -349,7 +357,6 @@ $(document).ready(function(){
     // If true, than we are on the settings page.
     // The settings page does not have an file select button.
     if( focusEntity._id ){
-	console.log('On the settings page');
 	
 	// Data is the id of the fileContainer 
 	// we are looking for.
@@ -378,7 +385,6 @@ $(document).ready(function(){
 			// Let the CB do its things
 			seriesCB(null, data); 			
 			
-			console.log( data );
 			// populate form data
 			setTitle( data.displaySettings.title  );
 			

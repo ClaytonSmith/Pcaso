@@ -28,6 +28,10 @@
     "async": "^1.5.2",
     "trumbowyg": "^1.1.7",
     "jquery-comments": "^1.1.0",
-    "jquery-validation": "^1.14.0"
+    "jquery-validation": "^1.14.0",
+    "tinymce": "^4.3.7"
+  },
+  "resolutions": {
+    "trumbowyg": "^1.1.7"
   }
 }

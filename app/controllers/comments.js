@@ -20,14 +20,18 @@ exports.getComments  = function(req, res){
     };
 
     Comments.collectByTopic( query , function(err, docs){
-    	res.send( Comments.jqueryCommentsTransform( docs ));
+    	if( err ){
+	    res.status( 500 ).send({err: "Server err"});
+	    throw new Error( err );
+	}
+	else res.send( Comments.jqueryCommentsTransform( docs ));
     });
     
 }
 
 exports.postComment = function(req, res){
     if( !req.isAuthenticated() )
-	res.sendStatus( 403 );
+	return  res.status( 403 ).send({err: "Forbidden"});
 
     var query = null;
 
@@ -47,9 +51,13 @@ exports.postComment = function(req, res){
     var collection = mongoose.model( query.__t );
 
     collection.findOne( query, function(err, doc){
-	if( err || !doc ) req.sendStatus(404);
+	if( err ) {
+	    res.status(500).send({err: "Server error"})
+	    throw new Error( err );
+	}
 	
-	
+	if( !doc ) return res.status(404).send({err: "Document not found"});
+
 	var subject = null;
 	if( doc.name ) subject =  doc.name.first +' '+ doc.name.last +"'s account";
 	else if( ( doc.displaySettings || {}).title ) subject = doc.displaySettings.title;
@@ -61,10 +69,18 @@ exports.postComment = function(req, res){
 	}
 	
 	var comment = req.user.leaveComment( doc, subject, req.body.body, function(commentError){ 	    
-	    req.user.save(function(err){
-		if( err ) res.sendStatus(500);
+	    if( commentError ){
+		res.status(500).send({err: "Server error", message: commentError });
+		throw new Error( err );
+	    }
+
+	    req.user.save(function(saveErr){
+		if( saveErr ) {
+		    res.status(500).send({err: "Server error"})
+		    throw new Error( saveErr );
+		} 
+		
 		res.send( Comments.jqueryCommentsTransform( [ comment ] )[0] );
-		// handle error somehow
 	    });
 	});
     });
@@ -72,7 +88,7 @@ exports.postComment = function(req, res){
 
 exports.deleteComment  = function(req, res){
     if( !req.isAuthenticated() )
-	res.sendStatus( 403 );
+	return res.status( 403 ).send({err: "Forbidden"});
     
     var query = {
 	'_id': req.params.commentID,
@@ -81,11 +97,19 @@ exports.deleteComment  = function(req, res){
     };
     
     Comments.findOne( query, function(err, doc){
-	if( err || !doc ) return res.sendStatus( 403 );
+	if( err ){
+	    res.status(500).send({err: "Server error"})
+	    throw new Error( err );
+	} 
 	
+	if( !doc ) return res.status(404).send({err: "Comment not found"});
+
 	doc.remove( function(removeError){
-	    if( removeError ) res.sendStatus( 500 );
-	    else res.sendStatus( 200 );
+	    if( removeErr ) {
+		res.status(500).send({err: "Server error"})
+		throw new Error( removeErr );
+	    
+	    } else res.sendStatus( 200 );
 	})
     });
 }
@@ -93,8 +117,9 @@ exports.deleteComment  = function(req, res){
 
 
 exports.editComment  = function(req, res){
+
     if( !req.isAuthenticated() )
-	res.sendStatus( 403 );
+	return res.status( 403 ).send({err: "Forbidden"});
     
     var query = {
 	'_id': req.body.id,
@@ -103,12 +128,21 @@ exports.editComment  = function(req, res){
     };
     
     Comments.findOne( query, function(err, doc){
-	if( err || !doc ) return res.sendStatus( 403 );
+	if( err ){
+	    res.status(500).send({err: "Server error"})
+	    throw new Error( err );
+	} 
+	
+	if( !doc ) return res.status(404).send({err: "Comment not found"});
+	
 	doc.body = req.body.body;
 	
 	doc.save( function(saveError){
-	    if( saveError ) res.sendStatus( 500 );
-	    else res.sendStatus( 200 );
+	    if( saveError ) {
+		res.status(500).send({err: "Server error"})
+		throw new Error( saveErr );
+		
+	    }  else res.status( 200 ).send({message: "OK"});
 	});
     });
 }
