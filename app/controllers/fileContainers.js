@@ -205,9 +205,10 @@ exports.getDatascapeSettings = function(req, res){
     	} else {
     	    res.render( 'request-access.ejs', {
     		user: req.user,
+		datascape: doc,
     		file: {
     		    name: doc.file.name,
-    		    requestLink: doc.displaySettings.link + '/request-access'
+		    requestLink: doc.displaySettings.link + '/request-access'
     		}
     	    });
     	}

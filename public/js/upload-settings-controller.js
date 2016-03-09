@@ -70,8 +70,9 @@ $(document).ready(function(){
 	    
 	}
 	
-	caption.trumbowyg( settings );
-	caption.trumbowyg('html', datascapeCaption );
+	//caption.trumbowyg( settings );
+	//caption.trumbowyg('html', datascapeCaption );
+	caption.val( datascapeCaption);
     }
     
     
@@ -303,7 +304,7 @@ $(document).ready(function(){
 	    var data = {
 		displaySettings: {
 		    title: title,
-		    caption: $('#caption').trumbowyg('html'),	    
+		    caption: $('#caption').val(),//.trumbowyg('html'),	    
 		    display: {
 			columnTypes: columnTypes
 		    },
