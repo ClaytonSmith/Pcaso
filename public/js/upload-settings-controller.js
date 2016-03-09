@@ -70,9 +70,9 @@ $(document).ready(function(){
 	    
 	}
 	
-	//caption.trumbowyg( settings );
-	//caption.trumbowyg('html', datascapeCaption );
-	caption.val( datascapeCaption);
+	caption.trumbowyg( settings );
+	caption.trumbowyg('html', datascapeCaption );
+	//caption.val( datascapeCaption);
     }
     
     

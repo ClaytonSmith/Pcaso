@@ -128,7 +128,7 @@ function init() {
 	var settings  = {
 	    // No settings yet
 	}
-
+	
 	//caption.trumbowyg( settings );
     }
     

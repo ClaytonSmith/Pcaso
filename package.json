@@ -1,7 +1,7 @@
 {
   "name": "Pcaso",
   "main": "server.js",
-    "scripts": {
+  "scripts": {
     "start-server": "node --harmony_proxies server.js",
     "test": "make test",
     "postinstall": "./node_modules/bower/bin/bower install"
@@ -33,6 +33,7 @@
     "mkdirp": "^0.5.1",
     "mocha": "^2.3.4",
     "mongoose": "~3.8.1",
+    "mongoose-paginate": "^5.0.0",
     "mongoose-schema-extend": "^0.2.0",
     "morgan": "~1.0.0",
     "multer": "^1.1.0",
