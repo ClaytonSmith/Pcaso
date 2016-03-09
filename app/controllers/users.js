@@ -173,11 +173,11 @@ exports.authenticateAccount = function(req, res){
 		    res.redirect('/500');
 		    return new Error( err );
 		}
+		// Delete temp account
+		unauthenticatedUser.remove();   
+	    
+		res.redirect('/sign-in');
 	    });	    	    
-
-	    // Delete temp account
-	    unauthenticatedUser.remove();   
-	    res.render('/sign-in');
 	}
     });
 }

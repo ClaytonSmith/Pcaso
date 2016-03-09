@@ -39,19 +39,19 @@ function init() {
 	column.shift()
 	console.log('colum:', column)
 	return Array.apply( null, column).reduce(function(predicate, value, i, self){
-	    return predicate && value !== undefined && self.indexOf( value ) === i ;
+	    return ( predicate && value !== undefined && self.indexOf( value ) === i )
+		|| ( predicate && i === column.length -1 );
 	}, true);
     }
     
     function isAxis(data, index){
 	var column = Array.apply(null, data).map(function(row){ return row[ index ]; });
-	console.log(typeof column);
-	
+
 	// Remove first row
 	column.shift()
-
 	return Array.apply( null, column).reduce(function(predicate, value, i, self){
-	    return predicate && value !== undefined && !isNaN( parseFloat( value ));
+	    return ( predicate && value !== undefined  && !isNaN( parseFloat( value ) ) )
+		|| ( predicate && i === column.length -1 );
 	}, true);
     }
     
@@ -61,7 +61,7 @@ function init() {
 	    // Nothing to set yet
 	}
 	
-	caption.trumbowyg(settings);
+	caption.trumbowyg( settings );
 	caption.trumbowyg('html', datascapeCaption );
     }
     

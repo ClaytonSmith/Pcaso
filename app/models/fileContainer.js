@@ -277,6 +277,7 @@ FileContainerSchema.static({
 	
 	console.log( 'Register', file );
 	var documentId = mongoose.Types.ObjectId();        		
+	var fileId = mongoose.Types.ObjectId();        		
 	var fileContainer = new this({
 	    _id: documentId,
 	    parent: {
@@ -285,6 +286,7 @@ FileContainerSchema.static({
 		name: parent.name,
 	    },
 	    file: {
+		id: fileId,
 		name: file.name,
 		path: file.path
 	    },

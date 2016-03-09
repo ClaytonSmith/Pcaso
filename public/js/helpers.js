@@ -98,6 +98,7 @@ function getUrlParameter(sParam) {
     }
 };
 
+
 function buildTile( datascapeContainer ){
     var dsTime = new Date( datascapeContainer.dateAdded );
 
