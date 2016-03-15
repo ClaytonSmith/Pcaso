@@ -296,7 +296,7 @@ FileContainerSchema.static({
 	    links: {
 		thumbnail: parent.publicDataPath + "/files/thumbnails/" + documentId +".png",
 		parent: parent.links.link,
-		bullet: Math.random().toString(36).substring(12) 
+		bullet: Math.random().toString(36).substring(2, 8) 
 	    }
 	});
 
