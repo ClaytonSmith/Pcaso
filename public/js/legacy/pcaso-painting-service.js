@@ -7,7 +7,7 @@ $(function(){
     var twitterLink = $("#twitter-link");
     var twitterLinkBody = {
 	url: "http://pcaso.io/" + focusEntity.links.bullet,
-	text: "Check out this cool datascape",
+	text: "Explore this datascape with me: ",
 	hashtags: "Pcaso" // Comma separated, NO SPACES....
     }
     

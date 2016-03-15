@@ -296,14 +296,10 @@ FileContainerSchema.static({
 	    links: {
 		thumbnail: parent.publicDataPath + "/files/thumbnails/" + documentId +".png",
 		parent: parent.links.link,
-		bullet: Math.random().toString(36).substring(21) 
+		bullet: Math.random().toString(36).substring(12) 
 	    }
 	});
 
-
-	console.log(Math.random().toString(36).substring(21) );
-	Math.random().toString(36).substring(8) 
-	
 	fileContainer.displaySettings.title = fileContainer.displaySettings.title || file.name;	    	
 	fileContainer.displaySettings.legacy = this.convertDisplaySettingsToLegacy( fileContainer.displaySettings );
 	

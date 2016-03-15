@@ -58,7 +58,7 @@ exports.requestAccess = function(req, res){
 	'links.bullet': req.params.bullet
     } : {
 	'parent.id': req.params.userID,
-	'links.custom': req.params.datascape 
+	'links.bullet': req.params.datascape 
     };
 
     FileContainers.findOne( fcQuery, function(fcErr, fc){
@@ -100,7 +100,7 @@ exports.displayDatascape = function(req, res, next){
 	    'links.bullet': req.params.bullet
 	} : {
 	    'parent.id': req.params.userID,
-	    'links.custom': req.params.datascape 
+	    'links.bullet': req.params.datascape 
 	};
     
     FileContainers.findOne( query, function(err, doc){
@@ -133,7 +133,7 @@ exports.datascapeGetCSV = function(req, res){
 	    'links.bullet': req.params.bullet
 	} : {
 	    'parent.id': req.params.userID,
-	    'links.custom': req.params.datascape 
+	    'links.bullet': req.params.datascape 
 	};
 
     FileContainers.findOne( query, function(err, doc){
@@ -161,7 +161,7 @@ exports.datascapeGetLegacyConfig = function(req, res){
 	    'links.bullet': req.params.bullet
 	} : {
 	    'parent.id': req.params.userID,
-	    'links.custom': req.params.datascape 
+	    'links.bullet': req.params.datascape 
 	};
     
     FileContainers.findOne( query, function(err, doc){
@@ -182,7 +182,7 @@ exports.getDatascapeSettings = function(req, res){
 	    'links.bullet': req.params.bulletURL
 	} : {
 	    'parent.id': req.params.userID,
-	    'links.custom': req.params.datascape 
+	    'links.bullet': req.params.datascape 
 	};
     
     FileContainers.findOne( query, function(err, doc){
@@ -283,7 +283,7 @@ exports.postDatascapeSettings = function(req, res){
 	
 	var settings = JSON.parse( fields.revertUponArival );
 	var query = {
-	    'links.custom': req.params.datascape
+	    'links.bullet': req.params.datascape
 	}
 	
 	FileContainers.findOne( query, function(fcErr, doc){
@@ -321,7 +321,7 @@ exports.deleteDatascape = function(req, res){
 	res.redirect('/403');
    
     var query = {
-	'links.custom': req.params.datascape
+	'links.bullet': req.params.datascape
     }
     
     FileContainers.findOne( query, function(fcErr, doc){
@@ -390,7 +390,7 @@ exports.addSharedUser = function(req, res){
 
     var datascapeQuery = {
 	'parent.id': req.params.userID,
-	'links.custom': req.params.datascape 
+	'links.bullet': req.params.datascape 
     };
     
     var userQuery = {

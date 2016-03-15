@@ -148,10 +148,6 @@ $(document).ready(function(){
 	// in the backend other things besides users can be on the shared list
 	var usersSharedWith = sharedWith.filter(function(obj){ return typeof obj === 'string' || myVar instanceof String});
 	usersSharedWith.forEach( addSharedUser );	
-
-
-	
-
 	
 	if( visibility === 'PUBLIC') {
 	    // Public 
@@ -230,11 +226,11 @@ $(document).ready(function(){
 	    
 	    select.append( $("<option\>", {value: 'omit',  html: 'Omit' }) );
 	    	    
-	    
 	    // Init 
 	    // Reselect values if loading settings, 
-	    select.val( settings.columnTypes[index] );
-	    	    
+	    if( settings.columnTypes[index] )
+		select.val( settings.columnTypes[index] );
+	    
 	    // Creates a change method for each method built
 	    select.change( function(value){
 		columnTypes[ index ] = this.value;

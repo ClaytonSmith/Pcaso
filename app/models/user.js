@@ -134,6 +134,7 @@ UserSchema.method({
 
 	var fileContainer = FileContainers.register(this, file, options);
 
+	console.log(fileContainer);
 	fileContainer.save(function(err){
 	    if( err ) callback( err ) ;
 	    
