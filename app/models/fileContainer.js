@@ -54,7 +54,7 @@ var FileContainerSchema = new mongoose.Schema({
     links: {
 	parent:          { type: String,  required: true },
 	thumbnail:       { type: String,  required: true },
-	custom:          { type: String,  required: true },
+	// custom:          { type: String,  required: true },
 	bullet:          { type: String,  required: true, unique: true },        // Should never have two identicle bullets
 	link:            { type: String,  required: true, unique: true },        // Unique links prvent users from having two files with 
 	local:           { type: String,  required: true, unique: true },        // files with the same name having the same link
@@ -296,15 +296,20 @@ FileContainerSchema.static({
 	    links: {
 		thumbnail: parent.publicDataPath + "/files/thumbnails/" + documentId +".png",
 		parent: parent.links.link,
-		bullet: Math.random().toString(36).substring(5) 
+		bullet: Math.random().toString(36).substring(21) 
 	    }
 	});
+
+
+	console.log(Math.random().toString(36).substring(21) );
+	Math.random().toString(36).substring(8) 
+	
 	fileContainer.displaySettings.title = fileContainer.displaySettings.title || file.name;	    	
 	fileContainer.displaySettings.legacy = this.convertDisplaySettingsToLegacy( fileContainer.displaySettings );
 	
-	fileContainer.links.custom = (settings.links || {}).customURL || fileContainer.links.bullet;
-	fileContainer.links.link  = parent.links.link  + "/datascapes/" + fileContainer.links.custom;
-	fileContainer.links.local = parent.links.local + "/datascapes/" + fileContainer.links.custom;
+	//fileContainer.links.custom = (settings.links || {}).customURL || fileContainer.links.bullet;
+	fileContainer.links.link  = parent.links.link  + "/datascapes/" + fileContainer.links.bullet;
+	fileContainer.links.local = parent.links.local + "/datascapes/" + fileContainer.links.bullet;
 	fileContainer.links.base  = parent.links.local + "/datascapes/";
 
 	return fileContainer;

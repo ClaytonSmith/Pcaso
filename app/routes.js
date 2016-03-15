@@ -109,10 +109,10 @@ module.exports = function(app, passport) {
     app.get(    '/api/notifications',       notifications.get);
     app.delete( '/api/notifications',       notifications.remove);
     
-    app.get(    '/api/*',  function(req, res){ res.sendStatus(404) });
-    app.post(   '/api/*',  function(req, res){ res.sendStatus(404) });
-    app.put(    '/api/*',  function(req, res){ res.sendStatus(404) });
-    app.delete( '/api/*',  function(req, res){ res.sendStatus(404) });
+    app.get(    '/api/*',  function(req, res){ res.status(404).send('Route not found') });
+    app.post(   '/api/*',  function(req, res){ res.status(404).send('Route not found') });
+    app.put(    '/api/*',  function(req, res){ res.status(404).send('Route not found') });
+    app.delete( '/api/*',  function(req, res){ res.status(404).send('Route not found') });
     
     app.get( '/gallery*', function(req, res){
 	res.render('gallery.ejs', {user: req.user});

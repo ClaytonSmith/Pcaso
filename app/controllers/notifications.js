@@ -23,7 +23,7 @@ var conn   = mongoose.createConnection(config.db);
 exports.get = function(req, res){
 
     // Make sure an authenticated user is making the request
-    if( !req.isAuthenticated() && 
+    if( !req.isAuthenticated() &&  req.user &&
 	req.query.parentID === req.user._id.toString() )
 	return res.status(403).send({err: "Forbidden"});
     
@@ -43,7 +43,7 @@ exports.redirect = function(req, res){
 
     // Make sure an authenticated user is making the request
     if( !req.isAuthenticated())
-	return res.render('/');
+	return res.redirect('/');
     
     var query = {
 	_id: req.params.notificationID
