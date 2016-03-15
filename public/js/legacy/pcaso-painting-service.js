@@ -694,7 +694,7 @@ $(function(){
 
 		// Set zoom icon to collapse            
 		_pcaso.select("#full_screen_toggle")
-		    .attr("xlink:href","/imgs/grow-big.png")
+		    .html("&#xf065")
 	    }
 	    else {
 		_pcaso.selectAll(".cell").style("visibility", "hidden");
@@ -708,7 +708,7 @@ $(function(){
 
 		// Set zoom icon to collapse            
 		_pcaso.select("#full_screen_toggle")
-		    .attr("xlink:href","/imgs/shrink-big.png")
+		    .html("&#xf066")
 		
 
 		currently_full_screen=true;
