@@ -14,7 +14,7 @@ var MongoStore   = require('connect-mongo')(session);
 
 var config       = require('./config/config');
 var models       = join( __dirname, 'app/models');
-var port         = process.env.PORT || 3000;
+var port         = process.env.PORT || 8080;
 var app          = express();
 
 
