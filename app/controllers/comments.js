@@ -34,7 +34,7 @@ exports.postComment = function(req, res){
 	return  res.status( 403 ).send({err: "Forbidden"});
 
     var query = null;
-
+    
     if( req.body.target !== '' ){
 	query = {
 	    '_id':  req.body.target,

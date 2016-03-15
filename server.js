@@ -38,11 +38,11 @@ require('./config/passport')(passport);                  // pass passport for co
 app.set('title', 'Pcaso');
 
 // Express init
-app.use(morgan('dev'));                                  // Logger
+//app.use(morgan('dev'));                                  // Logger
 app.use(cookieParser());                                 // read cookies (needed for auth) 
 
-app.use(bodyParser.json());                              // get information from html forms
-app.use(bodyParser.urlencoded({ extended: true }));     
+app.use(bodyParser.json({ limit: "50mb" }) );                              // get information from html forms
+app.use(bodyParser.urlencoded({ extended: true, limit: "50mb" }));     
 
 app.set('view engine', 'ejs');                           // set up ejs for templating
 

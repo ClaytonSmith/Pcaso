@@ -264,8 +264,9 @@ $(document).ready(function(){
 	var formContainer   = $("#form-file-settings-container")
 	var tableContainer  = $("#table-display-container");
 	
+	console.log(file );
 	// Create layout with title and table
-	setTitle( file.name  );
+	setTitle( file.name.replace(/.csv/, "")  );
 	
 	// Create table
 	tableContainer.append( genTable(table.data ) );

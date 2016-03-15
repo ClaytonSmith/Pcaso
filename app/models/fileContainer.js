@@ -188,7 +188,6 @@ FileContainerSchema.method({
 		Users.findOne({email: email}, function(err, doc){
 		    if( err ) return eachCB( err );
 		    if( doc ) {
-			console.log('NEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEW', "User\n\n\n\n\n\n\n\n");
 			mailer.useTemplate('shared-with-authenticated-user', doc, { datascape: fileContainer }, eachCB );
 		    } else
 			mailer.useTemplate('shared-with-unauthenticated-user', email, { datascape: fileContainer }, eachCB );
@@ -274,8 +273,6 @@ FileContainerSchema.static({
     },
     
     register: function(parent, file, settings){
-	
-	console.log( 'Register', file );
 	var documentId = mongoose.Types.ObjectId();
 	var fileId = mongoose.Types.ObjectId();        		
 	
@@ -380,9 +377,6 @@ FileContainerSchema.pre('remove', function(next) {
     grid.mongo = mongoose.mongo;
     var conn   = mongoose.createConnection(config.db);
     var fileQuery = {_id: fileContainer.file.id, root: 'uploads'};
-
-    console.log(fileQuery);
-
     var parentCollection  = mongoose.model( fileContainer.parent.collectionName );    
     function deleteFrom( collection, searchQuery, callback ){
         collection.findOne( { _id: searchQuery }, function( err, doc ){
@@ -410,9 +404,6 @@ FileContainerSchema.pre('remove', function(next) {
 	    
 	    function(parellelCB){
 		conn.once('open', function () {
-		    console.log("Removal:",fileQuery);
-
-		    
 		    grid(conn.db).remove( fileQuery, parellelCB );	
 		});
 	    },

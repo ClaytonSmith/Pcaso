@@ -511,3 +511,8 @@ body {
     height: calc( 100% - 80px);
     position: relative;
 }
+
+
+.fa-twitter{
+    color: #55acee;
+}

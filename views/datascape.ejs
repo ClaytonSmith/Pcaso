@@ -5,28 +5,24 @@
     <%- include header.ejs %>      
     <main>
       
-     
+      <script type="text/javascript" src="http://gabelerner.github.io/canvg/StackBlur.js"></script>
+      <script type="text/javascript" src="http://gabelerner.github.io/canvg/rgbcolor.js"></script> 
+      <script type="text/javascript" src="http://gabelerner.github.io/canvg/canvg.js"></script> 
+
+      <script src="/components/FileSaver/FileSaver.min.js"></script>
+      
       <script src="/components/d3/d3.min.js"></script>
       <script src="/js/legacy/pcaso-painting-service.js"></script>
       <script src="/js/comment-controller.js"></script>  
-      
+
+
       <div class="datascape-container">
 	
+	<div class="">
+	  <span><a  target="_blank" id="twitter-link"><i class="fa fa-twitter fa-3x"></i></a></span>
+	</div>
 	
-	<p class="title center">
-	  
-	  <span class="fa-3x">
-	    <%= datascape.displaySettings.title %>
-	  </span>
-	  
-	  <% if (isOwner) { %> 
-	  <a href="<%- datascape.links.local %>/settings">
-	    <i class="fa fa-cog rotate-on-hover" style="vertical-align: top;"></i></a>
-	  <% } %>
-	  
-	  <span class="font-size-small">by <a href="<%- datascape.links.parent %>"> <%= datascape.parent.name.first %> <%= datascape.parent.name.last %></a></span>
-	</h1>
-	
+
 	
 	<div id="loading">
 	  <h3><i class="fa fa-spinner fa-spin fa-2x"> </i> Painting data...</h3>
@@ -53,18 +49,49 @@
 	  <div id="pcaso-legend" ></div> 
 	  
 	</div>
-	
+
 	<br style="clear: both;">
+	<div class="top-m-1">
+	  <i id="take-snapshot" class="fa fa-camera fa-2x" style="color: #000000" title="Save a snapshot of this datascape."></i>
+	  
+	  <% if (isOwner) { %> 	  
+	  <input type="checkbox" id="update-thubnail" 
+		 title="Set the current display as the datascapes's thumbnail." name="update-thumbnail">
+	  <label for="update-thumbnail" title="Set the current display as the datascapes's thumbnail.">Make thumbnail</label>
+	  
+	  <a href="<%- datascape.links.local %>/settings" >
+	    <i class="fa fa-cog fa-2x rotate-on-hover" style="color: #000000; margin-left: 1em;"></i>
+	  </a>
+	  <% } %>
+
+	</div>
+	<div class="title pure-g">
+	  <div class="pure-u-1-2">
+	  <p>
+	    <span class="fa-3x">
+	      <%= datascape.displaySettings.title %>
+	    </span>
+	    
+	    
+	    <span class="font-size-small">by <a href="<%- datascape.links.parent %>"> <%= datascape.parent.name.first %> <%= datascape.parent.name.last %></a></span>
+	    
+	  </p>  	  
+	  </div>
+	</div>
+	
 	<div style="display:none;" id="show-caption" >
 	  
+	  
+	  
 	</div>
+	
+	<!-- <img id="img-out"></img> -->
+	
       </div>      
       
       <div class="app-content">
 	<div id="comments-container" class="jquery-comments"></div> 
       </div>
-
-      
       
     </main>
     <%- include footer.ejs %>  

@@ -323,8 +323,6 @@ exports.deleteDatascape = function(req, res){
     var query = {
 	'links.custom': req.params.datascape
     }
-
-    console.log("\n\n\n", query);
     
     FileContainers.findOne( query, function(fcErr, doc){
 	if( fcErr ){
@@ -440,5 +438,47 @@ exports.addSharedUser = function(req, res){
 		});	    
 	    });
 	});
+    });
+}
+
+
+exports.updateThumbnail = function(req, res){
+
+    var query = {
+	'_id': req.body.datascapeID,
+	'parent.id': ( req.user || {} ).id
+    }
+
+    FileContainers.findOne( query, function(err, doc){
+	if( err ){
+	    res.status(500).send({err: "Server error"});
+	    throw new Error( err );
+	}
+	if( !doc ) return res.status(404).send({err: 'File not found'});
+	
+	var thumbnailPath = doc.localDataPath + '/files/thumbnails/' + doc._id;
+	var base64URL = req.body.rawImageData.replace(/^data:image\/png;base64,/, "");
+
+	fs.writeFile(thumbnailPath, base64URL, "base64", function(writeErr){
+	    if( writeErr ){
+		res.status(500).send({err: "Error saving image"});
+		console.log(writeErr);
+		throw new Error( writeError );
+	    }
+	    
+	    // Keep the auto generated thumbnail just in case 
+	    // but change the image path
+	    doc.links.thumbnail = doc.publicDataPath + '/files/thumbnails/' + doc._id;
+	                             
+	    doc.save(function(saveErr){
+		if( saveErr ){
+		    res.status(500).send({err: "Error saving image"});
+		    console.log(saveErr);
+		    throw new Error( saveError );
+		}	
+		
+		res.send(doc);
+	    });
+	});	
     });
 }
