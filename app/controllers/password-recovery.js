@@ -36,14 +36,21 @@ exports.requestRecoveryEmail = function(req, res){
 
     // Find user in question by given email
     Users.findOne( query , function(queryErr, user){
-	if( queryErr ) throw new Error( queryError );
-	if( !user ) return; // Do nothing
+	if( queryErr ) {
+	    res.redirect('/500');
+	    throw new Error( queryErr );
+	}
+	if( !user ) return res.redirect('/'); // Do nothing
 	
 	// Create recovery doc. Remember, it will expire after some time
 	var recoveryDoc = AccountRecovery.register(user);	
 	
 	// save recovery doc
 	recoveryDoc.save(function(saveErr){
+	    if( saveErr ) {
+		res.redirect('/500');
+		throw new Error( saveErr );
+	    }   
 
 	    // Only one recovery doc can be assigned.
 	    // An error will be thrown if users make multiple requests

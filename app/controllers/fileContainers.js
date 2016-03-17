@@ -22,15 +22,15 @@ exports.displayGallery = function(req, res){
 exports.download = function(req, res){   
     FileContainers.findOne({_id: req.params.fileId}, function( err, doc ){
         if( err ) {
-	    res.sendStatus( 500 );
+	    res.status(500).send({err: "Server error"});
 	    throw new Error( err );
 	}
 	if( !doc ) {
-	    res.send(404);
+	    res.status(404).send({ err: "File not found"});
 	} else if( doc.viewableTo( req.user ) ){
             loadFile( doc.getFile( res ) );
         } else {
-            res.sendStatus(404);
+            res.status(404).send({ err: "File not found"});
         }
     });
 }
@@ -51,14 +51,14 @@ exports.requestAccess = function(req, res){
     var fcQuery        = null;
     
     // Only authenticated users can request access
-    if( !req.isAuthenticated() )
-	res.redirect('404.ejs', {user: req.user});
-
+    if( !req.isAuthenticated() ) 
+	return res.redirect('/404');
+    
     var query = req.params.bullet ? {
 	'links.bullet': req.params.bullet
     } : {
 	'parent.id': req.params.userID,
-	'links.custom': req.params.datascape 
+	'links.bullet': req.params.datascape 
     };
 
     FileContainers.findOne( fcQuery, function(fcErr, fc){
@@ -100,7 +100,7 @@ exports.displayDatascape = function(req, res, next){
 	    'links.bullet': req.params.bullet
 	} : {
 	    'parent.id': req.params.userID,
-	    'links.custom': req.params.datascape 
+	    'links.bullet': req.params.datascape 
 	};
     
     FileContainers.findOne( query, function(err, doc){
@@ -133,14 +133,16 @@ exports.datascapeGetCSV = function(req, res){
 	    'links.bullet': req.params.bullet
 	} : {
 	    'parent.id': req.params.userID,
-	    'links.custom': req.params.datascape 
+	    'links.bullet': req.params.datascape 
 	};
 
     FileContainers.findOne( query, function(err, doc){
 	if( err){
-	    res.sendStatus(500);
+	    res.status(500).send({err: "Server error"});
 	    throw new Error( err );
 	}
+	
+	if( !doc ) return res.status(404).send({err: "File not found"});
 	
 	if( doc.viewableTo( req.user ) ){ 
 	    doc.getFile( res );
@@ -150,7 +152,7 @@ exports.datascapeGetCSV = function(req, res){
 		}
 	    });
 	} else {
-	    res.send(404);
+	    res.status(404).send({err: "File not found"});
 	}
     });
 }
@@ -161,18 +163,21 @@ exports.datascapeGetLegacyConfig = function(req, res){
 	    'links.bullet': req.params.bullet
 	} : {
 	    'parent.id': req.params.userID,
-	    'links.custom': req.params.datascape 
+	    'links.bullet': req.params.datascape 
 	};
     
     FileContainers.findOne( query, function(err, doc){
 	if( err ){
-	    res.sendStatus( 500 );
+	    res.status(500).send({err: "Server error"});
 	    throw new Error( err );
 	}
+	
+	if( !doc ) return res.status(404).send({err: "File not found"});
+	
 	if( doc.viewableTo( req.user ) ){ 
 	    res.send( doc.displaySettings.legacy );
 	} else {
-	    res.sendStatus(404);
+	    res.status(404).send({err: "File not found"});
 	}
     });
 }
@@ -182,19 +187,20 @@ exports.getDatascapeSettings = function(req, res){
 	    'links.bullet': req.params.bulletURL
 	} : {
 	    'parent.id': req.params.userID,
-	    'links.custom': req.params.datascape 
+	    'links.bullet': req.params.datascape 
 	};
     
     FileContainers.findOne( query, function(err, doc){
 	
 	if( err ){
-	    res.render('500.ejs', {user: req.user});
+	    res.redirect('/500');
 	    throw new Error( err );
 	}
 
-	if( !doc) return res.render('404.ejs', {user: req.user});
+	if( !doc) return res.redirect('/404');
 
     	var isOwner = req.isAuthenticated() && req.user && req.user._id.toString() === doc.parent.id;
+
 	if( isOwner ){ 
     	    res.render('datascape-settings.ejs', { 
 		user: req.user,
@@ -205,9 +211,10 @@ exports.getDatascapeSettings = function(req, res){
     	} else {
     	    res.render( 'request-access.ejs', {
     		user: req.user,
+		datascape: doc,
     		file: {
     		    name: doc.file.name,
-    		    requestLink: doc.displaySettings.link + '/request-access'
+		    requestLink: doc.displaySettings.link + '/request-access'
     		}
     	    });
     	}
@@ -225,13 +232,13 @@ exports.getFileContainer = function(req, res){
     
     FileContainers.findOne( query, function(err, doc){
 	if( err ){
-	    res.send( 500 );
+	    res.status(500).send({err: "Server error"});
 	    throw new Error( err );
 	}
 	
-	if( !doc ) return res.send( 404 );
+	if( !doc ) return res.status(404).send({err: "File not found"});
 	if( !doc.viewableTo( req.user ) )
-	    return res.send( 404 );
+	    return res.status(404).send({err: "File not found"});
 	
 	// At this point, no errors
 	// we found the doc, and the user,
@@ -253,13 +260,13 @@ exports.getFileContainerSource = function(req, res){
     
     FileContainers.findOne( query, function(err, doc){
 	if( err ){
-	    res.send( 500 );
+	    res.status(500).send({err: "Server error"});
 	    throw new Error( err );
 	}
 	
-	if( !doc ) return res.send( 404 );
+	if( !doc ) return res.status(404).send({err: "File not found"});
 	if( !doc.viewableTo( req.user ) )
-	    return res.send( 404 );
+	    return res.status(404).send({err: "File not found"});
 	
 	// Send fileContainer 
 	doc.getFile( res );
@@ -269,34 +276,34 @@ exports.getFileContainerSource = function(req, res){
 exports.postDatascapeSettings = function(req, res){
     
     if( !req.isAuthenticated() )
-	res.sendStatus(403);
+	return res.status(403).send({err: "Forbidden"});
     
     var form = new formidable.IncomingForm();
 
     form.parse(req, function(err, fields) {
 	if (err){
-	    res.sendStatus(500);
+	    res.status(500).send({err: "Server error"});
 	    throw new Error( err );
 	}
 	
 	var settings = JSON.parse( fields.revertUponArival );
 	var query = {
-	    'links.custom': req.params.datascape
+	    'links.bullet': req.params.datascape
 	}
 	
 	FileContainers.findOne( query, function(fcErr, doc){
 	    if( fcErr ){
-		res.sendStatus( 500 );
+		res.status(500).send({err: "Server error"});
 		throw new Error( fcErr );
 	    }
 
 	    // Make sure the user exists and they are the parent 
 	    if( req.user && doc.parent.id !== req.user._id.toString() )
-		return res.sendStatus(403);
+		return res.status(403).send({err: "Forbidden"});
 	    
 	    doc.updateSettings( settings, function(updateErr){
 		if( updateErr ) {
-		    res.sendStatus( 500 );
+		    res.status(500).send({err: "Server error"});
 		    throw new Error( updateErr );
 		}	
 	    });
@@ -304,7 +311,7 @@ exports.postDatascapeSettings = function(req, res){
 	    // no need to wait on emails
 	    doc.save(function(saveErr){
 		if( saveErr ){
-		    return res.sendStatus( 500 );
+		    return res.status(500).send({err: "Server error"});
 		}
 		res.send( doc.links.link );
 	    });
@@ -315,20 +322,20 @@ exports.postDatascapeSettings = function(req, res){
 
 exports.deleteDatascape = function(req, res){
 
-    if( !req.isAuthenticated() )
+    if( !req.isAuthenticated() && req.user )
 	res.redirect('/403');
    
     var query = {
-	'links.custom': req.params.datascape
+	'links.bullet': req.params.datascape
     }
-
-    console.log("\n\n\n", query);
     
     FileContainers.findOne( query, function(fcErr, doc){
 	if( fcErr ){
 	    res.redirect('/500' );
 	    throw new Error( fcErr );
 	}
+	
+	if( !doc ) return res.redirect( req.user.links.local );
 	
 	// Make sure the user exists and they are the parent 
 	if( req.user && doc.parent.id !== req.user._id.toString() )
@@ -368,7 +375,7 @@ exports.getPaginatedFiles = function(req, res){
     if( req.user && ( req.query.parentID === req.user._id.toString() ) ){
 	query['$or'].push( {'displaySettings.visibility': 'PRIVATE' } );
     }
-    
+
     // Construct paginate params
     // Don't forget to parse all incoming integer values
     var paginateParams = {
@@ -390,7 +397,7 @@ exports.addSharedUser = function(req, res){
 
     var datascapeQuery = {
 	'parent.id': req.params.userID,
-	'links.custom': req.params.datascape 
+	'links.bullet': req.params.datascape 
     };
     
     var userQuery = {
@@ -400,23 +407,23 @@ exports.addSharedUser = function(req, res){
     
     FileContainers.findOne( datascapeQuery, function(fcErr, fc){
 	if( fcErr ){
-	    res.render( '500.ejs', { user: req.user} );
+	    res.redirect( '/500');
 	    throw new Error( fcErr );
 	}
-	if( !fc ) return res.render('404.ejs', {user: req.user});
+	
+	if( !fc ) return res.redirect('/404');
+	
 	var isOwner = req.isAuthenticated() && req.user && req.user._id.toString() === fc.parent.id;
     
-    if(!isOwner)
-	return res.render('403.ejs', {user: req.user});
-    
-
+	if(!isOwner) return res.redirect('/403');
+		
 	Users.findOne( userQuery, function( userErr, user){
 	    if( userErr ){
-		res.render( '500.ejs', { user: req.user} );
+		res.redirect( '/500');
 		throw new Error( userErr );
 	    }
 	    
-	    if( !user ) return res.render('404.ejs', {user: req.user});
+	    if( !user ) return res.redirect('/404');
 	    
 	    var newSettings = {
 		sharedWith: JSON.parse(JSON.stringify( fc.sharedWith ))
@@ -426,17 +433,57 @@ exports.addSharedUser = function(req, res){
 	    
 	    fc.updateSettings( newSettings, function(updateErr){
 		if( updateErr ){
-		    res.render( '500.ejs', { user: req.user} );
+		    res.redirect( '/500');
 		    throw new Error( updateErr );
 		}
 
 		fc.save(function(saveErr){
 		    if( saveErr ){
-			res.render( '500.ejs', { user: req.user} );
+			res.redirect( '/500' );
 			throw new Error( saveErr );
 		    } else res.render('requested-user-added.ejs', {user: req.user, addedUser: user, datascape: fc }); 
 		});	    
 	    });
 	});
+    });
+}
+
+
+exports.updateThumbnail = function(req, res){
+
+    var query = {
+	'_id': req.body.datascapeID,
+	'parent.id': ( req.user || {} ).id
+    }
+
+    FileContainers.findOne( query, function(err, doc){
+	if( err ){
+	    res.status(500).send({err: "Server error"});
+	    throw new Error( err );
+	}
+	if( !doc ) return res.status(404).send({err: 'File not found'});
+	
+	var thumbnailPath = doc.localDataPath + '/files/thumbnails/' + doc._id;
+	var base64URL = req.body.rawImageData.replace(/^data:image\/png;base64,/, "");
+
+	fs.writeFile(thumbnailPath, base64URL, "base64", function(writeErr){
+	    if( writeErr ){
+		res.status(500).send({err: "Error saving image"});
+		throw new Error( writeError );
+	    }
+	    
+	    // Keep the auto generated thumbnail just in case 
+	    // but change the image path
+	    doc.links.thumbnail = doc.publicDataPath + '/files/thumbnails/' + doc._id;
+	                             
+	    doc.save(function(saveErr){
+		if( saveErr ){
+		    res.status(500).send({err: "Error saving image"});
+		    throw new Error( saveError );
+		}	
+		
+		res.send(doc);
+	    });
+	});	
     });
 }

@@ -128,8 +128,8 @@ function init() {
 	var settings  = {
 	    // No settings yet
 	}
-
-	caption.trumbowyg( settings );
+	
+	//caption.trumbowyg( settings );
     }
     
     // @fileContainer and @CSV are overrides form the default data

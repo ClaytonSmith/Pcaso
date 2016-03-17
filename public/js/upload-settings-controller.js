@@ -2,7 +2,7 @@
 
 // Call this somethings that is triggered when upload page is loaded
 
-function init() {
+$(document).ready(function(){
     
     // Globals
     var user         = window.globaData.user;
@@ -15,6 +15,11 @@ function init() {
 
     // Setup rradio buttons
     $("#privacy-public").click(function(event){
+	$("#user-select *").attr('disabled', true);
+	$("#add-user").attr('disabled', true);
+    });
+    
+    $("#privacy-self-public").click(function(event){
 	$("#user-select *").attr('disabled', true);
 	$("#add-user").attr('disabled', true);
     });
@@ -37,32 +42,50 @@ function init() {
 		
 	// Remove first row
 	column.shift()
-	console.log('colum:', column)
 	return Array.apply( null, column).reduce(function(predicate, value, i, self){
 	    return ( predicate && value !== undefined && self.indexOf( value ) === i )
-		|| ( predicate && i === column.length -1 );
+	    || ( predicate && i === column.length -1) ;
 	}, true);
     }
     
     function isAxis(data, index){
 	var column = Array.apply(null, data).map(function(row){ return row[ index ]; });
-
+	
 	// Remove first row
 	column.shift()
 	return Array.apply( null, column).reduce(function(predicate, value, i, self){
-	    return ( predicate && value !== undefined  && !isNaN( parseFloat( value ) ) )
-		|| ( predicate && i === column.length -1 );
+	    return ( predicate && value !== undefined && !isNaN( parseFloat( value ) ) )
+		|| ( predicate && i === column.length -1) ; // Last row can get funky, ignore it
 	}, true);
     }
     
     function setCaption(datascapeCaption){
 	var caption   = $("#caption");	
+
+
+	// For more TinyMCE settings, look here 
+	// https://www.tinymce.com/docs/demo/basic-example/
 	var settings  = {
-	    // Nothing to set yet
-	}
+	    
+	    selector: 'textarea',
+	    height: 250,
+	    plugins: [
+		'advlist autolink lists link image charmap print preview anchor',
+		'searchreplace visualblocks code fullscreen',
+		'insertdatetime media table contextmenu paste code'
+	    ],
+	    toolbar: 'insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image',
+	    content_css: [
+		//'//fast.fonts.net/cssapi/e6dc9b99-64fe-4292-ad98-6974f93cd2a2.css'
+		//'//www.tinymce.com/css/codepen.min.css'
+	    ]
+	};
+
+	// Load content first
+	caption.val( datascapeCaption);
 	
-	caption.trumbowyg( settings );
-	caption.trumbowyg('html', datascapeCaption );
+	// Activate TinyMCE
+	tinymce.init( settings );
     }
     
     
@@ -77,8 +100,7 @@ function init() {
 	// Select user defined default privacy settings
 	// Reminder the string stored in `visibility` must 
 	// match one of the possible radio values. 
-	privacySettings.filter('[value='+ visibility +' ]').prop('checked', true );
-	console.log( visibility );
+	//	console.log( visibility );
 
 	function addSharedUser(sharedUser){
 	    if( !$("#dataset-upload-form").valid() ) return;
@@ -123,16 +145,27 @@ function init() {
 	// Make sure to add users and then disable elements
 	// Make sure only see user emails
 	// in the backend other things besides users can be on the shared list
-	sharedWith.
-	    filter(function(obj){ 
-		return typeof obj === 'string' || myVar instanceof String}).
-	    forEach( addSharedUser );	
+	var usersSharedWith = sharedWith.filter(function(obj){ return typeof obj === 'string' || myVar instanceof String});
+	usersSharedWith.forEach( addSharedUser );	
 	
 	if( visibility === 'PUBLIC') {
+	    // Public 
 	    $("#user-select *").attr('disabled', true);
 	    $("#add-user").attr('disabled', true);
-	} 
-	    
+	    $("#privacy-public").prop('checked', true );
+
+	} else if( visibility === 'PRIVATE' && usersSharedWith.length === 0 ){
+	    //Private and shared with no one
+	    $("#user-select *").attr('disabled', true);
+	    $("#add-user").attr('disabled', true);
+	    $("#privacy-self-private").prop('checked', true );
+
+	} else {
+	    // Private but shared publicly 
+	    $("#privacy-private").prop('checked', true );
+
+	}
+	
 	// // Onclick method to add new email field
 	addUser.click( function(event){
 	    addSharedUser();
@@ -162,7 +195,6 @@ function init() {
 	data[0].forEach(function(datum){ trHead.append( $("<th\>", {html: datum} ) ); })
 	thead.append( trHead );
 	
-	console.log( settings );
 	
 	settings = settings ? settings : {};
 	settings.columnTypes = settings.columnTypes ? settings.columnTypes : [];
@@ -181,8 +213,6 @@ function init() {
 	    var sID = 'eval-column-'+ index +'-as';
 	    var select = $("<select\>", {name: "column-eval-type[]", id: sID, size: 4} );
 	    
-	    console.log('data', datum);
-	    
 	    // Invert the is*() results because `disabled` will disable elements if `true`
 	    // so if something IS true DON'T disable it
 	    
@@ -195,14 +225,13 @@ function init() {
 	    
 	    select.append( $("<option\>", {value: 'omit',  html: 'Omit' }) );
 	    	    
-	    
 	    // Init 
 	    // Reselect values if loading settings, 
-	    select.val( settings.columnTypes[index] );
-	    	    
+	    if( settings.columnTypes[index] )
+		select.val( settings.columnTypes[index] );
+	    
 	    // Creates a change method for each method built
 	    select.change( function(value){
-		console.log(this.value);
 		columnTypes[ index ] = this.value;
 	    });
 	    
@@ -230,8 +259,9 @@ function init() {
 	var formContainer   = $("#form-file-settings-container")
 	var tableContainer  = $("#table-display-container");
 	
+	console.log(file );
 	// Create layout with title and table
-	setTitle( file.name  );
+	setTitle( file.name.replace(/.csv/, "")  );
 	
 	// Create table
 	tableContainer.append( genTable(table.data ) );
@@ -280,7 +310,7 @@ function init() {
 	    var data = {
 		displaySettings: {
 		    title: title,
-		    caption: $('#caption').trumbowyg('html'),	    
+		    caption: tinymce.activeEditor.getContent({format : 'raw'}),	    
 		    display: {
 			columnTypes: columnTypes
 		    },
@@ -293,7 +323,6 @@ function init() {
 	    // I hate to do this but I don't know how else to send objects
 	    formData.append( 'revertUponArival', JSON.stringify( data ) );
 	    formData.append( 'file', file);
-	    console.log(columnTypes);
 	    $.ajax({
 	    	url: actionURL,
 	    	type: method,
@@ -311,7 +340,6 @@ function init() {
 	if( !e.target.files ) return null;
 	
 	file = e.target.files[0];
-	console.log(file.name);
 	
 	Papa.parse( file, {
 	    complete: function(parsedObj){
@@ -325,7 +353,6 @@ function init() {
     // If true, than we are on the settings page.
     // The settings page does not have an file select button.
     if( focusEntity._id ){
-	console.log('On the settings page');
 	
 	// Data is the id of the fileContainer 
 	// we are looking for.
@@ -354,7 +381,6 @@ function init() {
 			// Let the CB do its things
 			seriesCB(null, data); 			
 			
-			console.log( data );
 			// populate form data
 			setTitle( data.displaySettings.title  );
 			
@@ -396,6 +422,5 @@ function init() {
 		});	
 	    });
     }
-}
+});
 
-document.addEventListener("DOMContentLoaded", init);

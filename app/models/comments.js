@@ -82,7 +82,6 @@ CommentSchema.static({
 	    "parent.collectionName": parent.__t || parent.collectionName 
 	}           
 	
-	console.log( query );
 	this.find( query, callback );
     },
 
@@ -132,7 +131,6 @@ CommentSchema.static({
 	
     register: function(parent, target, from, subject, body){
 	
-	console.log(parent, target, from, subject, body);
 	var id = mongoose.Types.ObjectId();
 	var newComment = new this({
 	    __id: id,

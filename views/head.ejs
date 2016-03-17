@@ -18,9 +18,6 @@
 
   <!-- Dataset viewer -->
   <link rel="stylesheet" href="/css/dataset-viewer.css">	
-
-  <!-- Trumbowyg -->
-  <link rel="stylesheet" href="/components/trumbowyg/dist/ui/trumbowyg.min.css">
   
   <!-- Custom style sheets -->
   <link rel="stylesheet" href="/css/pure-extras.css">
@@ -73,7 +70,7 @@
     __t:             "<%- datascape.__t %>", 
     parent:           <%- datascape.parent %>,
     file: {
-    name:            "<%- datascape.file.name %>"
+    name:             "<%- datascape.file.name %>"
     },
     statistics:       <%- datascape.statistics %>,
     //Not sharing user emails for security reasons									
@@ -92,32 +89,39 @@
     window.globaData.focusEntity = focusEntity;
     console.log( window.globaData );
   </script>
-  
-  <!-- Jquery -->
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
 
-  <script src="/components/async/dist/async.min.js"></scritp>
-  <!-- D3 -->
-  <script src="/components/d3/d3.min.js"></script>  
 
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
     
-  <!-- Jquery-comments -->
-  <script src="/components/jquery-comments/js/jquery-comments.min.js"></script>  
+    ga('create', 'UA-69497857-1', 'auto');
+    ga('send', 'pageview');
+  </script>
+
+  <!-- Jquery -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.js"></script>
   
-  <!-- Trumbowyg -->
-  <script src="/components/trumbowyg/dist/trumbowyg.min.js"></script>
-
- <!-- Papa Parse -->
-  <script src="/js/PapaParse/papaparse.js"></script>
-
+  <!-- Async -->
+  <script src="/components/async/dist/async.js"></script>
+  
+  <!-- Jquery-comments -->
+  <script src="/components/jquery-comments/js/jquery-comments.js"></script>  
+  
+  <!-- TinyMCE -->
+  <script src="/components/tinymce/tinymce.min.js"></script>  
+  
   <!-- Jquery form vlidator -->
   <script src="/components/jquery-validation/dist/jquery.validate.min.js"></script>
+
+  
+ <!-- Papa Parse -->
+  <script src="/js/PapaParse/papaparse.js"></script>
   
   <!-- Form2js -->
   <script src="/js/form2js/src/form2js.js"></script>
   <script src="/js/form2js/src/js2form.js"></script>
-  
-  <!-- Upload controllers-->
-  <script src="/js/helpers.js"></script>
   	  
 </head>

@@ -93,8 +93,7 @@ function MailClient( client ){
 
 	users = Array.isArray( users ) ? users : [ users ] ;	
 	newClient.message.to = users.map(function(user){
-	    
-	    console.log("USER \n\n\n",user);
+
 	    if(typeof user === 'string' || user instanceof String)
 		return '<'+ user +'>';
 	    else {
@@ -184,10 +183,6 @@ exports.useTemplate = function(templateName, recipients, additionalObjects, call
     	    mailClient.subject( mailer.subject );
     	    mailClient.html( results.html );
     	    mailClient.text( results.text );
-
-	    console.log("\n\n\n", results.html, "\n\n\n");
-	    console.log("\n\n\n", results.text, "\n\n\n");
-
     	    mailClient.send( next );
     	});
 

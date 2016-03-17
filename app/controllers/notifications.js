@@ -17,26 +17,22 @@ var FileContainers        = mongoose.model('FileContainer');
 var Comments              = mongoose.model('Comment');
 var Notifications         = mongoose.model('Notification');
 
-grid.mongo = mongoose.mongo;
-var conn   = mongoose.createConnection(config.db);
 
 exports.get = function(req, res){
 
     // Make sure an authenticated user is making the request
-    if( !req.isAuthenticated() && 
+    if( !req.isAuthenticated() &&  req.user &&
 	req.query.parentID === req.user._id.toString() )
-	res.sendCode(403);
+	return res.status(403).send({err: "Forbidden"});
     
     var query = {
 	'parent.id': req.query.parentID,
 	'parent.collectionName': req.query.parentCollectionName
     };
 
-    console.log( query );
-    Notifications.find( query , function(err, docs){
-	
-	if( err ) return res.sendCode( 500 );
-    	res.send( docs );
+    Notifications.find( query , function(err, docs){	
+	if( err ) return res.status(500).send({err: "Server error"});
+    	else res.send( docs );
     });
 }
 
@@ -44,22 +40,25 @@ exports.redirect = function(req, res){
 
     // Make sure an authenticated user is making the request
     if( !req.isAuthenticated())
-	res.render('/');
+	return res.redirect('/');
     
     var query = {
 	_id: req.params.notificationID
     };
     
     Notifications.findOne( query , function(err, doc){
-	if( err )  return res.render( '500.ejs' );
-    	if( !doc ) return res.render( '404.ejs' );
+	if( err ){
+	    res.redirect( '/500' );
+    	    throw new Error( err );
+	}
+	if( !doc ) return res.redirect( '/404' );
 	if( doc.parent.id !== req.user.id )
-	    return res.render( '403.ejs' );
+	    return res.redirect( '/403' );
 	
 	doc.read = true;
 
 	doc.save(function(saveErr){
-	    if( saveErr ) return res.render( '500.ejs' );
+	    if( saveErr ) return res.redirect( '/500' );
 	    
 	    res.redirect( doc.links.link );
 	});
@@ -70,23 +69,25 @@ exports.remove = function(req, res){
     
     // Make sure an authenticated user is making the request
     if( !req.isAuthenticated())
-	res.render('/');
+	return res.render('/');
     
     var query = {
 	_id: req.body.notificationID
     };
     
-    console.log(req.body)
     Notifications.findOne( query , function(err, doc){
-	if( err )  return res.sendStatus( 500 );
-    	if( !doc ) return res.sendStatus( 404 );
+	if( err ){
+	    res.status( 500 ).send({err: "Server error"});
+	    throw new Error( err );
+	}
+    	if( !doc ) return res.status( 404 ).send({err: "Notification not found"});
+
 	if( doc.parent.id !== req.user.id )
-	    return res.sendStauts( 403 );
-	
+	    return res.status( 403 ).send({err: "Forbidden"});
+
 	doc.remove(function(saveErr){
-	    if( saveErr ) return res.sendStatus( 500 );
-	    
-	    res.sendStatus( 200 );
+	    if( saveErr ) res.status( 500 ).send({err: "Server error"});
+	    else res.sendStatus( 200 );
 	});
     });
 }

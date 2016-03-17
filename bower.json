@@ -26,8 +26,13 @@
   "dependencies": {
     "d3": "^3.5.14",
     "async": "^1.5.2",
-    "trumbowyg": "^2.0.0",
     "jquery-comments": "^1.1.0",
-    "jquery-validation": "^1.14.0"
+    "jquery-validation": "^1.14.0",
+    "tinymce": "^4.3.7",
+    "base64-js": "^1.1.1",
+    "html2canvas": "^0.4.1",
+    "canvas2image": "*",
+    "canvg": "^1.3.0",
+    "FileSaver": "*"
   }
 }

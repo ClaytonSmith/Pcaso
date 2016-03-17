@@ -1,10 +1,89 @@
+var focusEntity  = window.globaData.focusEntity;
 
 
-    // ===========================================================================
-    // == Config
-    // ===========================================================================
-    // preview_holder
-    // Static settings
+$(function(){
+    
+    // Twitter link
+    var twitterLink = $("#twitter-link");
+    var twitterLinkBody = {
+	url: "http://pcaso.io/" + focusEntity.links.bullet,
+	text: "Explore this datascape with me: ",
+	hashtags: "Pcaso" // Comma separated, NO SPACES....
+    }
+    
+    $("#twitter-link").attr("href", "https://twitter.com/intent/tweet?" + $.param( twitterLinkBody ))
+    console.log( $("#twitter-link").attr("href"), $("#twitter-link") );
+    
+    
+    // Take snapshot
+    $('#take-snapshot').click(function(){
+	
+	$("text").hide();
+	$("path").hide();
+	
+        var focusElement =  "#pcaso";
+	var mySvg = document.querySelector( focusElement );    
+	var canvas = document.createElement('canvas');
+	
+	// For user when focusing on an element. WIP
+	// var canvgSettings = {
+	// 	offsetX: parseInt( $('#box-preview').attr("x")),
+	// 	offsetY: parseInt( $('#box-preview').attr("y")),
+	// 	log: true
+	// }
+	
+        canvas.height = mySvg.getAttribute('height'); //$('#box-preview').attr("height");//
+        canvas.width = mySvg.getAttribute('width'); // $('#box-preview').attr("width");
+        
+	canvg(canvas, mySvg.innerHTML.trim() ); //, canvgSettings);
+	
+        var dataURL = canvas.toDataURL('image/png');
+        var data = atob(dataURL.substring('data:image/png;base64,'.length)),
+
+        asArray = new Uint8Array(data.length);
+
+	$('#img-out').attr('src', dataURL );
+	
+        for (var i = 0, len = data.length; i < len; ++i) {
+	    asArray[i] = data.charCodeAt(i);
+        }
+	$("text").show();
+	
+
+	// Customer wants to update thumbnail with checkbox,
+	// Separate button was recommended
+	if( $('#update-thubnail').is(':checked') ){
+	    var thumbnailData = {
+		'datascapeID': focusEntity._id,
+		'rawImageData': dataURL
+	    };
+	 
+	    $.ajax({
+		type: 'POST',
+		url: '/api/datascapes/update-thumbnail',
+		data: thumbnailData,
+		cache: false,
+		fail: console.log,
+		dataType: 'json'
+	    }).success(function(data){
+		$('#thumbnail-success').attr("hidden", false);
+	    });
+	}
+	
+	var blob = new Blob([asArray.buffer], {type: 'image/png'});
+        saveAs(blob,  focusEntity.displaySettings.title+ '.png');
+	
+    });
+    
+});
+
+
+// Legacy code. The following was preexisting Pcaso.io code used for datascape paiting
+// ===========================================================================
+// == Config
+// ===========================================================================
+// preview_holder
+// Static settings
     var _c = {
 	'nLinesPrev'    : 3,
 	'minPCA'        : 2,
@@ -68,7 +147,7 @@
     // 	// When file is read, load first 5 lines
     // 	reader.onload = function(e){
     // 	    rawData = e.target.result
-	    
+
     // 	    //
     // 	    // Parse data as CSV and load first few lines
     // 	    parseData(rawData);
@@ -187,17 +266,17 @@
 		// --
 		for(var i in _c['fields-pca']){
 		    console.log( _c['fields-pca'][i]-1 );
-		   // console.log( document.getElementById("s[" + (_c['fields-pca'][i]-1) + "]").selectedIndex ); 
-		  //  document.getElementById("s[" + (_c['fields-pca'][i]-1) + "]").selectedIndex = 1;
+		    // console.log( document.getElementById("s[" + (_c['fields-pca'][i]-1) + "]").selectedIndex ); 
+		    //  document.getElementById("s[" + (_c['fields-pca'][i]-1) + "]").selectedIndex = 1;
 		}
 
 		for(var i in _c['fields-meta'])
-//		    .//document.getElementById("s[" + (_c['fields-meta'][i]-1) + "]").selectedIndex = 2;
+		    //		    .//document.getElementById("s[" + (_c['fields-meta'][i]-1) + "]").selectedIndex = 2;
 
-		for(var i in _c['fields-meta-id'])
-//		    document.getElementById("s[" + (_c['fields-meta-id'][i]-1) + "]").selectedIndex = 0;
-//
-		console.log(config);
+		    for(var i in _c['fields-meta-id'])
+			//		    document.getElementById("s[" + (_c['fields-meta-id'][i]-1) + "]").selectedIndex = 0;
+			//
+			console.log(config);
 		_c["caption"] = config["caption"]
 		//
 		// document.getElementById('pcaso-upload').style.display = "none"
@@ -222,7 +301,7 @@
     var _p_color = null;
     var _pcaso = null;
 
-    
+
     var responsive_padding  = null;
 
     var current_p_in_preview  = null;;
@@ -233,7 +312,7 @@
 	.on("brushstart",brushstart)
 	.on("brush",brushmove)
 	.on("brushend",brushend);
-    
+
     var preview_x_scale = d3.scale.linear();
     var preview_y_scale = d3.scale.linear();
 
@@ -252,7 +331,7 @@
 	responsive_padding = getWindowSize() * _c['padding_fraction'];
 	console.log(responsive_padding);
 
-	point_size = _c['pt_size']+parseInt(5/Math.log(data.length));
+	point_size = 2;// _c['pt_size']+parseInt(5/Math.log(data.length));
 
 	// Show caption
 	document.getElementById('show-caption').style.display = "block"
@@ -269,6 +348,8 @@
 	// .classed("svg-container", true)
 	    .append("svg")
 	    .attr("id", "svg-id")
+	    .attr('xmlns', 'http://www.w3.org/2000/svg')
+	    .attr('xmlns:xlink', 'http://www.w3.org/1999/xlink' )
 	    .attr("width",  _c['width' ])
 	    .attr("height", _c['height'])
 	    .attr("viewBox", "-5 0 " + getWindowSize() + " " + getWindowSize())
@@ -358,13 +439,12 @@
 	
 
 	var button_size = responsive_padding;
-	var full_screen_toggle_button = _pcaso.append("svg:image")
+	var full_screen_toggle_button = _pcaso.append("g").append("text")
 	    .attr("id","full_screen_toggle")
-	    .attr("x",preview_x_shift()+preview_size()-button_size*1.5)
-	    .attr("y",responsive_padding/2)
-	    .attr("width",button_size)
-	    .attr("height",button_size)
-	    .attr("xlink:href","/imgs/grow-big.png")
+	    .attr("x",preview_x_shift() + preview_size() - button_size*1.5)
+	    .attr("y", responsive_padding * 1.5)
+	    .attr("class", "grow-shrink-icon-size")
+	    .html("&#xf065")
 	// .text("full screen")
 	    .on("click",function(d) {full_screen_toggle();});
 
@@ -400,10 +480,11 @@
 	    // console.log("drawPreview");
 	    current_p_in_preview = p;
 
-	    var x_shift = preview_x_shift();
+	    var x_shift =  preview_x_shift();
 
 	    size = preview_size();
 	    
+	    console.log([  responsive_padding / 2, size - responsive_padding / 2]);
 	    preview_x_scale.range([  responsive_padding / 2, size - responsive_padding / 2]);
 	    preview_y_scale.range([ size - responsive_padding / 2, responsive_padding / 2]);
 
@@ -414,24 +495,29 @@
 	    
 	    var cell = _pcaso.append("g").attr("id","preview_holder")
 		.append("g").attr("id","preview")
+		.attr("height", size - responsive_padding)
+		.attr("width", size - responsive_padding)
 	    // .attr("x",_c["width"]/2)
 		.attr("transform", function() {
 		    return "translate(" + x_shift + "," + 0 + ")";
 		});
-
+	    
 	    cell.append("rect")
 		.attr("class","box-preview")
+		.attr('id', 'box-preview')
 		.attr("x", responsive_padding / 2)
 		.attr("y", responsive_padding / 2)
 		.attr("width", size - responsive_padding)
 		.attr("height", size - responsive_padding)
-	    .call(brush);
+	    	.style("fill", "#FFFFFF").call(brush);
+	
 	    // .on("click", function(d){
 	    //     _p_mode_highlight = -1;
 	    //     colorPoints(_p_colorBy);
 	    //     size_points_by_selection();
 	    // });
 
+//	     previewBox ) 
 	    //  activate brush listener
 	    cell.call(brush);
 	    // cell.call(function(d){console.log(d)})
@@ -509,11 +595,11 @@
 		.attr("class","selected")
 		.attr("r", point_size)
 		.attr("cx", function(d){ return preview_x_scale(d[p.x]); })
-		.attr("cy", function(d){ return preview_y_scale(d[p.y]); })
+		.attr("cy", function(d){ return preview_y_scale(d[p.y]); });
 	    
 	    // Only hover or click on preview box
 	    cell.selectAll("circle")
-		.style("cursor", "crosshair")
+		//.style("cursor", "crosshair")
 		.on("mouseover", function(d){ hoverPoint(p, d); })
 		.on("click", function(d){ clickPoint(p, d); });
 	}
@@ -535,11 +621,13 @@
 	    //
 	    var cell = d3.select(this);
 	    cell.append("rect")
+		.attr('id', 'testtest')
 		.attr("class", whichClass)
 		.attr("x", responsive_padding / 2)
 		.attr("y", responsive_padding / 2)
 		.attr("width", size - responsive_padding)
 		.attr("height", size - responsive_padding)
+		.style('fill', "#FFFFFF")
 		.on("click", function(d){
 		    redrawPreview(p)
 		})
@@ -606,7 +694,7 @@
 
 		// Set zoom icon to collapse            
 		_pcaso.select("#full_screen_toggle")
-		    .attr("xlink:href","/imgs/grow-big.png")
+		    .html("&#xf065")
 	    }
 	    else {
 		_pcaso.selectAll(".cell").style("visibility", "hidden");
@@ -620,7 +708,7 @@
 
 		// Set zoom icon to collapse            
 		_pcaso.select("#full_screen_toggle")
-		    .attr("xlink:href","/imgs/shrink-big.png")
+		    .html("&#xf066")
 		
 
 		currently_full_screen=true;
@@ -654,7 +742,8 @@
 		.ease("variable")
 	    // Plot coordinates
 		.attr("cx", function(d) { return preview_x_scale(d[newX]); })
-		.attr("cy", function(d) { return preview_y_scale(d[newY]); })
+		.attr("cy", function(d) { return preview_y_scale(d[newY]); });
+		//.style('fill', "#FFFFFF");
 
 	    // Update x and y axes
 	    xAxis = d3.svg.axis().scale(preview_x_scale).orient(_c["x_axis_label_side"]).ticks(5);
@@ -722,7 +811,7 @@
 	    update_styles_on_selection();
 
 	    d3.selectAll("circle.selected")
-		.style("r", function(d) {if (d==this_data){return 4*point_size} else {return point_size}})
+		.attr("r", function(d) {if (d==this_data){return 4*point_size} else {return point_size}})
 	    
 	    // console.log("this_data");
 	    // console.log(this_data);
@@ -881,7 +970,7 @@
     function color_points_by_selection() {
 	// Color selected points
 	_pcaso.selectAll("circle.selected")
-	    .style("fill", function(d) {
+	    .attr("fill", function(d) {
 		val = d[_p_header[_p_colorBy-1]]
 		if(val == "")
 		    return _c['point-na']
@@ -891,22 +980,22 @@
 
 	// Color unselected points
 	_pcaso.selectAll("circle.unselected")
-	    .style("fill",_c["legend-off"])
+	    .attr("fill",_c["legend-off"])
     }
 
     function size_points_by_selection() {
 	// Size selected points
 	_pcaso.selectAll("circle.selected")
-	    .style("r",2*point_size)
+	    .attr("r",2*point_size)
 
 	// Size unselected points
 	_pcaso.selectAll("circle.unselected")
-	    .style("r",point_size)
+	    .attr("r",point_size)
     }
     function size_all_points_small() {
 	// Return all points to their original size
 	_pcaso.selectAll("circle")
-	    .style("r",point_size)
+	    .attr("r",point_size)
     }
 
     function push_selected_points_to_front() {
@@ -923,8 +1012,8 @@
 	    dupe.data([d])  
 	    orig.remove();
 
-	})
-	    }
+	});
+    }
 
     function select_all_points() {
 	_pcaso.selectAll("circle.unselected").attr("class", "selected");
@@ -970,10 +1059,10 @@
 		    return "selected";
 		}
 	    });
-			 
-			 // Count only the number in the preview plot by looking for all the selected circles within the preview plot
+	    
+	    // Count only the number in the preview plot by looking for all the selected circles within the preview plot
 	    _pcaso.select("#preview").selectAll("circle.selected").each( function(d) {
-	    num_highlighted = num_highlighted + 1;
+		num_highlighted = num_highlighted + 1;
 	    });
 
 	    //Update the number selected on the right panel 

@@ -88,14 +88,17 @@ module.exports = function(app, passport) {
     app.get(    '/u/:userID/datascapes/:datascape/settings',       files.getDatascapeSettings );
     app.get(    '/u/:userID/datascapes/:datascape/access-grant/:sharedUserID', files.addSharedUser );
     app.post(   '/u/:userID/datascapes/:datascape/settings',       files.postDatascapeSettings );
-    app.get(   '/u/:userID/datascapes/:datascape/delete',          files.deleteDatascape );
- 
+    
+    app.get(    '/u/:userID/datascapes/:datascape/delete',          files.deleteDatascape );
+    
     //app.delete( '/u/:userID/datascapes/:datascape/delete',         users.deleteDataset );
     app.post(   '/u/:userID/datascapes/:datascape/request-access', files.requestAccess );    
     
     app.get(    '/api/datascapes',          files.getFileContainer);
+    app.post(   '/api/datascapes/update-thumbnail', files.updateThumbnail );
     app.get(    '/api/datascapes/source',   files.getFileContainerSource);
     app.get(    '/api/datascapes/paginate', files.getPaginatedFiles);
+    
     //app.delete( '/api/fileContainer/:fileContaienrID', files.getFileContainer);
     
     app.get(    '/api/comments',            comments.getComments);
@@ -106,10 +109,10 @@ module.exports = function(app, passport) {
     app.get(    '/api/notifications',       notifications.get);
     app.delete( '/api/notifications',       notifications.remove);
     
-    app.get(    '/api/*',  function(req, res){ res.sendStatus(404) });
-    app.post(   '/api/*',  function(req, res){ res.sendStatus(404) });
-    app.put(    '/api/*',  function(req, res){ res.sendStatus(404) });
-    app.delete( '/api/*',  function(req, res){ res.sendStatus(404) });
+    app.get(    '/api/*',  function(req, res){ res.status(404).send('Route not found') });
+    app.post(   '/api/*',  function(req, res){ res.status(404).send('Route not found') });
+    app.put(    '/api/*',  function(req, res){ res.status(404).send('Route not found') });
+    app.delete( '/api/*',  function(req, res){ res.status(404).send('Route not found') });
     
     app.get( '/gallery*', function(req, res){
 	res.render('gallery.ejs', {user: req.user});

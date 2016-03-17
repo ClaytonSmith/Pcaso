@@ -117,8 +117,8 @@ function buildTile( datascapeContainer ){
 	style: 'background-image: url('+ datascapeContainer.links.thumbnail +');'
     };
     var linkSettings = {
-	href: datascapeContainer.links.local
-
+	href: datascapeContainer.links.local,
+	style: "display: block; height: 100%;"
     };
     var authorSettings = {
 	class: "view-count",
@@ -155,8 +155,8 @@ function buildTile( datascapeContainer ){
     link.append( title );
     link.append( author );
     link.append( views );
-    link.append( comments );
-    link.append( created );
+    //link.append( comments );
+    //link.append( created );
     container.append( link );
 
     console.log( container ) ;

@@ -2,6 +2,7 @@
   "name": "Pcaso",
   "main": "server.js",
   "scripts": {
+    "start-server": "node --harmony_proxies server.js",
     "test": "make test",
     "postinstall": "./node_modules/bower/bin/bower install"
   },

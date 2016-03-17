@@ -54,7 +54,7 @@ var FileContainerSchema = new mongoose.Schema({
     links: {
 	parent:          { type: String,  required: true },
 	thumbnail:       { type: String,  required: true },
-	custom:          { type: String,  required: true },
+	// custom:          { type: String,  required: true },
 	bullet:          { type: String,  required: true, unique: true },        // Should never have two identicle bullets
 	link:            { type: String,  required: true, unique: true },        // Unique links prvent users from having two files with 
 	local:           { type: String,  required: true, unique: true },        // files with the same name having the same link
@@ -188,7 +188,6 @@ FileContainerSchema.method({
 		Users.findOne({email: email}, function(err, doc){
 		    if( err ) return eachCB( err );
 		    if( doc ) {
-			console.log('NEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEW', "User\n\n\n\n\n\n\n\n");
 			mailer.useTemplate('shared-with-authenticated-user', doc, { datascape: fileContainer }, eachCB );
 		    } else
 			mailer.useTemplate('shared-with-unauthenticated-user', email, { datascape: fileContainer }, eachCB );
@@ -274,10 +273,9 @@ FileContainerSchema.static({
     },
     
     register: function(parent, file, settings){
-	
-	console.log( 'Register', file );
-	var documentId = mongoose.Types.ObjectId();        		
+	var documentId = mongoose.Types.ObjectId();
 	var fileId = mongoose.Types.ObjectId();        		
+	
 	var fileContainer = new this({
 	    _id: documentId,
 	    parent: {
@@ -298,15 +296,16 @@ FileContainerSchema.static({
 	    links: {
 		thumbnail: parent.publicDataPath + "/files/thumbnails/" + documentId +".png",
 		parent: parent.links.link,
-		bullet: Math.random().toString(36).substring(5) 
+		bullet: Math.random().toString(36).substring(2, 8) 
 	    }
 	});
+
 	fileContainer.displaySettings.title = fileContainer.displaySettings.title || file.name;	    	
 	fileContainer.displaySettings.legacy = this.convertDisplaySettingsToLegacy( fileContainer.displaySettings );
 	
-	fileContainer.links.custom = (settings.links || {}).customURL || fileContainer.links.bullet;
-	fileContainer.links.link  = parent.links.link  + "/datascapes/" + fileContainer.links.custom;
-	fileContainer.links.local = parent.links.local + "/datascapes/" + fileContainer.links.custom;
+	//fileContainer.links.custom = (settings.links || {}).customURL || fileContainer.links.bullet;
+	fileContainer.links.link  = parent.links.link  + "/datascapes/" + fileContainer.links.bullet;
+	fileContainer.links.local = parent.links.local + "/datascapes/" + fileContainer.links.bullet;
 	fileContainer.links.base  = parent.links.local + "/datascapes/";
 
 	return fileContainer;
@@ -379,8 +378,6 @@ FileContainerSchema.pre('remove', function(next) {
     grid.mongo = mongoose.mongo;
     var conn   = mongoose.createConnection(config.db);
     var fileQuery = {_id: fileContainer.file.id, root: 'uploads'};
-
-
     var parentCollection  = mongoose.model( fileContainer.parent.collectionName );    
     function deleteFrom( collection, searchQuery, callback ){
         collection.findOne( { _id: searchQuery }, function( err, doc ){
@@ -408,7 +405,6 @@ FileContainerSchema.pre('remove', function(next) {
 	    
 	    function(parellelCB){
 		conn.once('open', function () {
-		    console.log("Removal:",fileQuery);
 		    grid(conn.db).remove( fileQuery, parellelCB );	
 		});
 	    },

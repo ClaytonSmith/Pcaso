@@ -15,7 +15,7 @@ circle           { cursor:pointer; /*fill-opacity: 0.6;*/ }
 /* Axis-related */
 .axis, .box      { shape-rendering:crispEdges; }
 .axis line       { stroke:#aaa; }
-.axis path       { display:none; }
+.axis path       { fill: none; }
 #x_label         {font-size:1.7vmin;}
 #y_label         {font-size:1.7vmin;}
 
@@ -36,7 +36,9 @@ circle           { cursor:pointer; /*fill-opacity: 0.6;*/ }
 #pcaso-selection { padding-right:4vmin; font-size:2vmin; display:inline-block; float:left; padding: 2vmin 2vmin 2vmin 2vmin; } /* Showing meta-data column names */
 #pcaso-legend    { font-weight:bold; font-size:2vmin; line-height:3vmin; overflow-y:auto; display:inline-block; float:left; padding: 2vmin 2vmin 2vmin 2vmin; } /* meta-data content */
 
-
+.dimain{
+    background-color: white;
+}
 /* Caption */
 #show-caption{
     display:none;
@@ -65,7 +67,6 @@ circle           { cursor:pointer; /*fill-opacity: 0.6;*/ }
 
 /* Brush area */
 .extent {
-    fill: #000;
     fill-opacity: .125;
     stroke: #fff;
 }
@@ -76,4 +77,22 @@ circle           { cursor:pointer; /*fill-opacity: 0.6;*/ }
 
 .datascape-container{
     padding: 1em 2em 2em 2em;
+}
+
+#preview circle{
+    cursor: crosshair;
+}
+
+svg text{
+    font-family: FontAwesome;
+}
+
+.grow-shrink-icon-size{
+    font-size: 16pt;
+}
+
+
+.grow-shrink-icon-size:hover{
+    font-size: 17pt;
+    cursor: pointer; 
 }

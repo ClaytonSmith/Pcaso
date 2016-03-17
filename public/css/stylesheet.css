@@ -37,6 +37,13 @@ body {
     display: block !important;
 }
 
+.paint-datascape{
+    border-radius: 20px;
+    margin-left: .5em;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
 /* Pcaso span */
 .pcaso:before{
     content: "Pca";
@@ -172,7 +179,7 @@ body {
 }
 
 .app-content {
-    width: 75%;
+    width: 76%;
     max-width: 1500px;
     min-width: 350px;
     margin: auto;
@@ -278,6 +285,7 @@ body {
 }
 
 .profile-main-display{
+    min-height: 25em;
     max-height: 35em;
     margin-bottom: 6em;
 }
@@ -285,7 +293,6 @@ body {
 
 .dataspace-tile{
     width: 16em;
-    margin: auto;
     padding: .5em;
     text-align: left;
     background-color: white;
@@ -295,15 +302,19 @@ body {
     border-width: 1px;
     background-size: cover;
     background-repeat: no-repeat;
-    height: 130px;
+    height: 16em;
     position: relative;
-    margin-top: .5em;    
+    margin: .5em 5px 0 4px;
+/* display: flex; */
 }
 
 
 .dataspace-tile a{
     z-index: 100;
+    overflow: auto;
     color: #353535;
+    align-items: stretch;
+    width: 100%;
     text-shadow: -.5px -.5px 0 #FFFFFF, .5px -.5px 0 #FFFFFF, -.5px .5px 0 #FFFFFF, .5px .5px 0 #FFFFFF;
 }
 
@@ -497,6 +508,20 @@ body {
     max-height: inherit;
     overflow-x: inherit;
     overflow-y: auto;
-    height: calc( 100% - 80px);
     position: relative;
+}
+
+
+.fa-twitter{
+    color: #55acee;
+}
+
+.datascape-icon{
+    color: #757575;
+    margin-right: .5em;
+    margin-left: .5em;
+}
+
+.datascape-icon:hover{
+    color: #3B3B3B;
 }
