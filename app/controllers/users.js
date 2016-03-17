@@ -224,7 +224,6 @@ exports.createDataset = function(req, res){
     // var fileInfo = // check req	
     form.parse(req, function(err, fields, files) {
 	if (err) {
-	    console.log(err);
 	    res.status(500).send({err: "Server error" });
 	    //res.sendStatus(500);
 	    throw new Error( err );
@@ -319,8 +318,6 @@ exports.editProfileSettings = function(req, res){
 	    
 	    // If a new password has been provided
 	    if( fields.newPassword && fields.newPassword !== '' ){
-		
-		console.log('fields.newPassword: ',fields.newPassword);
 		doc.password = Users.generateHash( fields.newPassword );  
 	    }
 	    

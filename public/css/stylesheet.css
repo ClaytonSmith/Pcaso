@@ -292,7 +292,6 @@ body {
 
 .dataspace-tile{
     width: 16em;
-    margin: auto;
     padding: .5em;
     text-align: left;
     background-color: white;
@@ -304,8 +303,8 @@ body {
     background-repeat: no-repeat;
     height: 16em;
     position: relative;
-    margin-top: .5em;
-    display: flex;
+    margin: .5em 5px 0 4px;
+/* display: flex; */
 }
 
 
@@ -515,4 +514,14 @@ body {
 
 .fa-twitter{
     color: #55acee;
+}
+
+.datascape-icon{
+    color: #757575;
+    margin-right: .5em;
+    margin-left: .5em;
+}
+
+.datascape-icon:hover{
+    color: #3B3B3B;
 }

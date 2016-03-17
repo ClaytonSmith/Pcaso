@@ -17,8 +17,6 @@ var FileContainers        = mongoose.model('FileContainer');
 var Comments              = mongoose.model('Comment');
 var Notifications         = mongoose.model('Notification');
 
-grid.mongo = mongoose.mongo;
-var conn   = mongoose.createConnection(config.db);
 
 exports.get = function(req, res){
 
@@ -32,8 +30,7 @@ exports.get = function(req, res){
 	'parent.collectionName': req.query.parentCollectionName
     };
 
-    Notifications.find( query , function(err, docs){
-	
+    Notifications.find( query , function(err, docs){	
 	if( err ) return res.status(500).send({err: "Server error"});
     	else res.send( docs );
     });

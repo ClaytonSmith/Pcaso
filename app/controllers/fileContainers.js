@@ -142,6 +142,8 @@ exports.datascapeGetCSV = function(req, res){
 	    throw new Error( err );
 	}
 	
+	if( !doc ) return res.status(404).send({err: "File not found"});
+	
 	if( doc.viewableTo( req.user ) ){ 
 	    doc.getFile( res );
 	    doc.save(function(saveErr){
@@ -166,9 +168,12 @@ exports.datascapeGetLegacyConfig = function(req, res){
     
     FileContainers.findOne( query, function(err, doc){
 	if( err ){
-	    res.status(500).send({});
+	    res.status(500).send({err: "Server error"});
 	    throw new Error( err );
 	}
+	
+	if( !doc ) return res.status(404).send({err: "File not found"});
+	
 	if( doc.viewableTo( req.user ) ){ 
 	    res.send( doc.displaySettings.legacy );
 	} else {
@@ -317,7 +322,7 @@ exports.postDatascapeSettings = function(req, res){
 
 exports.deleteDatascape = function(req, res){
 
-    if( !req.isAuthenticated() )
+    if( !req.isAuthenticated() && req.user )
 	res.redirect('/403');
    
     var query = {
@@ -329,6 +334,8 @@ exports.deleteDatascape = function(req, res){
 	    res.redirect('/500' );
 	    throw new Error( fcErr );
 	}
+	
+	if( !doc ) return res.redirect( req.user.links.local );
 	
 	// Make sure the user exists and they are the parent 
 	if( req.user && doc.parent.id !== req.user._id.toString() )
@@ -462,7 +469,6 @@ exports.updateThumbnail = function(req, res){
 	fs.writeFile(thumbnailPath, base64URL, "base64", function(writeErr){
 	    if( writeErr ){
 		res.status(500).send({err: "Error saving image"});
-		console.log(writeErr);
 		throw new Error( writeError );
 	    }
 	    
@@ -473,7 +479,6 @@ exports.updateThumbnail = function(req, res){
 	    doc.save(function(saveErr){
 		if( saveErr ){
 		    res.status(500).send({err: "Error saving image"});
-		    console.log(saveErr);
 		    throw new Error( saveError );
 		}	
 		
