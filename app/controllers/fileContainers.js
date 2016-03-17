@@ -375,7 +375,7 @@ exports.getPaginatedFiles = function(req, res){
     if( req.user && ( req.query.parentID === req.user._id.toString() ) ){
 	query['$or'].push( {'displaySettings.visibility': 'PRIVATE' } );
     }
-    
+
     // Construct paginate params
     // Don't forget to parse all incoming integer values
     var paginateParams = {
