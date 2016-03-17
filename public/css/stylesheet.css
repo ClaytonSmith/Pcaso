@@ -179,7 +179,7 @@ body {
 }
 
 .app-content {
-    width: 76%;
+    width: 78%;
     max-width: 1500px;
     min-width: 350px;
     margin: auto;
@@ -509,6 +509,7 @@ body {
     overflow-x: inherit;
     overflow-y: auto;
     position: relative;
+    height: 20em;
 }
 
 

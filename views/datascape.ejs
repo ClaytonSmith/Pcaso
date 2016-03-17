@@ -32,9 +32,8 @@
 	
 	<!-- Pcaso --> 
 	<div id="pcaso"></div>
-	
 	<div id="pcaso-panel">
-	  
+
 	  <div id="pcaso-hover">( 0, 0 )</div> 
 	  <div id="search_panel">
 	    <form name="searchform" onSubmit="return handleSearch()" >
@@ -50,14 +49,15 @@
 	  <div id="pcaso-selection" ></div>
 	  <div id="pcaso-legend" ></div> 
 	  
-	</div>
 
+
+	</div>
+		
 	<br style="clear: both;">
 	<div class="top-m-1">
 	  <p>
-	    <a target="_blank" id="twitter-link"><i class="fa fa-twitter fa-2x"></i></a>
 	    <!-- <span>|</span> -->
-	    <i id="take-snapshot" class="fa fa-file-image-o fa-2x datascape-icon" title="Save a snapshot of this datascape."></i>
+	    <i id="take-snapshot" class="fa fa-camera fa-3x datascape-icon" title="Save a snapshot of this datascape."></i>
 	    
 	    
 	    <% if (isOwner) { %> 	  
@@ -66,10 +66,15 @@
 	    <label for="update-thumbnail" title="Set the current display as the datascapes's thumbnail.">Make thumbnail</label>
 	    
 	    <a href="<%- datascape.links.local %>/settings" >
-	      <i class="fa fa-cog fa-2x rotate-on-hover datascape-icon pull-right" style="margin-right: 1em"></i>
+	      <i class="fa fa-cog fa-3x rotate-on-hover datascape-icon" style="margin-right: 1em"></i>
 	    </a>
+	
 	    <% } %>
+
+	    <a target="_blank" id="twitter-link"><i class="fa fa-twitter fa-3x" style="position: absolute; left: 700px"></i></a>
+		  
 	  </p>
+
 	</div>
       	
 	<div style="display:none;" id="show-caption" >
