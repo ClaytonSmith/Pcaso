@@ -179,7 +179,7 @@ body {
 }
 
 .app-content {
-    width: 75%;
+    width: 76%;
     max-width: 1500px;
     min-width: 350px;
     margin: auto;
@@ -285,6 +285,7 @@ body {
 }
 
 .profile-main-display{
+    min-height: 25em;
     max-height: 35em;
     margin-bottom: 6em;
 }
