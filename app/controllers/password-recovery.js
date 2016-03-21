@@ -67,7 +67,7 @@ exports.requestRecoveryEmail = function(req, res){
 
 exports.resetAccountPasswordForm = function(req, res){ 
     if( req.isAuthenticated() ) return res.redirect('/profile');
-    else res.render('passwrod-reset-form', { user: req.user, recoveryID: req.params.recoveryID }); 
+    else res.render('password-reset-form', { user: req.user, recoveryID: req.params.recoveryID }); 
 }
 
 exports.resetAccountPassword = function(req, res){
