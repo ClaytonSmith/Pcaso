@@ -116,13 +116,14 @@ describe('User - FileContainer: Integration test', function(){
 		expect( fc.parent.collectionName ).to.equal( user1.__t );
 		done();
 	    });
+
 	}).catch( function(d,e){ done(e)} );
     
     });
     
     it('Register and remove file with user1', function(done){
 	
-	var check = helper.check( done );
+	var check = helper.check(done);
 	
 	var promise = new Promise( function(resolve, reject){
 	    fileCntr = user1.registerFile(fileTemplate.file, fileTemplate.settings, function(err){
@@ -181,19 +182,19 @@ describe('User - FileContainer: Integration test', function(){
 	    });
 	});
 		
-	promise.then(function( fc ){
-	    check(function(){
-		expect( fc.viewableTo( user1 ) ).to.be.true;
-		console.log(fc.viewableTo( user2 ));
-		expect( fc.viewableTo( user2 ) ).to.be.false;
-		
-	    }, done);
-	}).catch( function(d,e){done(e)} );
+	promise.catch( function(d,e){ done(e)} )
+	    .then(function( fc ){
+		check(function(){
+		    expect( fc.viewableTo( user1 ) ).to.be.true;
+		    expect( fc.viewableTo( user2 ) ).to.be.false;
+		    done();
+		});
+	    });
     });
-
+    
     it('File visability: Shared', function(done){
 	
-	function check(f){ try{ f() }catch( e ){ done(e); };};
+	var check = helper.check( done );
 
 	var promise = new Promise( function(resolve, reject){
 	    fileCntr = user1.registerFile(fileTemplate.file, fileTemplate.settings, function(err){
@@ -202,7 +203,7 @@ describe('User - FileContainer: Integration test', function(){
 	    });
 	});
 	
-	promise.then(function( fc ){
+	promise.catch( function(d,e){ done(e) }).then(function( fc ){
 	    check(function(){
 		expect( fileCntr.viewableTo( user1 ) ).to.be.true;
 		expect( fileCntr.viewableTo( user2 ) ).to.be.false;
@@ -214,38 +215,15 @@ describe('User - FileContainer: Integration test', function(){
 		    else resolve()
 		});
 	    });
-	}).catch( function(d,e){done(e)} ).then(function(){
+	}).then(function(){
 	    check(function(){	    
 		expect( fileCntr.viewableTo( user1 ) ).to.be.true;
 		expect( fileCntr.viewableTo( user2 ) ).to.be.true;
 		done();
 	    });
-	}).catch( function(d,e){done(e)} );
-    });
-
-    it('File visability: Default visibility', function(done){
-	
-	var check = helper.check( done );
-
-	user1.fileSettings.defaults.visibility = 'PUBLIC'
-	
-	var promise = new Promise( function(resolve, reject){
-	    fileCntr = user1.registerFile(fileTemplate.file, fileTemplate.settings, function(err){
-		if( err ) reject( done, err );
-		else resolve( fileCntr );
-	    });
 	});
-	
-	promise.then(function( fc ){
-	    check(function(){
-		expect( fc.viewableTo( user1 ) ).to.be.true;
-		expect( fc.viewableTo( user2 ) ).to.be.true;
-		done();
-	    });
-	    
-	}).catch( function(d,e){done(e)} );
     });
-    
+
     it('Remove file when parent is removed', function(done){
 	
 	var check = helper.check( done );

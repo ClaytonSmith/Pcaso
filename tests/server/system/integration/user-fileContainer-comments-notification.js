@@ -95,7 +95,7 @@ describe('User - FileContainer - Comments - Notification: Integration test', fun
     });
 
 
-    it("User1 comments on User1's account: expect notification", function(done){
+    it("User1 comments on User1's account: expect no notifications", function(done){
 	var check = helper.check(done);
 	
 	// Keep track of comment throughout this mess of a test
@@ -117,7 +117,7 @@ describe('User - FileContainer - Comments - Notification: Integration test', fun
 	    });
 	}).catch( function(e){ done(e) }).then(function(updatedUser){
 	    check(function(){
-		expect( user1.notifications.length ).to.equal( 1 );
+		expect( user1.notifications.length ).to.equal( 0 );
 		done();
 	    });
 	});

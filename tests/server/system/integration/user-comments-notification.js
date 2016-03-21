@@ -42,7 +42,8 @@ describe('User - Comments - Notification: Integration test', function(){
 		keepFile: true
 	    },
 	    displaySettings:{
-		// null
+		// Set to private for visibility test
+		visibility: "PRIVATE"
 	    }
 	}
     };

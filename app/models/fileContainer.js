@@ -230,7 +230,7 @@ FileContainerSchema.method({
     
     viewableTo: function(entity){ 
         var fileContainer = this;
-        
+	
         // Is file public 
 	if( fileContainer.displaySettings.visibility === 'PUBLIC') return true;
 	
@@ -242,11 +242,6 @@ FileContainerSchema.method({
 	if( String( fileContainer.parent.id ) === entity._id.toString() &&
 	    fileContainer.parent.collectionName === entity.__t ) return true;
 
-
-	console.log(String( fileContainer.parent.id ) === entity._id.toString() &&
-		    fileContainer.parent.collectionName === entity.__t ,
-		    String( fileContainer.parent.id ) === entity._id.toString(),
-		    fileContainer.parent.collectionName === entity.__t );
 	
         // File is private and entity is on the shared list
         var idIndex         = fileContainer.sharedWith.map( function(e){ return String( e.id ) } ).indexOf( String( entity._id ));

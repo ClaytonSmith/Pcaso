@@ -6,8 +6,8 @@ require('./user-comments-notification');
 
 // FileContainers
 require('./user-fileContainer');
-//require('./user-fileContainer-notification');
+require('./user-fileContainer-notification');
 
 // FileContainers and Comments
-//require('./user-fileContainer-comments');
-//require('./user-fileContainer-comments-notification');
+require('./user-fileContainer-comments');
+require('./user-fileContainer-comments-notification');
