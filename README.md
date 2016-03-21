@@ -21,9 +21,12 @@ install nvm
 set node v5.4.1 as server default
 > nvm alias default v5.4.1
 
-clone repo
-> git clone https://github.com/claytonsmith/pcaso
+Unpack `pcaso-numedii.zip` into desired location. Install `unzip` if needed, ( apt-get ).
+> unzip pcaso-numedii.zip -d pcaso
+
 > cd pcaso
+
+
 
 install app dependencies 
 > npm install
