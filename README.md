@@ -7,6 +7,7 @@
 
 
 > curl -sL https://deb.nodesource.com/setup | sudo bash -
+
 > sudo apt-get install git nodejs mongodb build-essential npm build-essential libssl-dev libgd2-xpm-dev
 
 Set nodejs to node
@@ -14,13 +15,14 @@ Set nodejs to node
 
 install nvm
 > curl https://raw.githubusercontent.com/creationix/nvm/v0.16.1/install.sh | sh
+
 > nvm install v5.4.1
 
 set node v5.4.1 as server default
 > nvm alias default v5.4.1
 
 clone repo
-> git clone https://github.com/claytonsmith/picaso
+> git clone https://github.com/claytonsmith/pcaso
 > cd pcaso
 
 install app dependencies 
