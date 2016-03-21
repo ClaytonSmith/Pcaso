@@ -28,6 +28,7 @@ install app dependencies
 
 When running on a server, install forever to keep the server alive forever
 > npm install -g forever
+
 ### Setup 
 configure the app's secrets in `config/secrets.js`
 
