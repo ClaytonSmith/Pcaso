@@ -25,18 +25,15 @@ describe('Unauthenticated user', function(){
     beforeEach( function(done){
 	userTemplate = helper.genUser();
 	
+	// Create user
 	user = UnauthenticatedUser.register(
 	    userTemplate.name.first,
 	    userTemplate.name.last,
 	    userTemplate.email,
-	    userTemplate.password,
-	    userTemplate.username
+	    userTemplate.password
 	);
 	
-	user.save( function(err){
-	    console.log( err );
-	    done( err );
-	} );
+	user.save( done );
     });
     
     afterEach(function(done){
@@ -49,9 +46,7 @@ describe('Unauthenticated user', function(){
     });
 
     it('Password encription', function(){
-	
-	expect( user.password ).not
-	    .equal( userTemplate.password );
+	expect( user.password ).not.equal( userTemplate.password );
     });             
     
     it('User information saved correctly', function(){
@@ -80,6 +75,7 @@ describe('User', function(){
 	    userTemplate.username
 	);
 	
+	//console.log( user );
 	user.save( done );
     });
     
@@ -100,7 +96,6 @@ describe('User', function(){
 	expect( user.name.first ).equal( userTemplate.name.first );
 	expect( user.name.last ).equal( userTemplate.name.last );
 	expect( user.email ).equal( userTemplate.email );
-	expect( user.username ).equal( userTemplate.username );
     });
 
     it('Attach file', function(){
@@ -131,43 +126,35 @@ describe('User', function(){
 	expect( user.comments.length ).to.equal( 1 );
 	expect( user.comments ).to.include( comment  );
     });
-
-    //it('Add new notification', function(){
-	// create notification
-	//var notification = new Notification({ -- });
-	//use.addNotification( notification );
-	//expect( user.notifications.length ).to.equal( 1 );
-    //});
-
-    //it('Mark notification as read', function(){
-    // create notification
-    // var notification = new Notification({ -- });
-    // use.addNotification( notification );
-    // expect( user.notifications.length ).to.equal( 1 );
-    // user.markNotificationAsRead( notification );
-    // expect( user.notifications.length ).to.equal( 1 );
-    // expect( user.notifications[0] ).to.equal( -- );
-    //});
     
-    // it('Add new notification', function(){
-    // create notification
-    // var notification = new Notification({ -- });
-    // use.addNotification( notification );
-    // expect( user.notifications.length ).to.equal( 1 );
-    // user.removeNotification( notification );
-    // expect( user.notifications.length ).to.equal( 0 );
-    // });
-    
+   it('Add new notification', function(  ){
 
-    // it('Add comment, expect notification', function(){
-    // 	var comment = mongoose.Types.ObjectId(); // fake the obejct ID
-    // 	user.addComment(comment);
+       // create notification id
+       var notificationID =  mongoose.Types.ObjectId();
+
+       // Add a single notification 
+       user.addNotification( notificationID );
+       expect( user.notifications.length ).to.equal( 1 );
+   });
+
+    
+    it('Add and remove notification', function(done){
 	
-    // 	expect( user.comments.length ).to.equal( 1 );
-    // 	expect( user.comments ).to.include( comment  );
+	// create notification id
+	var notificationID =  mongoose.Types.ObjectId();
 	
-    // 	expect( user.notifications.length ).to.equal( 1 );
-    // });
+	user.addNotification( notificationID );
+	expect( user.notifications.length ).to.equal( 1 );
+	
+	user.removeNotification( notificationID, function(err){
+	    if( err ) return done(err);
+	    
+	    expect( user.notifications.length ).to.equal( 0 );
+	    
+	    done( null );
+	});
+    });
+
     
     it('Add and remove comment', function(done){
 	var comment = mongoose.Types.ObjectId(); // fake the obejct ID
@@ -182,16 +169,5 @@ describe('User', function(){
 	    expect( user.comments ).to.not.include( comment  );
 	    done();
 	});
-    });
-        
-    
-    /* Need to updated to ensure emails are still unique */
-    // it('Update email and expect notification', function(){
-    // 	var newEmailAddr = 'me@newTest.com';
-	
-    // 	user.updateEmail( newEmailAddr );
-
-    // 	expect(user.email).to.equal( newEmailAddr );
-    // 	//expect(user.notifications.length).to.equal( 1 );
-    // });
+    });    
 });

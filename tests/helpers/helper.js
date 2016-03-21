@@ -26,7 +26,7 @@ exports.fileTemplate =	{
     file: {
 	name: 'test file',
 	path: './data/test/test-file.txt'
-	},
+    },
     settings:{
 	fileOptions: {
 	    keepFile: true
@@ -39,11 +39,12 @@ exports.fileTemplate =	{
     }
 };
 
-exports.check = function( done ){
-    return function(tests){
+exports.check = function(done ){
+    return function(test){
 	try{
 	    tests()
 	} catch( error ) {
+	    console.log( error );
 	    done( error );
 	    throw new Error( error );
 	}

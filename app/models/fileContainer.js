@@ -114,19 +114,28 @@ FileContainerSchema.method({
 	    notification.save( function(err){
 		if( err ) return callback( err );
 		// TODO: move this into notificationx
-		mailer.useTemplate( 'shared-datascape', sharedEntity, fileContainer, callback );
+		mailer.useTemplate( 'shared-with-authenticated-user', sharedEntity, { datascape: fileContainer }, callback );
 	    });
 	
+
+	    // If string is given, email ( we hope ), query for user
 	} else if( typeof sharedEntity ===  'string' || sharedEntity instanceof String ){
+	    
+
+	    // Should check that string is email
 	    
 	    User.findOne( { email: sharedeeEntity }, function(err, doc){
 		if( err )  callback( err );
+		
+		// No user found with provided email
 		if( !doc ){
+		    
 		    // Not user. Email non-user and save email 
 		    this.sharedWith.push( sharedeeEntity );
-		    mailer.useTemplate( 'shared-datascape-with-unregistered-user', sharedEntity, fileContainer, callback );
+		    mailer.useTemplate( 'shared-datascape-with-unregistered-user', doc, { datascape: fileContainer }, callback );
 		    
-		} else {
+		
+		} else { // Found user, email them
 		    
 		    this.sharedWith.push( sharedEntity.email );
 		    
@@ -137,12 +146,13 @@ FileContainerSchema.method({
 			if( err ) return callback( err );
 			
 			// TODO: move this into notificationx
-			mailer.useTemplate( 'shared-datascape', sharedEntity, callback );
+			mailer.useTemplate( 'shared-with-authenticated-user', doc, { datascape: fileContainer}, callback );
 		    });	    
 		}
 	    });
 	    
-	} else {
+	    
+	} else {// Add shered  entity
 	    shared = { id: sharedEntity._id, collectionName: sharedEntity.__t };
 	    this.sharedWith.push( shared  );
 	    callback( null );
@@ -166,10 +176,11 @@ FileContainerSchema.method({
 	var fileContainer = this;
 
 	// Diff the `sharedWith` list to get the newly added users
-	var newSharedUsers = newSettings.sharedWith.filter(function(email){ return fileContainer.sharedWith.indexOf( email ) === -1; })
+	var newSharedUsers = ( newSettings.sharedWith || [] ).filter(function(email){ return fileContainer.sharedWith.indexOf( email ) === -1; })
 	
 	fileContainer.sharedWith = newSettings.sharedWith;
-
+	
+	// Allows for updating single fields at a time
 	fileContainer.displaySettings.display     = ( newSettings.displaySettings || {} ).display     || fileContainer.displaySettings.display;
 	fileContainer.displaySettings.title       = ( newSettings.displaySettings || {} ).title       || fileContainer.displaySettings.title;
 	fileContainer.displaySettings.caption     = ( newSettings.displaySettings || {} ).caption     || fileContainer.displaySettings.caption;
@@ -231,6 +242,12 @@ FileContainerSchema.method({
 	if( String( fileContainer.parent.id ) === entity._id.toString() &&
 	    fileContainer.parent.collectionName === entity.__t ) return true;
 
+
+	console.log(String( fileContainer.parent.id ) === entity._id.toString() &&
+		    fileContainer.parent.collectionName === entity.__t ,
+		    String( fileContainer.parent.id ) === entity._id.toString(),
+		    fileContainer.parent.collectionName === entity.__t );
+	
         // File is private and entity is on the shared list
         var idIndex         = fileContainer.sharedWith.map( function(e){ return String( e.id ) } ).indexOf( String( entity._id ));
 	var collectionIndex = fileContainer.sharedWith.map( function(e){ return e.collectionName } ).indexOf( entity.__t );

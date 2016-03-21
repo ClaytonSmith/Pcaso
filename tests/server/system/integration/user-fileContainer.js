@@ -104,10 +104,7 @@ describe('User - FileContainer: Integration test', function(){
 
 	var promise = new Promise( function(resolve, reject){
 	    fileCntr = user1.registerFile(fileTemplate.file, fileTemplate.settings, function(err){
-		if( err ) {
-		    console.log(err); 
-		    reject( done, err );
-		}
+		if( err ) reject( done, err );
 		else resolve( fileCntr );
 	    });
 	});
@@ -136,14 +133,10 @@ describe('User - FileContainer: Integration test', function(){
 	
 	promise.then(function( fc ){
 	    check(function(){
-
-		expect( user1.files ).to.not.include( fc._id );
+		expect( user1.files ).to.include( fc._id );
 		expect( fc.parent.id ).to.equal( user1._id.toString() );
 		expect( fc.parent.collectionName ).to.equal( user1.__t );
 	    });
-	    
-	    
-	    
 	    return new Promise( function(resolve, reject){
 		user1.removeFile( fc._id, function(err){
 		    if( err ) reject( done, err );
@@ -157,10 +150,9 @@ describe('User - FileContainer: Integration test', function(){
 		    if( err ) reject( done, err );
 		    else resolve( doc )
 		});
-	    });	    
+	    });
 	}).catch( function(d,e){done(e)} ).then(function(updatedUser){
 	    check(function(){
-		console.log( 'HELLLLLLLLLOOOOOOOOO',fileCntr );
 		expect( user1.files ).to.not.include( fileCntr._id );
 	    });
 	    
@@ -188,13 +180,14 @@ describe('User - FileContainer: Integration test', function(){
 		else resolve( fileCntr );
 	    });
 	});
-	
+		
 	promise.then(function( fc ){
 	    check(function(){
 		expect( fc.viewableTo( user1 ) ).to.be.true;
+		console.log(fc.viewableTo( user2 ));
 		expect( fc.viewableTo( user2 ) ).to.be.false;
-		done();
-	    });
+		
+	    }, done);
 	}).catch( function(d,e){done(e)} );
     });
 

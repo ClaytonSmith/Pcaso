@@ -65,16 +65,14 @@ describe('User - Comments - Notification: Integration test', function(){
 	    user1Template.name.first,
 	    user1Template.name.last,
 	    user1Template.email,
-	    user1Template.password,
-	    user1Template.username
+	    user1Template.password
 	);
 
 	user2 = User.register(
 	    user2Template.name.first,
 	    user2Template.name.last,
 	    user2Template.email,
-	    user2Template.password,
-	    user2Template.username
+	    user2Template.password
 	);
 	
 	user1.save(function(err){
@@ -108,7 +106,7 @@ describe('User - Comments - Notification: Integration test', function(){
     });
 
     
-    it("User1 comments on User1's account: expect notification", function(done){
+    it("User1 comments on User1's account: expect no notification", function(done){
     	var check = helper.check(done);
 	
     	// Keep track of comment throughout this mess of a test
@@ -123,14 +121,14 @@ describe('User - Comments - Notification: Integration test', function(){
     	}).catch( function(e){ done(e) }).then(function(){
 	    
     	    return new Promise( function(resolve, reject){
-    		User.findOne( { _id: user1 }, function(err, doc){
+    		User.findOne( { _id: user1._id }, function(err, doc){
     		    if( err || !doc ) reject( ( err || new Error( 'No Doc' ) ) );
     		    else { user1 = doc ; resolve( doc ); } 
     		});
     	    });
     	}).catch( function(e){ done(e) }).then(function(updatedUser){
     	    check(function(){
-    		expect( user1.notifications.length ).to.equal( 1 );
+    		expect( user1.notifications.length ).to.equal( 0 );
     		done();
     	    });
     	});
@@ -151,7 +149,7 @@ describe('User - Comments - Notification: Integration test', function(){
     	}).catch( function(e){ done(e) }).then(function(){
 	    
     	    return new Promise( function(resolve, reject){
-    		User.findOne( { _id: user1 }, function(err, doc){
+    		User.findOne( { _id: user1._id }, function(err, doc){
     		    if( err || !doc ) reject( ( err || new Error( 'No Doc' ) ) );
     		    else { user1 = doc ; resolve( doc ); } 
     		});
@@ -178,39 +176,38 @@ describe('User - Comments - Notification: Integration test', function(){
     		else resolve( comment1 );
     	    });
     	}).catch( function(e){ done(e) }).then(function(){
-	    
     	    return new Promise( function(resolve, reject){
-    		User.findOne( { _id: user1 }, function(err, doc){
+    		User.findOne( { _id: user1._id }, function(err, doc){
     		    if( err || !doc ) reject( ( err || new Error( 'No Doc' ) ) );
     		    else { user1 = doc ; resolve( doc ); } 
     		});
     	    });
     	}).catch( function(e){ done(e) }).then(function(updatedUser){
     	    check(function(){
-    		expect( user1.notifications.length ).to.equal( 1 );
+		
+		// Users should not get notified of their own actions
+    		expect( user1.notifications.length ).to.equal( 0 );
     	    });
 	    
     	    return new Promise( function(resolve, reject){
     		comment2 = user2.leaveComment(comment1, commentTemplate.subject, commentTemplate.body, function(err){
-    		    if( err ) reject( done, err);
+		    if( err ) reject( done, err);
     		    else resolve( comment1 );
     		});
     	    });
     	}).catch( function(e){ done(e) }).then(function(){
 	    
     	    return new Promise( function(resolve, reject){
-    		User.findOne( { _id: user1 }, function(err, doc){
+    		User.findOne( { _id: user1._id }, function(err, doc){
     		    if( err || !doc ) reject( ( err || new Error( 'No Doc' ) ) );
-    		    else { user1 = doc ; resolve( doc ); } 
+    		    else resolve( doc );
     		});
     	    });
     	}).catch( function(e){ done(e) }).then(function(updatedUser){
     	    check(function(){
-    		expect( user1.notifications.length ).to.equal( 2 );
-
+		expect( updatedUser.notifications.length ).to.equal( 1 );	
     		done();
     	    });
     	});
-	
     });
 });

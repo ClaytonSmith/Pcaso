@@ -47,8 +47,7 @@ describe('FileContainer', function(){
 	    temp.name.first,
 	    temp.name.last,
 	    temp.email,
-	    temp.password,
-	    temp.username
+	    temp.password
 	);
 	
 	parent.save( done );
@@ -66,18 +65,16 @@ describe('FileContainer', function(){
 	    user1Template.name.first,
 	    user1Template.name.last,
 	    user1Template.email,
-	    user1Template.password,
-	    user1Template.username
+	    user1Template.password
 	);
 
 	user2 = User.register(
 	    user2Template.name.first,
 	    user2Template.name.last,
 	    user2Template.email,
-	    user2Template.password,
-	    user2Template.username
+	    user2Template.password
 	);
-
+	
 	fileCntr = FileContainer.register(
 	    parent,
 	    fileTemplate.file,
@@ -130,7 +127,7 @@ describe('FileContainer', function(){
     	expect( fileCntr.parent.collectionName ).to.equal( parent.__t );
     	expect( fileCntr.file.name ).to.equal( fileTemplate.file.name );
     	expect( fileCntr.file.path ).to.equal( fileTemplate.file.path );
-    	expect( fileCntr.links.custom ).to.equal( fileCntr.links.bullet );
+    	expect( fileCntr.links.bullet ).to.equal( fileCntr.links.bullet );
     	expect( fileCntr.links.parent ).to.equal( parent.links.link );
     });
     
@@ -142,7 +139,7 @@ describe('FileContainer', function(){
     	expect( fileCntr.comments.length ).to.equal( 1 );
     	expect( fileCntr.comments ).to.include( comment );
     });
-
+    
     
     it('Add and remove comment', function(done){
     	var comment1 = mongoose.Types.ObjectId(); // fake the obejct ID
@@ -173,7 +170,6 @@ describe('FileContainer', function(){
     
     it('Add shared user', function(done){
     	fileCntr.addSharedEntity( user1, function(err){
-	    console.log( err );
 	    expect( err ).to.be.null;
     	    expect( fileCntr.sharedWith.length ).to.equal( 1 );
     	    expect( fileCntr.sharedWith ).to.include( user1.email );
@@ -279,7 +275,6 @@ describe('FileContainer', function(){
     	var path = './data/test/temp.txt';
     	var write = fs.createWriteStream(path);
 	
-    	write.on('ERROR', console.log);		
     	write.on('finish', function(){
     	    fs.unlinkSync(path);	    
     	    done();
@@ -304,12 +299,17 @@ describe('FileContainer', function(){
     	fileCntr.getFile(write);
     });
     
-    it('Save display settings', function(){
-    	var displaySettings ={
-    	    visibility: "test test test"
-    	}
+    it('Save display settings', function(done){
+
+    	var settings ={
+	    displaySettings: { 
+    		visibility: "test test test"
+    	    }
+	};
 	
-    	fileCntr.saveDisplaySettings( displaySettings );
-    	expect( fileCntr.displaySettings.toObject() ).to.eql( displaySettings );
-    });       
+    	fileCntr.updateSettings( settings, function(err){
+    	    expect( fileCntr.displaySettings.visibility ).to.equal( settings.displaySettings.visibility );
+	    done(err);
+	});       
+    });
 });

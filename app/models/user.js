@@ -276,7 +276,7 @@ UserSchema.method({
     // deletes the notification 
     removeNotification: function(notificationID, callback){
 	var user = this;
-	var deleted = user.deleteNotification( notificationID );
+	var deleted  = user.deleteNotification( notificationID );
 	if( deleted.length > 0 ){
 	    Notification.findOne( { _id: notificationID }, function(err, doc){
 		if( err || !doc ) return callback( err, doc );		
