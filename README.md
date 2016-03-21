@@ -53,7 +53,7 @@ module.exports = {
 	    // Optional others
 	    'other-auto-email-accounts': {
 	       user: "account-name@domain.com",
-	       pass: "addount-name's password"
+	       pass: "account-name's password"
 	    }
 }
 ```
@@ -80,7 +80,7 @@ module.exports = {
 ### Setup dev and production environments. 
 
 If you wish to run this app on another domain or just another server, you must reconfigure the domain settings for the app. 
-In  `config/env/`, the files `test.js`, `development.js`, and `test.js` can be found. These files inform the app what domain to use for a given environment 'test', 'prod', 'dev' ( default ). To configure Pcaso for your own domain or test machine, set the development or production domain to match the matchine you are using.
+In  `config/env/`, the files `test.js`, `development.js`, and `test.js` can be found. These files inform the app what domain to use for a given environment 'test', 'prod', 'dev' ( default ). To configure Pcaso for your own domain or test machine, set the development or production domain to match the machine you are using.
 
 Example: 
 
@@ -160,11 +160,11 @@ V1 Backend
   - [X] Unit tests 
     - [X] User accounts
     - [X] Email services
-    - [X] File managment	
+    - [X] File management	
     - [X] Comments
   - [X] Integration 
     - [X] User accounts
-    - [X] File managment	
+    - [X] File management	
     - [X] Comments
     - [X] Garbage collection
   - [ ] E2E
