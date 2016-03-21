@@ -24,7 +24,6 @@ function init() {
 	function loadElement(dest, elm){
 	    setTimeout( 2000 );
 	    dest.hide()
-		.empty()
 		.append( buildTile( elm ) )
 		.fadeIn( 'slow');
 	}	    
@@ -39,7 +38,7 @@ function init() {
     function updateDatascapeDisplay(pageNumber){
 	var request = {
 	    page: pageNumber,
-	    limit: displayLimit
+	    limit: 3
 	};
 	
 	$.ajax({

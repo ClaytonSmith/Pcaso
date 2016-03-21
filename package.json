@@ -2,8 +2,8 @@
     "name": "Pcaso",
     "main": "server.js",
     "scripts": {
-	"start-server": 'nohup forever start -c "node --harmony_proxies" server.js &',
-	"restart-server": "forever restartall"
+	"start-server": "nohup forever start -c \"node --harmony_proxies\" server.js &",
+	"restart-server": "forever restartall",
 	"test": "make test",
 	"postinstall": "./node_modules/bower/bin/bower install"
     },
