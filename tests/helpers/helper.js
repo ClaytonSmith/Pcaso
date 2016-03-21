@@ -30,8 +30,9 @@ exports.fileTemplate =	{
     settings:{
 	fileOptions: {
 	    keepFile: true
-	    },
+	},
 	displaySettings:{
+	    visibility: "PRIVATE",
 	    display: {
 		columnTypes: ['id','id','id'] // Arbitrary 
 	    }
@@ -39,12 +40,11 @@ exports.fileTemplate =	{
     }
 };
 
-exports.check = function(done ){
-    return function(test){
+exports.check = function(done){
+    return function(tests){
 	try{
-	    tests()
+	    tests();
 	} catch( error ) {
-	    console.log( error );
 	    done( error );
 	    throw new Error( error );
 	}
