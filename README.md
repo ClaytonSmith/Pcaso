@@ -77,6 +77,25 @@ module.exports = {
 
 ```
 
+### Setup dev and production environments. 
+
+If you wish to run this app on another domain or just another server, you must reconfigure the domain settings for the app. 
+In  `config/env/`, the files `test.js`, `development.js`, and `test.js` can be found. These files inform the app what domain to use for a given environment 'test', 'prod', 'dev' ( default ). To configure Pcaso for your own domain or test machine, set the development or production domain to match the matchine you are using.
+
+Example: 
+
+For local testing and deployment I might set `config/env/development` to:
+```
+module.exports = {
+    db: 'mongodb://localhost/pcaso', 
+    service: {
+	domain: 'http://127.0.0.1:8080/',
+	api: 'http://127.0.0.1:8080/api/'
+    }
+}
+```
+
+
 
 ### Testing
 
@@ -92,6 +111,12 @@ OR
 
 
 By default, the server will run on port 8080. 
+
+
+Setting environment variables:
+> NODE_ENV=production NODE_COOL_ENVAR=awesome node --harmony_proxies" server.js
+
+
 
 ## Features
 
