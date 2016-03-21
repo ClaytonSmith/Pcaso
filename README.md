@@ -5,19 +5,92 @@
 
 ### Installation
 
-Pcaso is meant to run in a linux environment. Assuming [nodejs V5.4.1^](https://nodejs.org/en/download/package-manager/) has been installed, 
 
-Run the following:
-> git clone http://github.com/claytonsmith/pcaso
+> curl -sL https://deb.nodesource.com/setup | sudo bash -
+> sudo apt-get install git nodejs mongodb build-essential npm build-essential libssl-dev libgd2-xpm-dev
 
+Set nodejs to node
+> sudo ln -s /usr/bin/nodejs /usr/bin/node
+
+install nvm
+> curl https://raw.githubusercontent.com/creationix/nvm/v0.16.1/install.sh | sh
+> nvm install v5.4.1
+
+set node v5.4.1 as server default
+> nvm alias default v5.4.1
+
+clone repo
+> git clone https://github.com/claytonsmith/picaso
 > cd pcaso
 
+install app dependencies 
 > npm install
 
-### Starting the server
-> npm start 
+When running on a server, install forever to keep the server alive forever
+> npm install -g forever
+### Setup 
+configure the app's secrets in `config/secrets.js`
 
-By default, the server will run on port 3000. If you wish to change the port number, be sure to change the auth paths in `config/auth`.
+```
+'use strict'
+
+module.exports = {
+	
+	// User session key
+	sessionKey: "Your secret session key.",
+
+	// Email login
+	emailCredentials: {
+
+	    // required
+	    'no-reply': {
+	       user: "no-reply@domain.com",
+	       pass: "no-reply's password"
+
+	    },
+
+	    // Optional others
+	    'other-auto-email-accounts': {
+	       user: "account-name@domain.com",
+	       pass: "addount-name's password"
+	    }
+}
+```
+
+in `config/auth.js`, add oauth credentials
+```
+'use strict'                                                                                                                            
+
+// expose our config directly to our application using module.exports                                                                                                                                      
+module.exports = {
+    googleAuth: {
+        clientID: "YOUR CLIENT ID",
+        clientSecret: "YOUR CLIENT SECRET",
+
+        // If you change the callback url path, make sure to change the route in `app/routs.js`
+        callbackURL: "http://YOUR-DOMAIN/auth/google/callback"
+    }
+    
+    // Additional auth stuff goes here too
+};
+
+```
+
+
+### Testing
+
+> make test
+
+### Starting the server
+
+> nohup forever start -c "node --harmony_proxies" server.js &
+
+OR
+
+> node --harmony_proxies" server.js
+
+
+By default, the server will run on port 8080. 
 
 ## Features
 
@@ -51,9 +124,8 @@ V1 Backend
   - [X] Remove comments
   - [X] Edit comments
 - [X] API for the above 
-- [ ] Statistics
+- [X] Statistics
   - [X] File "view" count
-  - [ ] Traffic - views per day...
 - [X] Garbage collection
   - [X] Comments 
   - [x] Files
@@ -64,7 +136,7 @@ V1 Backend
     - [X] Email services
     - [X] File managment	
     - [X] Comments
-  - [ ] Integration 
+  - [X] Integration 
     - [X] User accounts
     - [X] File managment	
     - [X] Comments
