@@ -62,6 +62,7 @@ function MailClient( client ){
     var okayToSend  = { from: false, to: false, subject: false, body: false } 
     
     // Create a SMTP transporter object
+    // Check https://github.com/nodemailer/nodemailer to see if there is a transport object compatible with your email service
     var transport   =  nodemailer.createTransport({
 	host: 'smtpout.secureserver.net', 
 	port: 465, 
