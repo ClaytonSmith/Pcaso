@@ -62,6 +62,9 @@ module.exports = {
 	    }
 }
 ```
+For additional email configuration and settings, see `config/mailer.js` and [nodemailer](https://github.com/nodemailer/nodemailer)
+
+
 
 in `config/auth.js`, add oauth credentials
 ```
