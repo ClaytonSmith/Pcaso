@@ -10,16 +10,6 @@
   sent via email. Unauthenticated users will be unable to do anything until
   they click the registration link.
 
-  Users can:
-  
-  - add files
-  - remove files 
-  - transfer ownership of files 
-  - add comments
-  - remove comments
-  - 
-
-
 */
 
 
@@ -101,6 +91,7 @@ var UserSchema                 = BaseUserSchema.extend({
 	biography:    { type: String, default: '' }
     },
     displaySettings: {
+	// Formatted date string, see `dateFormatOptions` above
 	dateJoined: { type: String, default: (new Date()).toLocaleString("en-us", dateFormatOptions) },
     },                                                    
     links: {
@@ -115,6 +106,7 @@ UserSchema.plugin(mongoosePaginate);
 // Unregistered users dont get these cool features. They get nothing 
 UserSchema.method({
 
+    // Add file to list of owned files
     attachFile: function(fileID){
 	return this.files.push( fileID );
     },
@@ -177,10 +169,14 @@ UserSchema.method({
 	
 	var comment = Comments.register( user, entity, this.name.first +' '+ this.name.last, subject, commentBody);
 	
+
+	// Saves comment
 	comment.save(function(err){
 	    if( err ) callback( err ) ;
 	    user.userComments.push( comment._id );	
 	    
+
+	    // Saves entity being commented on
 	    entity.save( function(entSaveErr){
 		if( entSaveErr ) callback( entSaveErr ) ;	
 		
@@ -196,24 +192,28 @@ UserSchema.method({
 		// Full name
 		var notificationTitle = user.name.first +" "+ user.name.last +" has commented on your " + Comments.commentMap( entity.__t );
 		
-
+		// Create new notification
 		var notification = Notification.register( entity, comment, notificationTitle );
 
+		// Save notification
 		notification.save( function(noteSaveErr){
 		    if( noteSaveErr ) throw new Error(noteSaveErr);
 		    
 		    callback( noteSaveErr );
+		    
+		    
 		    if( entity.__t === "User" ){
 			// Entity is a user account,
 			// We do not need to query for it
 			
+			// Mail user
 			mailer.useTemplate('new-comment', entity, {comment: comment, notification: notification}, function(mailErr){
 			    if( mailErr ) throw new Error( mailErr );
 			});
 			
 		    } else { 
-			// Entity is not a user so the parent must be queried
-			
+
+			// Entity is not a user so the parent must be queried			
 			var model = mongoose.model(entity.parent.collectionName);
 			model.findOne({_id: entity.parent.id}, function(qreErr, doc){
 			    if( qreErr ) throw new Error( qreErr );
