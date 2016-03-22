@@ -65,7 +65,6 @@ module.exports = function(passport) {
             passReqToCallback : true
 	},
 	function(req, email, password, done){
-	    console.log('Local signup');
 	    if (email)
 		
 		process.nextTick(function() {
@@ -136,9 +135,7 @@ module.exports = function(passport) {
 	    
 	},
 	function(req, token, refreshToken, profile, done) {
-	    
-	    console.log("Success?", token, refreshToken, profile );
-	    
+	    	    
 	    // asynchronous
 	    process.nextTick(function() {
 
@@ -175,7 +172,6 @@ module.exports = function(passport) {
 			    newUser.google.token = token;
 			    newUser.google.refreshToken = refreshToken; 
 			    
-			    console.log("\n\n", newUser, "\n\n");
 			    newUser.save( done );
 			}
 		    });
