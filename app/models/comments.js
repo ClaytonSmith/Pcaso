@@ -152,8 +152,8 @@ CommentSchema.static({
 	    links: {
 		parent: parent.links.link,
 		avatar: parent.links.avatar,
-		link:  parent.links.link, //+ '/' + id.toString()  
-		local: parent.links.local 
+		link:  target.links.link, //+ '/' + id.toString()  
+		local: target.links.local 
 	    }
 	});
 
