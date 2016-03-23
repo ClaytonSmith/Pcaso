@@ -33,7 +33,7 @@ var templateClients = {
 	client: 'no-reply'
     }, // Email for any comment
     'new-comment': { 
-	subject: 'Pcaso: You have received a new comment',
+	subject: 'Pcaso: You got a new comment',
 	client: 'no-reply'
     }, // Authentication email for user registration
     'authenticate-new-user': { 
