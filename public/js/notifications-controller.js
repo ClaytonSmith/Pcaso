@@ -13,7 +13,7 @@ function init() {
     var title        = null;
     
     // calculate once
-    var timezoneOffset = new Date().getTimezoneOffset() / 60 * (-1) ;	
+    var timezoneOffset = 0;// new Date().getTimezoneOffset() / 60 * (-1) ;	   
     
     var dateFormatOptions = {
 	weekday: "long",
